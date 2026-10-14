@@ -135,6 +135,7 @@ function launch (file, args, options, readiness) {
       clearTimeout(pollTimer)
       if (error) {
         if (!(await stopLaunchedChild(child))) error.unsafeToRollback = true
+        child.unref()
         reject(error)
       } else { child.unref(); resolve({ pid: child.pid, appReady: true }) }
     }

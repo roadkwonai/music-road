@@ -1,12 +1,55 @@
 # AI 에이전트에서 Road Music CLI 사용하기
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
+> 앱·CLI가 설치된 컴퓨터에서 새 AI 세션을 연결하거나, 다른 프로젝트에서 기존 CLI를 사용할 때 읽습니다.
+
 Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node cli/road-music.js`를 실행하고 stdout JSON 한 줄과 stderr 이벤트 JSONL을 분리해 읽는다. CLI는 실행 중인 GUI와 같은 로컬 서비스·대기열을 쓸 수 있으므로, 에이전트는 먼저 상태를 읽고 생성·이동·삭제·외부 열기 명령을 요청 범위로 제한해야 한다.
 
 ## 목차
 
+- [이미 설치된 CLI로 새 세션 시작](#new-session)
 - [필요한 파일](#toc-1)
 - [실행 계약](#toc-2)
 - [음악 요청 예시 찾기](#toc-3)
+
+<a id="new-session"></a>
+
+## 이미 설치된 CLI로 새 세션 시작
+
+### 복사할 프롬프트
+
+`[설치 폴더 절대 경로]`에는 `cli/road-music.js`와 `AGENTS.md`가 함께 있는 키트 루트를 넣는다. 저장소·앱·CLI는 이미 설치된 상태이므로 새로 clone하거나 설치하지 않는다.
+
+```text
+로드뮤직 앱과 CLI는 이미 설치돼 있어. CLI 폴더: [설치 폴더 절대 경로]
+그 안의 AGENTS.md와 docs/ai-cli.md에 따라 새 세션을 준비해줘.
+재설치 없이 연결·ACE 준비 상태를 확인하고, 이후 음악 요청은 동봉 스킬과 공식 가이드로 처리해줘.
+```
+
+### AI가 준비할 내용
+
+| 순서 | 수행할 일 | 완료 기준 |
+| --- | --- | --- |
+| 1. 기존 CLI 찾기 | 제공한 절대 경로의 `cli/road-music.js`와 `AGENTS.md` 확인. 경로가 없으면 기존 전역 `road-music` 명령의 실제 위치부터 확인 | 실제 키트 루트와 실행 명령 확보 |
+| 2. 지침 연결 | 그 루트의 `AGENTS.md`, 이 문서와 동봉 스킬을 읽고 가사·태그·검토·공식 원문의 위치를 확인 | 다른 프로젝트의 지침을 덮어쓰지 않고 참고 경로 연결 |
+| 3. 실행 계약 확인 | `schema`와 `service:status --no-start`로 공개 명령·현재 서비스 설치본·데이터 폴더 확인 | 실행 파일과 연결 대상이 의도한 설치본인지 확인 |
+| 4. 현재 상태 조회 | `app:state`, `engines:list`, `projects:list`, `songs:list`, `setup:check` 순으로 조회 | 엔진 준비 여부·현재 프로젝트·대기 작업과 플랫폼 제외 항목 파악 |
+| 5. 준비 결과 보고 | 설치 루트·절대 경로 호출 명령·실제 앱/서비스 버전·엔진 상태·기본 검토 정책 요약 | 새 세션에서 곧바로 음악 요청을 받을 수 있음 |
+
+렌더·미리보기 등 진행 작업이 있으면 화면 상태를 바꾸는 조회를 섞지 않고 해당 항목을 보류한다. 서비스를 공유 중인 설치본이 예상과 다르거나 필수 실행 환경이 없으면 확인한 상태와 부족한 항목을 보고한다. 연결 실패를 이유로 앱·모델을 재설치하거나 기존 서비스를 강제로 종료하지 않는다.
+
+다른 디렉터리에서는 파일 경로를 절대 경로로 호출한다. 아래 예시는 설치 위치로 바꾼다.
+
+```bash
+node "/absolute/path/to/music-road/cli/road-music.js" schema
+node "/absolute/path/to/music-road/cli/road-music.js" service:status --no-start
+```
+
+> [!IMPORTANT]
+> 세션 준비에는 **음악 생성·테스트 곡·모델 다운로드·업데이트를 포함하지 않는다.** 음악을 요청받은 뒤 공식 가이드와 스킬로 입력을 검증하고, 기본 검토 또는 명시적 전체 자동 위임을 적용한다.
+
+AI는 설치 루트와 실행 명령을 **현재 대화의 문맥**으로 유지한다. 전역 스킬 등록이나 `AGENTS.md`·`CLAUDE.md` 복사를 전제하지 않는다. CLI를 찾지 못했다면 임의의 새 설치 대신 실제 설치 경로만 확인한다.
 
 <a id="toc-1"></a>
 
@@ -24,11 +67,11 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 Codex는 세션 시작 시 프로젝트 루트부터 현재 디렉터리까지 지침을 읽는다. Git 프로젝트가 아니면 현재 디렉터리를 기준으로 한다. 따라서 외부 프로젝트에서 Road Music 키트를 제어할 때는 기존 프로젝트의 `AGENTS.md`를 덮어쓰거나 복사하지 말고, 에이전트에게 다음 절대 경로를 읽도록 요청한다.
 
 ```text
-Road Music CLI를 사용하기 전에 /사용자가 설치한 절대 경로/RoadMusic-1.4.0-cli/AGENTS.md,
-/사용자가 설치한 절대 경로/RoadMusic-1.4.0-cli/docs/cli.md,
-/사용자가 설치한 절대 경로/RoadMusic-1.4.0-cli/docs/cli-reference.md를 읽고 지침을 따른다.
+Road Music CLI를 사용하기 전에 /사용자가 설치한 절대 경로/RoadMusic-버전-cli/AGENTS.md,
+/사용자가 설치한 절대 경로/RoadMusic-버전-cli/docs/cli.md,
+/사용자가 설치한 절대 경로/RoadMusic-버전-cli/docs/cli-reference.md를 읽고 지침을 따른다.
 ACE로 음악을 만들거나 가사·옵션을 설계할 때는 요청마다
-/사용자가 설치한 절대 경로/RoadMusic-1.4.0-cli/docs/ace-prompt-guide.md를 먼저 읽고
+/사용자가 설치한 절대 경로/RoadMusic-버전-cli/docs/ace-prompt-guide.md를 먼저 읽고
 그 안에 연결된 로컬 공식 원문의 해당 부분도 참고한다.
 가사·프롬프트 작업에는 같은 키트의 skills/road-music-ace/SKILL.md와
 docs/lyrics-tags.md, docs/music-review.md도 읽고 기본 검토 또는 명시적 자동 위임을 적용한다.
@@ -41,7 +84,7 @@ Claude Code는 `CLAUDE.md`에서 코드 펜스 밖의 상대 가져오기 문법
 ## 실행 계약
 
 ```bash
-cd "/사용자가 선택한 경로/RoadMusic-1.4.0-cli"
+cd "/사용자가 선택한 경로/RoadMusic-버전-cli"
 node cli/road-music.js schema
 node cli/road-music.js app:state
 ```

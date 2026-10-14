@@ -1,6 +1,6 @@
 # 업데이트 전 과정 검증
 
-검증일: 2026-10-15. 대상: macOS Apple Silicon, 실제 GitHub Release의 1.4.0 → 1.4.1.
+검증일: 2026-10-15. 대상: macOS Apple Silicon, 실제 GitHub Release의 1.4.0 → 1.4.2.
 
 이 보고서는 개별 모듈 테스트와 실제 앱 전체 실행을 구분한다. 이전 119개 테스트와 설치 도우미의 1.3.1 → 1.4.0 교체 성공만으로 GUI·CLI 전체 인계를 완료했다고 판단하지 않는다.
 
@@ -29,9 +29,9 @@
 ## 재현
 
 ```bash
-node scripts/verify-update-e2e.js --mode gui --baseline-app /absolute/path/to/1.4.0/Road\ Music.app --expected-version 1.4.1
-node scripts/verify-update-e2e.js --mode cli --baseline-app /absolute/path/to/1.4.0/Road\ Music.app --expected-version 1.4.1
-node scripts/verify-update-e2e.js --mode source --expected-version 1.4.1
+node scripts/verify-update-e2e.js --mode gui --baseline-app /absolute/path/to/1.4.0/Road\ Music.app --expected-version 1.4.2
+node scripts/verify-update-e2e.js --mode cli --baseline-app /absolute/path/to/1.4.0/Road\ Music.app --expected-version 1.4.2
+node scripts/verify-update-e2e.js --mode source --expected-version 1.4.2
 ```
 
 실제 주기 검증은 새 Release가 나오기 전에 `--mode cli --notification periodic`으로 시작한다. 업데이트 조회를 수동 호출하지 않고 15분 타이머가 알림을 발생시키는지 확인한다.

@@ -139,7 +139,6 @@ async function installMac (payload) {
     } catch (error) {
       await fsp.rm(payload.bundle, { recursive: true, force: true })
       await fsp.rename(backup, payload.bundle)
-      await launch(path.join(payload.bundle, 'Contents', 'MacOS', info.CFBundleExecutable), payload.service ? ['--roadmusic-service'] : [], { env: launchEnvironment(payload) }).catch(() => {})
       throw error
     }
     return { backup }
@@ -186,7 +185,7 @@ async function installSource (payload) {
 
   const ref = `refs/roadmusic-update/v${payload.version}`
   await git(root, ['fetch', '--no-tags', 'origin', `refs/tags/v${payload.version}:${ref}`])
-  const commit = await git(root, ['rev-parse', ref])
+  const commit = await git(root, ['rev-parse', `${ref}^{commit}`])
   const old = await git(root, ['rev-parse', 'HEAD'])
   await git(root, ['merge-base', '--is-ancestor', old, commit])
   if (JSON.parse(await git(root, ['show', `${commit}:package.json`])).version !== payload.version) throw new Error('릴리스 태그와 package.json 버전이 다릅니다.')
@@ -203,7 +202,6 @@ async function installSource (payload) {
       await launch(payload.execPath, payload.service ? ['.', '--roadmusic-service'] : ['.'], { cwd: root, env: launchEnvironment(payload) })
     } catch (error) {
       if (!(await restoreSource(root, old, commit, depsBackup))) throw new Error(`${error.message} (새 변경이 있어 자동 복구하지 않았습니다.)`)
-      await launch(payload.execPath, payload.service ? ['.', '--roadmusic-service'] : ['.'], { cwd: root, env: launchEnvironment(payload) }).catch(() => {})
       throw error
     }
     if (depsBackup) await fsp.rm(depsBackup, { recursive: true, force: true })

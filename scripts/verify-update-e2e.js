@@ -11,13 +11,13 @@ const { parseArgs } = require('../cli/client')
 
 const repository = path.resolve(__dirname, '..')
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms))
-async function until (read, accept, timeoutMs, label) {
+async function until (read, accept, timeoutMs, label, pollMs = 200) {
   const deadline = Date.now() + timeoutMs
   let value
   while (Date.now() < deadline) {
     value = await read()
     if (accept(value)) return value
-    await pause(200)
+    await pause(pollMs)
   }
   throw new Error(`${label}: ${JSON.stringify(value)}`)
 }
@@ -103,6 +103,7 @@ async function main () {
   }
   const cli = async (name, params = {}, { optional = false, flags = [] } = {}) => {
     const timeout = ['update:install', 'update:download'].includes(name) ? 1800000
+      : name === 'video:render' ? 120000
       : name === 'update:watch' ? Math.min(3600000, (params.timeoutMs || 3000) + 5000) : 15000
     const args = [name, '--json', JSON.stringify(params), '--no-start', '--timeout', String(timeout), ...flags]
     parseArgs(args) // Invalid test arguments must fail, rather than look like a stopped service.
@@ -161,7 +162,14 @@ async function main () {
       assert.equal(initial.available, false, 'start the periodic test before publishing the next release')
       const start = Date.now()
       console.log(JSON.stringify({ phase: 'waiting-for-real-periodic-notification', root, before: evidence.before, expected }))
-      const alarm = await cli('update:watch', { timeoutMs: 1200000 }, { flags: ['--events'] })
+      let alarm
+      if (initial.status === 'error') {
+        evidence.initialCheckError = initial.error
+        await until(() => cli('update:status'), state => state.available && state.version === expected, 1200000, 'periodic recovery after initial server error', 2000)
+        alarm = await cli('update:watch', { timeoutMs: 3000 }, { flags: ['--events'] })
+      } else {
+        alarm = await cli('update:watch', { timeoutMs: 1200000 }, { flags: ['--events'] })
+      }
       assert.equal(alarm.version, expected)
       assert.equal(alarm.changed, true)
       const elapsedMs = Date.now() - start
@@ -185,6 +193,22 @@ async function main () {
       const alarm = await cli('update:watch', { timeoutMs: 3000 }, { flags: ['--events'] })
       assert.equal(alarm.version, expected)
       assert.equal(alarm.changed, true)
+      if (options['busy-check'] === 'true') {
+        assert.equal((await cli('update:download', {}, { flags: ['--events'] })).status, 'downloaded')
+        const rendering = cli('video:render', { tracks: [originalSongs[0].dir], name: '업데이트 진행 작업 보호',
+          video: { resolution: '720p', fps: 30, renderer: 'cpu', length: { mode: 'repeat', count: 30 },
+            spectrum: { visible: true, kind: 'bars', barCount: 16 } } },
+        { flags: ['--output', path.join(root, 'protected-render.mp4')] })
+        rendering.catch(() => {})
+        await until(() => cli('service:status'), state => state.rendering || state.requests?.some(item => item.command === 'video:render'), 15000, 'active video render')
+        const blocked = await cli('update:install')
+        assert.equal(blocked.status, 'error', JSON.stringify(blocked))
+        assert.match(blocked.error, /진행 중|작업/)
+        assert.equal((await cli('service:status')).pid, oldPid)
+        assert.equal((await cli('app:state')).version, evidence.before)
+        await rendering
+        evidence.busyProtection = { installationBlocked: true, oldProcessPreserved: true, renderCompleted: true }
+      }
       const installed = await cli('update:install', {}, { flags: ['--events'] })
       assert.equal(installed.status, 'installing', JSON.stringify(installed))
     }

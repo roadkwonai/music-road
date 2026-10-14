@@ -140,7 +140,7 @@ async function successCase (base, launcher) {
     assert.equal(result.durable.ok, true)
     assert.equal(result.durable.version, newVersion)
     assert.equal(JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8')).version, newVersion)
-    assert.equal(await git(root, ['rev-parse', 'HEAD']), await git(root, ['rev-parse', `refs/roadmusic-update/v${newVersion}`]))
+    assert.equal(await git(root, ['rev-parse', 'HEAD']), await git(root, ['rev-parse', `refs/roadmusic-update/v${newVersion}^{commit}`]))
     await fs.access(path.join(root, 'node_modules', 'electron', 'package.json'))
     await assert.rejects(fs.access(path.join(root, 'node_modules', 'old-dependency-sentinel')))
     assert.equal(await git(root, ['status', '--porcelain', '--untracked-files=all']), '')
@@ -157,8 +157,8 @@ async function rejectedCase (base, launcher, name, prepare, expected) {
   const root = await cloneRelease(base, `${name}-source`)
   const dataDir = await prepareData(base, name)
   const marker = path.join(base, `${name}-launches.jsonl`)
-  const oldHead = await git(root, ['rev-parse', 'HEAD'])
   await prepare(root)
+  const oldHead = await git(root, ['rev-parse', 'HEAD'])
   try {
     const result = await installer(root, dataDir, launcher, marker)
     assert.notEqual(result.code, 0)
@@ -188,6 +188,7 @@ async function rollbackCase (base, launcher) {
     const launches = await stopLaunched(marker)
     assert.ok(launches.some(entry => entry.version === newVersion), '새 버전 시작 시도가 없습니다.')
     assert.ok(launches.some(entry => entry.version === oldVersion), '이전 버전 재시작이 없습니다.')
+    assert.equal(launches.filter(entry => entry.version === oldVersion).length, 1, '이전 버전은 한 번만 재시작해야 합니다.')
     await assertNoResidue(base, root)
   } finally { await stopLaunched(marker) }
   return '새 버전 기동 실패 시 HEAD·node_modules 롤백과 이전 버전 재시작'
@@ -196,7 +197,7 @@ async function rollbackCase (base, launcher) {
 async function main () {
   const tag = await command('/usr/bin/git', ['ls-remote', '--exit-code', '--tags', origin, `refs/tags/v${newVersion}`])
   assert.equal(tag.code, 0, `공식 v${newVersion} 태그가 아직 공개되지 않았습니다.`)
-  const base = await fs.mkdtemp(path.join(os.tmpdir(), 'roadmusic-source-update-'))
+  const base = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'roadmusic-source-update-')))
   try {
     const launcher = await writeLauncher(base)
     const checks = [await successCase(base, launcher)]

@@ -1,5 +1,7 @@
 # Road Music CLI 설계와 범위
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 Road Music CLI는 GUI 기능을 새로 구현하지 않는다. 실행 중인 Electron 앱의 기존 IPC와 제한된 renderer 자동화 명령을 로컬 JSON Lines 전송으로 호출한다.
 
 ```text

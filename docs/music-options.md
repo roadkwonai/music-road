@@ -1,5 +1,7 @@
 # 음악 생성 옵션 가이드
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 원하는 소리를 CLI 입력으로 바꾸는 실전 가이드다. 바로 요청하려면 [장르별 프롬프트](genre-prompts.md), 최근 흐름을 조사하려면 [리서치 기반 음악 만들기](music-research.md)를 사용한다. 설치·작업 보존·오류 대응은 [AGENTS.md](../AGENTS.md)를 따른다.
 
 ACE 작업은 요청마다 먼저 [공식 가이드 적용 절차](ace-prompt-guide.md)를 읽는다. [공식 원문 보관본](vendor/ace-step-1.5/README.md)을 근거로 caption·가사·지원 옵션을 점검한다.

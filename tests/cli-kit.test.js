@@ -15,6 +15,9 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
   assert.ok(result.bytes > 1000)
   const entries = execFileSync('/usr/bin/unzip', ['-Z1', result.path], { encoding: 'utf8' }).trim().split('\n')
   const name = `RoadMusic-${version}-cli`
+  for (const file of ['docs/README.md', 'docs/assets/brand/banner.svg', 'releases/README.md']) {
+    assert.ok(entries.includes(`${name}/${file}`), file)
+  }
   for (const file of ['AGENTS.md', 'CLAUDE.md', 'package-lock.json', 'cli/road-music.js', 'docs/cli-install.md', 'docs/ai-cli.md', 'docs/music-options.md', 'docs/genre-prompts.md', 'docs/music-research.md', 'docs/ace-prompt-guide.md', 'docs/vendor/ace-step-1.5/README.md', 'docs/vendor/ace-step-1.5/manifest.json', 'docs/vendor/ace-step-1.5/LICENSE', 'docs/vendor/ace-step-1.5/en/Tutorial.md', 'docs/vendor/ace-step-1.5/en/INFERENCE.md', 'docs/vendor/ace-step-1.5/en/ace_step_musicians_guide.md', 'docs/vendor/ace-step-1.5/ko/Tutorial.md', 'docs/vendor/ace-step-1.5/ko/INFERENCE.md', 'prompts/cli-workflows.md']) {
     assert.ok(entries.includes(`${name}/${file}`), file)
   }
@@ -32,7 +35,7 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
     assert.ok(target.startsWith(kitRoot + path.sep), `키트 밖 스킬 참조: ${reference}`)
     await fs.access(target)
   }
-  const row = JSON.parse(execFileSync(process.execPath, [path.join(extracted, name, 'cli/road-music.js'), 'schema'], { encoding: 'utf8' }))
+  const row = JSON.parse(execFileSync(process.execPath, [path.join(extracted, name, 'cli/road-music.js'), 'schema'], { cwd: temp, encoding: 'utf8' }))
   assert.equal(row.ok, true)
   const source = require('../electron/cli-transport').getSchema()
   assert.deepEqual(row.result.commands.map(item => item.command), source.commands.map(item => item.command))

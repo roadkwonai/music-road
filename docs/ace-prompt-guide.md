@@ -1,10 +1,15 @@
 # ACE 프롬프트 최적화 가이드
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 ACE로 음악을 만들거나 가사·생성 옵션을 설계할 때 **작업 요청마다 먼저 읽는 가이드**다. 공식 권장사항을 로드뮤직의 실제 입력 처리에 맞게 적용한다. 품질은 가사 전달력·장르 적합성·편곡·음원 결함을 들어서 판단하며, 문서를 따랐다는 이유만으로 보장하지 않는다.
 
 기준: ACE-Step 1.5 `acestep-v15-turbo` + `acestep-5Hz-lm-0.6B`. **확인일: 2026-10-15 KST.** 공식 원문은 [로컬 보관본](vendor/ace-step-1.5/README.md)에 있다. 이 문서는 공식 문서의 전문 번역이 아니라 로드뮤직 적용 가이드다.
 
 작업 스킬은 [road-music-ace](../skills/road-music-ace/SKILL.md), 태그 선택은 [구간 태그 가이드](lyrics-tags.md)를 따른다. **기본은 가사·프롬프트 검토 후 생성**이며, 두 항목부터 생성까지 전부 자동 위임한 경우의 예외와 결과 자료는 [검토 규칙](music-review.md)에 정리했다.
+
+> [!IMPORTANT]
+> 이 문서는 현재 공개 CLI와 ACE Turbo·0.6B에 맞춘 적용 가이드다. 실제 입력 필드와 범위는 실행 버전의 `schema`가 우선한다.
 
 ## 목차
 

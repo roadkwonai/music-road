@@ -1,5 +1,7 @@
 # Road Music 빠른 시작
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 AI나 터미널에서 설치부터 첫 곡 저장까지 진행하는 순서다. 전체 명령은 [CLI 레퍼런스](cli-reference.md), GUI 사용은 [시작하기](getting-started.md)를 참고한다.
 
 ## 목차

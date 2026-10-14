@@ -1,6 +1,10 @@
 # Road Music CLI 작업 프롬프트
 
+[Road Music](../README.md) · [문서 지도](../docs/README.md) · [릴리스 노트](../releases/README.md)
+
 이 파일은 자동 로드되지 않는다. 작업을 시작할 때 [AGENTS.md](../AGENTS.md), [CLI 설치](../docs/cli-install.md), [CLI 사용법](../docs/cli.md), [CLI 레퍼런스](../docs/cli-reference.md)를 먼저 읽은 AI 에이전트에게 아래 프롬프트 중 하나를 전달한다. 모든 경로는 사용자가 고른 실제 절대 경로로 바꾼다.
+
+`RoadMusic-버전-cli`의 `버전`은 설치한 Release의 값으로 바꾼다.
 
 음악 제작 예시는 [장르별 프롬프트](../docs/genre-prompts.md), 상세 입력은 [음악 옵션](../docs/music-options.md), 최신 스타일 조사는 [리서치 프롬프트](../docs/music-research.md)를 참고한다. 이 파일은 설치·작업 실행·내보내기·진단에 집중한다.
 
@@ -20,7 +24,7 @@
 
 ```text
 Road Music CLI 소스 키트에서 설치와 읽기 전용 환경 점검을 해줘.
-키트 절대 경로: /사용자가 선택한 경로/RoadMusic-1.3.1-cli
+키트 절대 경로: /사용자가 선택한 경로/RoadMusic-버전-cli
 Node.js 버전을 확인하고 npm ci --include=dev로 CLI 의존성을 설치한 뒤 schema, app:state, setup:check, engines:list을 확인해줘. 음악 생성·모델 설치·기존 곡 삭제나 설정 변경은 하지 마. 첫 상태 요청에서 서비스와 데이터 폴더가 초기화될 수 있다는 점은 보고해줘.
 stdout 최종 JSON과 핵심 상태를 요약하고, 누락된 ffmpeg/ffprobe/ACE 엔진이 있으면 설치 명령을 실행하지 말고 알려줘.
 ```
@@ -95,7 +99,7 @@ Road Music CLI 오류를 읽기 전용으로 진단해줘.
 실행한 명령: [사용자가 실제로 실행한 명령]
 stdout JSON: [사용자가 받은 stdout 한 줄]
 stderr 이벤트 또는 오류: [사용자가 받은 stderr 전체]
-키트 절대 경로: /사용자가 선택한 경로/RoadMusic-1.3.1-cli
+키트 절대 경로: /사용자가 선택한 경로/RoadMusic-버전-cli
 
 app:state, service:status --no-start, setup:check, engines:list을 조회하고 필요한 경우 queue:list과 songs:list도 읽어줘.
 오류 코드, 이미 실행됐을 가능성(uncertain:true), 다음의 비파괴적 확인 명령을 순서대로 제시해줘.

@@ -2,7 +2,23 @@
 
 검증일: 2026-10-15. 환경: macOS Apple Silicon, Node.js 24, 실제 GitHub 정식 Release.
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
+> [!NOTE]
+> 이 문서는 2026-10-15에 수행한 업데이트 시험 기록이다. 이후 릴리스와 다른 운영체제에서 같은 결과를 보장하지 않는다.
+
 이전 119개 모듈 테스트와 설치 도우미 단독 교체만으로 GUI·CLI 전체 업데이트를 완료했다고 판단하지 않는다. 이 보고서는 알림부터 설치 인계, 새 앱 실행, 데이터 보존과 실제 사용까지 별도 설치본에서 확인한 결과다.
+
+## 목차
+
+- [정식 배포본 1.4.0 → 1.4.2](#release-140-142)
+- [발견한 문제와 수정](#fixed-issues)
+- [실패·복구 검증](#recovery)
+- [정식 최신 1.4.3의 설치 검증](#release-143)
+- [재현과 증거](#evidence)
+- [검증 범위](#scope)
+
+<a id="release-140-142"></a>
 
 ## 정식 배포본 1.4.0 → 1.4.2
 
@@ -17,6 +33,8 @@
 
 15분 검증은 최초 GitHub API HTTP 403을 오류로 표시한 뒤 다음 자동 주기에 정상 조회·알림·설치로 회복했다. 1.4.0의 도우미로 완료된 위 시험은 이후 추가된 준비 완료 확인을 검증한 시험과 구분한다.
 
+<a id="fixed-issues"></a>
+
 ## 발견한 문제와 수정
 
 - Git 주석 태그의 객체 SHA를 이전 커밋과 비교하던 문제: 태그를 실제 커밋으로 해석해 소스·의존성 복구를 수정했다. 1.4.1 도우미의 실패를 재현한 뒤 수정본의 복구를 확인했다.
@@ -24,11 +42,15 @@
 - 새 프로세스가 1.5초 살아 있기만 하면 성공으로 간주하던 문제: 실제 서명된 즉시 종료 앱으로 조기 성공을 재현했다. 1.4.3 도우미는 공개 CLI 상태의 새 PID·목표 버전을 확인하고 준비 상태가 1.5초 유지된 뒤 성공을 기록한다.
 - 검증 도구가 상태 조회에 허용 범위를 넘는 timeout을 넣어 시작 실패로 오인하던 문제를 수정했다. 설치 중 조회 연결 손실은 읽기 재시도로 처리하며 설치 명령은 자동 재제출하지 않는다. 과거 성공 결과가 남아 있어도 이번 목표 버전의 설치 결과를 기다린다.
 
+<a id="recovery"></a>
+
 ## 실패·복구 검증
 
 실제 Git 저장소·npm 의존성을 사용하는 `scripts/verify-source-update.js`에서 정상 전진, 로컬 수정 거부, 이력 분기 거부, 새 앱 시작 실패 후 HEAD·node_modules 복구와 이전 버전 단일 재시작이 통과했다. 이 시험은 Release CI에서도 수행한다.
 
 `scripts/verify-mac-update-rollback.js`는 별도 정식 1.4.0 앱과 서명된 실패 후보 DMG를 사용했다. 새 후보가 종료 코드 71로 종료되자 이전 번들을 복원하고 실제 CLI가 1.4.0으로 응답했으며 이전 앱 실행은 1회였다. 서명됐지만 번들 ID가 다른 DMG도 교체 전 거부했다. 두 경우 모두 설정·곡·모델 센티널을 보존했다.
+
+<a id="release-143"></a>
 
 ## 정식 최신 1.4.3의 설치 검증
 
@@ -44,6 +66,8 @@
 
 다섯 경로 모두 기존 곡·프로젝트·설정·모델 폴더 센티널을 보존하고 새 앱의 WAV 가져오기·MP3 내보내기·전체 디코드를 통과했다. 과거 버전의 성공 결과를 미리 남긴 상태에서도 이번 목표 버전의 결과를 기다려 검증했다. 공개 [v1.4.3 Release](https://github.com/roadkwonai/music-road/releases/tag/v1.4.3)와 [CI의 테스트·실제 Git 복구·빌드·서명·DMG·해시 검사](https://github.com/roadkwonai/music-road/actions/runs/38652302553)가 모두 성공했다. 호스트 경로를 제외한 [실행 결과 JSON](update-e2e-results.json)도 함께 보관한다.
 
+<a id="evidence"></a>
+
 ## 재현과 증거
 
 ```bash
@@ -57,6 +81,8 @@ node scripts/verify-mac-update-rollback.js --baseline-app /absolute/path/to/1.4.
 최신 Release가 예시보다 높아지면 `--expected-version`도 실제 목표 버전에 맞춘다. 실제 주기 시험은 `--mode cli --notification periodic`으로 실행한다. 수동 업데이트 조회 없이 최대 15분 자동 확인을 기다린다. 새 도우미를 포함한 기준 설치본은 `--baseline-version 1.4.2 --expected-version 1.4.3 --require-ready true`로 검사한다. 소스 기준 커밋은 `--baseline-ref`로 지정한다.
 
 원본 증거는 각 `dist/update-e2e/<시나리오>/result.json`, 앱 로그와 GUI 알림 스크린샷, `dist/verify-mac-update-rollback.json`에 저장한다. 시험은 별도 앱 복사본과 `ROADMUSIC_DATA_DIR`를 사용하며 사용자의 실행 앱·라이브러리를 교체하지 않는다. 모델 폴더 보존은 센티널로 확인했으며 모델 전체 재설치·재생성은 이 업데이트 시험에 포함하지 않았다.
+
+<a id="scope"></a>
 
 ## 검증 범위
 

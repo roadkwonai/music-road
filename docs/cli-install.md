@@ -1,6 +1,11 @@
 # Road Music CLI 설치
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 Road Music의 dmg와 CLI는 용도가 다르다. dmg는 Finder에서 쓰는 GUI 앱이고, CLI는 소스 키트 안의 Node.js 명령이다. dmg를 설치해도 전역 `road-music` 명령은 생기지 않는다.
+
+> [!IMPORTANT]
+> CLI만 추가할 때는 앱·엔진·모델·기존 곡을 바꾸지 않는다. 설치 범위는 아래 “AI에게 설치를 맡길 때” 절을 따른다.
 
 ## 목차
 
@@ -29,7 +34,7 @@ Road Music의 dmg와 CLI는 용도가 다르다. dmg는 Finder에서 쓰는 GUI 
 
 ## GUI(dmg) 설치
 
-1. `RoadMusic-1.3.1-mac-arm64.dmg`를 연다.
+1. 받은 `RoadMusic-버전-mac-arm64.dmg`를 연다.
 2. `Road Music.app`을 `Applications`로 끌어 놓는다.
 3. `/Applications/Road Music.app`을 실행한다.
 
@@ -39,7 +44,7 @@ GUI만 쓸 때는 Node.js가 필요 없다. AI 엔진과 `ffmpeg`/`ffprobe`는 �
 
 ## CLI 소스 키트 설치
 
-배포된 `RoadMusic-1.3.1-cli.zip`을 원하는 작업 폴더에 풀면 `RoadMusic-1.3.1-cli` 폴더가 생긴다. 이 키트에는 CLI·Electron·renderer·Python 소스와 `package-lock.json`이 들어 있으며 `node_modules`, AI 모델, 곡 라이브러리, 실행 상태 파일은 넣지 않는다.
+배포된 `RoadMusic-버전-cli.zip`을 원하는 작업 폴더에 풀면 `RoadMusic-버전-cli` 폴더가 생긴다. `버전`은 실제 받은 Release의 버전으로 바꾼다. 이 키트에는 CLI·Electron·renderer·Python 소스와 `package-lock.json`이 들어 있으며 `node_modules`, AI 모델, 곡 라이브러리, 실행 상태 파일은 넣지 않는다.
 
 현재 소스에서 만드는 CLI 키트와 npm 패키지에는 다음 AI 제작 자료도 함께 들어간다. 과거 버전의 ZIP에는 없을 수 있으므로 실제로 푼 폴더에서 확인한다.
 
@@ -57,7 +62,7 @@ GUI만 쓸 때는 Node.js가 필요 없다. AI 엔진과 `ffmpeg`/`ffprobe`는 �
 AI는 `AGENTS.md`가 연결한 **동봉 스킬을 파일로 읽어 사용**한다. 전역 스킬 자동 등록이나 특정 제품의 슬래시 명령 지원을 가정하지 않는다. 외부 프로젝트에서 요청할 때는 [AI 사용 가이드](ai-cli.md)의 절대 경로 읽기를 적용하며, 다른 프로젝트의 지침이나 사용자 전역 스킬을 덮어쓰지 않는다.
 
 ```bash
-cd "/사용자가 선택한 경로/RoadMusic-1.3.1-cli"
+cd "/사용자가 선택한 경로/RoadMusic-버전-cli"
 node --version
 npm ci --include=dev
 node cli/road-music.js schema
@@ -87,7 +92,7 @@ ROADMUSIC_DATA_DIR="/사용자가 선택한 임시 절대 경로/road-music-test
 소스 키트 안에서만 다음 명령을 실행하면 현재 사용자 계정의 npm 전역 경로에 `road-music` 링크를 만들 수 있다.
 
 ```bash
-cd "/사용자가 선택한 경로/RoadMusic-1.3.1-cli"
+cd "/사용자가 선택한 경로/RoadMusic-버전-cli"
 npm link
 road-music schema
 ```

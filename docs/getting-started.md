@@ -1,5 +1,7 @@
 # 시작하기
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 맥에 Road Music을 설치하고 첫 곡과 첫 영상을 만드는 데까지 안내합니다. 기능별 자세한 설명은 [상세 가이드](guide.md)에 있습니다.
 
 ## 목차
@@ -46,12 +48,12 @@ dmg 파일을 받았다면 2.2로 넘어갑니다. 소스에서 직접 만들 �
 ```bash
 cd music-road
 npm install
-npm run dist:mac      # 결과: dist/RoadMusic-1.3.0-mac-arm64.dmg (약 100MB)
+npm run dist:mac      # 결과: dist/RoadMusic-현재버전-mac-arm64.dmg
 ```
 
 ### 2.2 Applications로 옮기기
 
-1. `RoadMusic-1.3.0-mac-arm64.dmg`를 두 번 눌러 엽니다.
+1. 받은 `RoadMusic-버전-mac-arm64.dmg`를 두 번 눌러 엽니다.
 2. 열린 창에서 `Road Music`을 `Applications` 폴더 아이콘 위로 끌어 놓습니다.
 3. Finder 사이드바에서 dmg를 꺼냅니다(⏏).
 4. Launchpad나 `응용 프로그램` 폴더에서 `Road Music`을 엽니다.

@@ -1,6 +1,8 @@
 # Road Music 상세 가이드
 
-Road Music 1.3.0의 모든 기능을 화면 순서대로 설명합니다. 설치와 첫 곡은 [시작하기](getting-started.md)에 있습니다.
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
+Road Music 기능을 화면 순서대로 설명합니다. 설치와 첫 곡은 [시작하기](getting-started.md)에 있습니다. 화면과 지원 범위는 설치한 버전에서 다를 수 있으므로, 현재 CLI 계약은 [CLI 레퍼런스](cli-reference.md)를 확인합니다.
 
 > 이 문서는 맥(Apple Silicon) 기준입니다. Windows에서 다르게 동작하는 부분은 따로 적었습니다. 현재 소스 코드(`electron/`, `renderer/`)를 기준으로 설명하며 실제 검증 범위는 [CLI 검수 결과](cli-qa-report.md)를 참고합니다.
 

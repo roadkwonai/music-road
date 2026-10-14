@@ -1,6 +1,11 @@
 # ACE-Step 1.5 공식 문서 보관본
 
+[Road Music](../../../README.md) · [문서 지도](../../README.md) · [릴리스 노트](../../../releases/README.md)
+
 음악 생성 전에 읽는 프로젝트 지침은 [ACE 프롬프트 최적화 가이드](../../ace-prompt-guide.md)다. 이 폴더는 그 가이드의 근거가 되는 공식 원문을 인터넷 연결 없이 참고하기 위한 보관본이다.
+
+> [!NOTE]
+> `en/`, `ko/`, `LICENSE`, `manifest.json`은 고정 커밋의 원문·무결성 자료다. 이 안내 파일만 로컬 탐색을 위해 작성한다.
 
 ## 목차
 

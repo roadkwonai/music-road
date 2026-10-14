@@ -1,5 +1,7 @@
 # 가사 구간 태그와 사용법
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 `[Verse]`, `[Chorus]`는 **가사 안에서 곡의 전개를 알려주는 태그**다. `bpm`처럼 CLI JSON에 넣는 독립 옵션이 아니다. 예를 들어 `"verse":true`를 추가하지 않고 `lyrics` 문자열에 `[Verse]`와 실제 부를 가사를 적는다.
 
 이 문서는 [공식 ACE Tutorial](vendor/ace-step-1.5/en/Tutorial.md#about-lyrics-the-temporal-script)에 실린 구조·보컬·에너지 태그와 로드뮤직의 실제 처리 차이를 정리한다. 공식 태그가 모두 로드뮤직을 통해 그대로 전달되지는 않는다. 생성 전에는 [ACE 가이드](ace-prompt-guide.md)와 [요청자 검토 규칙](music-review.md)을 함께 따른다.

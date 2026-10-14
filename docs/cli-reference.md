@@ -1,5 +1,7 @@
 # Road Music CLI 레퍼런스
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 이 문서는 `electron/cli-catalog.js`와 `electron/cli-transport.js`의 공개 스키마를 사람이 읽기 좋게 정리한 목록이다. 실행 중인 버전에서 `node cli/road-music.js schema`를 실행한 결과가 최종 기준이다. 내부 프레임·픽셀 전송 명령은 공개 API가 아니므로 포함하지 않는다.
 
 ## 목차

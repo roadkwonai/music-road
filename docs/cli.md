@@ -1,5 +1,7 @@
 # Road Music CLI
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 로컬 JSON 요청으로 호출한다. 독립 음악 엔진이나 네트워크 API가 아니다. 현재 설치 버전의 `schema`가 명령·필드의 기준이며, 전체 표는 [CLI 레퍼런스](cli-reference.md)에 있다.
 
 ## 목차
@@ -19,7 +21,7 @@ Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 
 
 ## 시작하기
 
-CLI는 소스 체크아웃 또는 배포된 `RoadMusic-1.4.0-cli` 소스 키트에서 Node.js로 실행한다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
+CLI는 소스 체크아웃 또는 배포된 `RoadMusic-버전-cli` 소스 키트에서 Node.js로 실행한다. `버전`은 설치한 Release의 값으로 바꾼다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
 
 ```bash
 npm ci --include=dev

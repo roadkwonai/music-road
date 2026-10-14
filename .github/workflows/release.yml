@@ -42,6 +42,8 @@ jobs:
           node -e 'const fs=require("node:fs"); const v=require("./package.json").version; if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(v) || process.env.RELEASE_TAG !== `v${v}`) throw Error("Tag/version mismatch"); if (!fs.statSync(`docs/releases/v${v}.md`).size) throw Error("Missing release notes")'
       - run: npm ci --include=dev
       - run: npm test
+      - name: Verify real Git source update and startup-failure rollback
+        run: node scripts/verify-source-update.js
       - run: npm run dist:mac
       - run: npm run dist:cli
       - name: Verify bundles and prepare checksums

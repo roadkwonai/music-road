@@ -3,6 +3,9 @@
 const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
+const net = require('net')
+const crypto = require('crypto')
+const os = require('os')
 const { spawn } = require('child_process')
 
 const VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/
@@ -65,21 +68,91 @@ function run (file, args, options = {}) {
   })
 }
 
-function launch (file, args, options) {
+function appReady (userData, pid, version) {
+  const key = crypto.createHash('sha256').update(path.resolve(userData)).digest('hex').slice(0, 16)
+  const endpoint = path.join(os.tmpdir(), `road-music-${key}.sock`)
+  const id = crypto.randomBytes(8).toString('hex')
+  return new Promise(resolve => {
+    const socket = net.createConnection(endpoint)
+    socket.setEncoding('utf8')
+    let pending = ''
+    let settled = false
+    const finish = ready => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      socket.destroy()
+      resolve(ready)
+    }
+    const timer = setTimeout(() => finish(false), 1000)
+    socket.once('connect', () => socket.write(JSON.stringify({ id, command: 'cli:status', params: {} }) + '\n'))
+    socket.on('data', chunk => {
+      pending += chunk
+      if (Buffer.byteLength(pending) > 16 * 1024 * 1024) return finish(false)
+      let end
+      while ((end = pending.indexOf('\n')) >= 0) {
+        const line = pending.slice(0, end); pending = pending.slice(end + 1)
+        if (!line) continue
+        let message
+        try { message = JSON.parse(line) } catch { return finish(false) }
+        if (message.id !== id) continue
+        finish(message.result?.pid === pid && message.result?.update?.current === version)
+      }
+    })
+    socket.once('error', () => finish(false))
+    socket.once('end', () => finish(false))
+    socket.once('close', () => finish(false))
+  })
+}
+
+function stopLaunchedChild (child) {
+  if (!child.pid || child.exitCode !== null || child.signalCode !== null) return Promise.resolve(true)
+  return new Promise(resolve => {
+    let killTimer
+    let finalTimer
+    const finish = stopped => { clearTimeout(killTimer); clearTimeout(finalTimer); child.removeListener('exit', exited); resolve(stopped) }
+    const exited = () => finish(true)
+    const signal = value => {
+      try { process.kill(-child.pid, value) } catch { try { child.kill(value) } catch {} }
+    }
+    child.once('exit', exited)
+    signal('SIGTERM')
+    killTimer = setTimeout(() => signal('SIGKILL'), 1000)
+    finalTimer = setTimeout(() => finish(false), 3000)
+  })
+}
+
+function launch (file, args, options, readiness) {
   return new Promise((resolve, reject) => {
     const child = spawn(file, args, { ...options, detached: true, stdio: 'ignore' })
     let settled = false
-    let timer = null
-    const finish = (error) => {
+    let pollTimer = null
+    let healthySince = null
+    const finish = async (error) => {
       if (settled) return
       settled = true
-      if (timer) clearTimeout(timer)
-      if (error) reject(error)
-      else { child.unref(); resolve() }
+      clearTimeout(deadline)
+      clearTimeout(pollTimer)
+      if (error) {
+        if (!(await stopLaunchedChild(child))) error.unsafeToRollback = true
+        child.unref()
+        reject(error)
+      } else { child.unref(); resolve({ pid: child.pid, appReady: true }) }
     }
+    const deadline = setTimeout(() => finish(new Error('새 앱의 준비 완료 응답 시간이 초과되었습니다.')), 45000)
     child.once('error', finish)
     child.once('exit', (code, signal) => finish(new Error(`재시작한 앱이 바로 종료되었습니다 (${signal || code}).`)))
-    child.once('spawn', () => { timer = setTimeout(() => finish(), 1500) })
+    child.once('spawn', () => {
+      const poll = async () => {
+        if (settled) return
+        const ready = await appReady(readiness.userData, child.pid, readiness.version)
+        if (settled) return
+        healthySince = ready ? (healthySince || Date.now()) : null
+        if (healthySince && Date.now() - healthySince >= 1500) return finish()
+        pollTimer = setTimeout(() => poll().catch(finish), 200)
+      }
+      poll().catch(finish)
+    })
   })
 }
 
@@ -135,14 +208,14 @@ async function installMac (payload) {
       throw error
     }
     try {
-      await launch(path.join(payload.bundle, 'Contents', 'MacOS', info.CFBundleExecutable), payload.service ? ['--roadmusic-service'] : [], { env: launchEnvironment(payload) })
+      const launched = await launch(path.join(payload.bundle, 'Contents', 'MacOS', info.CFBundleExecutable), payload.service ? ['--roadmusic-service'] : [], { env: launchEnvironment(payload) }, { userData: payload.userData, version: payload.version })
+      return { backup, ...launched }
     } catch (error) {
+      if (error.unsafeToRollback) throw error
       await fsp.rm(payload.bundle, { recursive: true, force: true })
       await fsp.rename(backup, payload.bundle)
-      await launch(path.join(payload.bundle, 'Contents', 'MacOS', info.CFBundleExecutable), payload.service ? ['--roadmusic-service'] : [], { env: launchEnvironment(payload) }).catch(() => {})
       throw error
     }
-    return { backup }
   } finally {
     await run('/usr/bin/hdiutil', ['detach', mount]).catch(() => {})
   }
@@ -186,13 +259,14 @@ async function installSource (payload) {
 
   const ref = `refs/roadmusic-update/v${payload.version}`
   await git(root, ['fetch', '--no-tags', 'origin', `refs/tags/v${payload.version}:${ref}`])
-  const commit = await git(root, ['rev-parse', ref])
+  const commit = await git(root, ['rev-parse', `${ref}^{commit}`])
   const old = await git(root, ['rev-parse', 'HEAD'])
   await git(root, ['merge-base', '--is-ancestor', old, commit])
   if (JSON.parse(await git(root, ['show', `${commit}:package.json`])).version !== payload.version) throw new Error('릴리스 태그와 package.json 버전이 다릅니다.')
 
   const stage = path.join(path.dirname(root), `.${path.basename(root)}.update-${process.pid}`)
   let depsBackup = null
+  let launched
   try {
     await git(root, ['worktree', 'add', '--detach', stage, commit])
     await run('npm', ['ci', '--include=dev'], { cwd: stage })
@@ -200,13 +274,14 @@ async function installSource (payload) {
     await git(root, ['merge', '--ff-only', commit])
     try {
       depsBackup = await swapDependencies(root, stage)
-      await launch(payload.execPath, payload.service ? ['.', '--roadmusic-service'] : ['.'], { cwd: root, env: launchEnvironment(payload) })
+      launched = await launch(payload.execPath, payload.service ? ['.', '--roadmusic-service'] : ['.'], { cwd: root, env: launchEnvironment(payload) }, { userData: payload.userData, version: payload.version })
     } catch (error) {
+      if (error.unsafeToRollback) throw error
       if (!(await restoreSource(root, old, commit, depsBackup))) throw new Error(`${error.message} (새 변경이 있어 자동 복구하지 않았습니다.)`)
-      await launch(payload.execPath, payload.service ? ['.', '--roadmusic-service'] : ['.'], { cwd: root, env: launchEnvironment(payload) }).catch(() => {})
       throw error
     }
     if (depsBackup) await fsp.rm(depsBackup, { recursive: true, force: true })
+    return launched
   } finally {
     await git(root, ['worktree', 'remove', '--force', stage]).catch(() => {})
   }
@@ -222,18 +297,29 @@ async function main (payload) {
 
 async function restartExisting (payload) {
   const args = payload.service ? ['.', '--roadmusic-service'] : ['.']
-  if (payload.mode === 'source' && payload.root && payload.execPath) return launch(payload.execPath, args, { cwd: payload.root, env: launchEnvironment(payload) })
+  if (payload.mode === 'source' && payload.root && payload.execPath) {
+    const version = JSON.parse(await fsp.readFile(path.join(payload.root, 'package.json'), 'utf8')).version
+    return launch(payload.execPath, args, { cwd: payload.root, env: launchEnvironment(payload) }, { userData: payload.userData, version })
+  }
   if (payload.mode !== 'mac-app' || !payload.bundle) return
   const plist = path.join(payload.bundle, 'Contents', 'Info.plist')
   const info = JSON.parse(await run('/usr/bin/plutil', ['-convert', 'json', '-o', '-', plist]))
   if (!info.CFBundleExecutable || path.basename(info.CFBundleExecutable) !== info.CFBundleExecutable) throw new Error('기존 앱 실행 파일 정보가 올바르지 않습니다.')
-  return launch(path.join(payload.bundle, 'Contents', 'MacOS', info.CFBundleExecutable), payload.service ? ['--roadmusic-service'] : [], { env: launchEnvironment(payload) })
+  return launch(path.join(payload.bundle, 'Contents', 'MacOS', info.CFBundleExecutable), payload.service ? ['--roadmusic-service'] : [], { env: launchEnvironment(payload) }, { userData: payload.userData, version: info.CFBundleShortVersionString })
 }
 
 if (require.main === module) {
   let payload
   try { payload = JSON.parse(process.argv[2] || '{}') } catch { process.exitCode = 1 }
-  if (payload) main(payload).then(result => record(payload, { ok: true, version: payload.version, ...result })).catch(async error => { await restartExisting(payload).catch(() => {}); await record(payload, { ok: false, error: String(error.message || error) }).catch(() => {}); process.exitCode = 1 })
+  if (payload) main(payload).then(result => record(payload, { ok: true, version: payload.version, ...result })).catch(async error => {
+    let recoveryError = null
+    if (!error.unsafeToRollback) {
+      try { await restartExisting(payload) } catch (failure) { recoveryError = String(failure.message || failure) }
+    }
+    await record(payload, { ok: false, version: payload.version, error: String(error.message || error), recoveryError,
+      manualRecovery: Boolean(error.unsafeToRollback || recoveryError) }).catch(() => {})
+    process.exitCode = 1
+  })
 }
 
 module.exports = { safeVersion, isRoadMusicBundle, run, main }

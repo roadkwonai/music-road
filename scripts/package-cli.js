@@ -15,7 +15,7 @@ async function packageCli (outputDir = path.join(root, 'dist')) {
   const kit = path.join(stage, name)
   try {
     await fs.mkdir(kit)
-    const entries = ['cli', 'electron', 'renderer', 'python', 'docs', 'tests', 'scripts',
+    const entries = ['cli', 'electron', 'renderer', 'python', 'docs', 'releases', 'tests', 'scripts',
       'package.json', 'package-lock.json', 'README.md', 'LICENSE', 'AGENTS.md', 'CLAUDE.md',
       'build/icon.png', 'build/icon.icns', 'prompts/cli-workflows.md', 'prompts/ace-review.md',
       'skills/road-music-ace']

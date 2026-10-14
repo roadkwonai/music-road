@@ -41,6 +41,7 @@
 - `ffmpeg`와 `ffprobe`, ACE 엔진은 CLI와 별도로 준비한다. 설치·생성 전 `setup:check`와 `engines:list`으로 확인한다.
 - 엔진·모델 다운로드는 사용자가 설치를 요청한 경우에만 실행한다. 음악 생성만 요청했는데 모델이 없으면 미설치 상태를 보고한다.
 - 업데이트는 [업데이트 가이드](docs/updates.md)를 따른다. `update:check`와 `update:status`로 대상·버전을 확인하고 사용자가 업데이트를 요청했을 때 `update:install`을 실행한다. 진행·대기 작업을 취소하거나 로컬 수정을 덮어쓰지 않는다. `installing`은 인계 응답이므로 재시작 후 실제 버전·설치 결과를 확인한다.
+- 새 정식 버전을 배포할 때는 [릴리스 노트](releases/README.md)를 읽고 `releases/YYYY-MM-DD-kebab-title.md`에 사용자 변경·설치 영향·검증·제한을 작성한다. 안정 버전은 `package.json`·`vX.Y.Z` 태그·메타데이터와 일치해야 하며, 공개된 태그·Release·노트는 수정하지 않는다.
 - 코드를 변경하면 `npm test`와 변경한 JavaScript의 `node --check`를 실행한다. 실제 엔진·마이크·다른 OS 검증을 생략했다면 결과에 구분해 적는다.
 
 ## 지침의 적용 범위

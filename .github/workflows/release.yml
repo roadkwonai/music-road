@@ -37,9 +37,18 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - name: Validate version and release notes
+      - name: Validate version and prepare release notes
+        id: release_notes
+        env:
+          RELEASE_NOTES_FILE: ${{ runner.temp }}/release-notes.md
         run: |
-          node -e 'const fs=require("node:fs"); const v=require("./package.json").version; if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(v) || process.env.RELEASE_TAG !== `v${v}`) throw Error("Tag/version mismatch"); if (!fs.statSync(`docs/releases/v${v}.md`).size) throw Error("Missing release notes")'
+          PACKAGE_VERSION="$(node -p 'require("./package.json").version')"
+          export PACKAGE_VERSION
+          if [ "$RELEASE_TAG" != "v$PACKAGE_VERSION" ]; then
+            echo "Tag/version mismatch" >&2
+            exit 1
+          fi
+          node scripts/release-notes.js resolve --version "$PACKAGE_VERSION" --output "$RELEASE_NOTES_FILE" --github-output "$GITHUB_OUTPUT"
       - run: npm ci --include=dev
       - run: npm test
       - name: Verify real Git source update and startup-failure rollback
@@ -57,6 +66,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          RELEASE_TITLE: ${{ steps.release_notes.outputs.release_title }}
+          RELEASE_NOTE_PATH: ${{ steps.release_notes.outputs.release_note_path }}
         run: |
-          gh release create "$RELEASE_TAG" --verify-tag --draft --title "$RELEASE_TAG — GitHub 업데이트" --notes-file "docs/releases/$RELEASE_TAG.md" "dist/RoadMusic-${RELEASE_TAG#v}-mac-arm64.dmg" "dist/RoadMusic-${RELEASE_TAG#v}-cli.zip" dist/SHA256SUMS.txt
+          gh release create "$RELEASE_TAG" --verify-tag --draft --title "$RELEASE_TITLE" --notes-file "$RELEASE_NOTE_PATH" "dist/RoadMusic-${RELEASE_TAG#v}-mac-arm64.dmg" "dist/RoadMusic-${RELEASE_TAG#v}-cli.zip" dist/SHA256SUMS.txt
           gh release edit "$RELEASE_TAG" --draft=false --latest

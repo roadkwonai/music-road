@@ -1,5 +1,7 @@
 # GitHub Release 업데이트
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 업데이트 기준은 [roadkwonai/music-road의 최신 정식 Release](https://github.com/roadkwonai/music-road/releases/latest)다. 앱 버전은 `package.json`을 사용한다. 초안·사전 공개 버전은 설치하지 않으며 현재보다 높은 버전만 제안한다.
 
 ## 목차
@@ -83,9 +85,9 @@ SHA-256은 파일 손상을 검출하지만 배포 계정의 탈취까지 막지
 
 ## 새 버전 배포
 
-버전·태그·파일명을 일치시킨다. 예를 들어 `package.json`과 잠금 파일 버전이 `1.4.1`이면 태그는 `v1.4.1`, 노트는 `docs/releases/v1.4.1.md`다. 이미 공개한 버전·태그·파일은 교체하지 않고 다음 버전으로 수정한다.
+버전·태그·파일명을 일치시킨다. 예를 들어 `package.json`과 잠금 파일 버전이 `1.4.1`이면 태그는 `v1.4.1`이다. 새 노트는 [`releases/YYYY-MM-DD-kebab-title.md`](../releases/README.md)에 작성하고 메타데이터의 안정 버전을 `1.4.1`로 맞춘다. 같은 버전의 날짜 노트가 있으면 그것을 우선하며, 과거 `docs/releases/v1.4.1.md`는 호환용 아카이브로만 사용한다. 이미 공개한 버전·태그·파일은 교체하지 않고 다음 버전으로 수정한다.
 
-`.github/workflows/release.yml`은 버전 태그가 올라오면 macOS에서 테스트, DMG·CLI 키트 빌드, 코드 서명·DMG 검사, 해시 생성을 수행한다. 모든 파일을 초안 Release에 올린 뒤 정식 Latest로 공개한다. 실패한 초안은 최신 버전으로 알리지 않는다. 수동 실행도 기존 정식 버전 태그를 입력받는다. 이미 같은 Release가 있으면 덮어쓰지 않고 실패한다.
+`.github/workflows/release.yml`은 정확한 버전 태그를 체크아웃한 뒤 `package.json`·날짜 노트·제목을 함께 검증한다. 메타데이터를 제거한 본문만 GitHub Release에 올려 내부 정보가 보이지 않게 한다. 이어서 macOS에서 테스트, DMG·CLI 키트 빌드, 코드 서명·DMG 검사, 해시 생성을 수행한다. 모든 파일을 초안 Release에 올린 뒤 정식 Latest로 공개한다. 실패한 초안은 최신 버전으로 알리지 않는다. 수동 실행도 기존 정식 버전 태그를 입력받는다. 이미 같은 Release가 있으면 덮어쓰지 않고 실패한다.
 
 | 필수 asset | 예시 |
 | --- | --- |
@@ -93,4 +95,4 @@ SHA-256은 파일 손상을 검출하지만 배포 계정의 탈취까지 막지
 | CLI 소스 키트 | `RoadMusic-1.4.0-cli.zip` |
 | 두 파일의 SHA-256 | `SHA256SUMS.txt` |
 
-직접 빌드할 때는 `npm test`, `npm run dist:mac`, `npm run dist:cli`, `npm run release:assets` 순서로 실행한다. 워크플로는 GitHub의 `GITHUB_TOKEN`에 Release 게시용 `contents: write`만 부여하며 개인 `GH_TOKEN`을 소스나 앱에 넣지 않는다. [Release API](https://docs.github.com/en/rest/releases/releases#get-the-latest-release)와 [asset 다운로드 API](https://docs.github.com/en/rest/releases/assets)를 사용한다.
+직접 빌드할 때는 `npm run release:note -- resolve --version X.Y.Z`, `npm test`, `npm run dist:mac`, `npm run dist:cli`, `npm run release:assets` 순서로 실행한다. 노트 작성·검증·과거 아카이브 규칙은 [릴리스 노트](../releases/README.md)를 따른다. 워크플로는 GitHub의 `GITHUB_TOKEN`에 Release 게시용 `contents: write`만 부여하며 개인 `GH_TOKEN`을 소스나 앱에 넣지 않는다. [Release API](https://docs.github.com/en/rest/releases/releases#get-the-latest-release)와 [asset 다운로드 API](https://docs.github.com/en/rest/releases/assets)를 사용한다.

@@ -1,5 +1,7 @@
 # dmg 패키징
 
+[Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
+
 Road Music을 맥용 dmg로 만드는 절차입니다. 사용자는 dmg를 열고 `Road Music`을 `Applications`로 끌어 놓아 설치합니다. 개발 중에는 dmg 없이 `npm start`로 실행해도 됩니다.
 
 소스를 수정해도 이미 설치된 앱의 `app.asar`에는 자동으로 반영되지 않습니다. 개발 실행은 재실행하고, 설치한 앱은 새 DMG의 앱으로 교체합니다. 같은 앱 ID와 데이터 경로를 사용하므로 기존 곡·엔진·설정은 유지됩니다.
@@ -167,7 +169,7 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 
 1. `package.json`의 `version`을 올립니다(예: `1.4.0`).
 2. `npm run dist:mac` → `dist/RoadMusic-1.4.0-mac-arm64.dmg`가 나옵니다.
-3. `npm run dist:cli`와 `npm run release:assets`로 CLI ZIP과 체크섬을 만듭니다. 같은 버전의 태그·Release에 DMG, ZIP, `SHA256SUMS.txt`를 게시합니다. 버전 태그를 push하면 GitHub Actions가 빌드·검증 후 Latest Release를 게시합니다. 노트 경로와 절차는 [업데이트 배포](updates.md#새-버전-배포)를 따릅니다.
+3. [릴리스 노트](../releases/README.md)에 버전에 맞는 날짜 노트를 만들고 `npm run release:note -- resolve --version X.Y.Z`로 검증합니다. 이어서 `npm run dist:cli`와 `npm run release:assets`로 CLI ZIP과 체크섬을 만듭니다. 같은 버전의 태그·Release에 DMG, ZIP, `SHA256SUMS.txt`를 게시합니다. 버전 태그를 push하면 GitHub Actions가 빌드·검증 후 Latest Release를 게시합니다. 노트 경로와 절차는 [업데이트 배포](updates.md#새-버전-배포)를 따릅니다.
 4. 사용자가 새 dmg로 덮어 설치해도 곡과 엔진(`~/Library/Application Support/Road Music`)은 그대로 남습니다.
 
 <a id="toc-7"></a>

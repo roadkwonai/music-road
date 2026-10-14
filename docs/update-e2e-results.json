@@ -1,0 +1,438 @@
+{
+  "date": "2026-10-15",
+  "platform": "macOS arm64",
+  "release": "v1.4.3",
+  "releaseCommit": "eb5b1998da6e9fa6428be27927e0152c56b81430",
+  "readinessCandidateCommit": "e2515d2936f29dbdd26966cb0e232c10f166aa2d",
+  "regression": {
+    "passed": 121,
+    "failed": 0
+  },
+  "scenarios": [
+    {
+      "mode": "gui",
+      "expected": "1.4.2",
+      "before": "1.4.0",
+      "notification": {
+        "status": "available",
+        "version": "1.4.2",
+        "trigger": "startup"
+      },
+      "after": {
+        "version": "1.4.2",
+        "pidChanged": true,
+        "visible": true
+      },
+      "backup": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "gui-soy9xM"
+    },
+    {
+      "mode": "cli",
+      "expected": "1.4.2",
+      "before": "1.4.0",
+      "notification": {
+        "status": "available",
+        "version": "1.4.2",
+        "trigger": "startup"
+      },
+      "busyProtection": {
+        "installationBlocked": true,
+        "oldProcessPreserved": true,
+        "renderCompleted": true
+      },
+      "after": {
+        "version": "1.4.2",
+        "pidChanged": true,
+        "visible": false
+      },
+      "backup": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "cli-NxG8jf"
+    },
+    {
+      "mode": "source",
+      "expected": "1.4.2",
+      "before": "1.4.0",
+      "notification": {
+        "status": "available",
+        "version": "1.4.2",
+        "trigger": "startup"
+      },
+      "after": {
+        "version": "1.4.2",
+        "pidChanged": true,
+        "visible": false
+      },
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "source-vF8KIb"
+    },
+    {
+      "mode": "cli",
+      "expected": "1.4.2",
+      "before": "1.4.0",
+      "initialCheckError": "업데이트 확인 네트워크 오류: 업데이트 서버가 HTTP 403을 반환했습니다.",
+      "notification": {
+        "status": "available",
+        "version": "1.4.2",
+        "trigger": "15-minute-periodic",
+        "elapsedMs": 899954
+      },
+      "after": {
+        "version": "1.4.2",
+        "pidChanged": true,
+        "visible": false
+      },
+      "backup": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "cli-alw5aF"
+    },
+    {
+      "mode": "gui",
+      "expected": "1.4.3",
+      "before": "1.4.0",
+      "notification": {
+        "status": "available",
+        "version": "1.4.3",
+        "trigger": "startup"
+      },
+      "after": {
+        "version": "1.4.3",
+        "pidChanged": true,
+        "visible": true
+      },
+      "installerReadyAcknowledged": false,
+      "backup": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "gui-eylM3z",
+      "installerResult": {
+        "ok": true,
+        "version": "1.4.3",
+        "backup": "/Users/freelife/.codex/worktrees/update-e2e/music-road/dist/update-e2e/gui-eylM3z/.Road Music.app.1792019513502.backup",
+        "at": "2026-10-14T23:11:55.631Z"
+      },
+      "baselineType": "official v1.4.0"
+    },
+    {
+      "mode": "cli",
+      "expected": "1.4.3",
+      "before": "1.4.0",
+      "notification": {
+        "status": "available",
+        "version": "1.4.3",
+        "trigger": "startup"
+      },
+      "after": {
+        "version": "1.4.3",
+        "pidChanged": true,
+        "visible": false
+      },
+      "installerReadyAcknowledged": false,
+      "backup": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "cli-7qdHpv",
+      "installerResult": {
+        "ok": true,
+        "version": "1.4.3",
+        "backup": "/Users/freelife/.codex/worktrees/update-e2e/music-road/dist/update-e2e/cli-7qdHpv/.Road Music.app.1792019507641.backup",
+        "at": "2026-10-14T23:11:49.751Z"
+      },
+      "baselineType": "official v1.4.0"
+    },
+    {
+      "mode": "gui",
+      "expected": "1.4.3",
+      "before": "1.4.2",
+      "notification": {
+        "status": "available",
+        "version": "1.4.3",
+        "trigger": "startup"
+      },
+      "after": {
+        "version": "1.4.3",
+        "pidChanged": true,
+        "visible": true
+      },
+      "installerReadyAcknowledged": true,
+      "backup": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "gui-xojF7V",
+      "installerResult": {
+        "ok": true,
+        "version": "1.4.3",
+        "backup": "/Users/freelife/.codex/worktrees/update-e2e/music-road/dist/update-e2e/gui-xojF7V/.Road Music.app.1792019505070.backup",
+        "pid": 65645,
+        "appReady": true,
+        "at": "2026-10-14T23:11:49.915Z"
+      },
+      "baselineType": "readiness-fix candidate"
+    },
+    {
+      "mode": "cli",
+      "expected": "1.4.3",
+      "before": "1.4.2",
+      "notification": {
+        "status": "available",
+        "version": "1.4.3",
+        "trigger": "startup"
+      },
+      "after": {
+        "version": "1.4.3",
+        "pidChanged": true,
+        "visible": false
+      },
+      "installerReadyAcknowledged": true,
+      "backup": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "cli-weGcDR",
+      "installerResult": {
+        "ok": true,
+        "version": "1.4.3",
+        "backup": "/Users/freelife/.codex/worktrees/update-e2e/music-road/dist/update-e2e/cli-weGcDR/.Road Music.app.1792019505127.backup",
+        "pid": 65647,
+        "appReady": true,
+        "at": "2026-10-14T23:11:51.387Z"
+      },
+      "baselineType": "readiness-fix candidate"
+    },
+    {
+      "mode": "source",
+      "expected": "1.4.3",
+      "before": "1.4.2",
+      "notification": {
+        "status": "available",
+        "version": "1.4.3",
+        "trigger": "startup"
+      },
+      "after": {
+        "version": "1.4.3",
+        "pidChanged": true,
+        "visible": false
+      },
+      "installerReadyAcknowledged": true,
+      "originalSongPreserved": true,
+      "preserved": [
+        "songs",
+        "models",
+        "settings"
+      ],
+      "afterUpdateExport": true,
+      "ok": true,
+      "evidenceId": "source-xauWSC",
+      "installerResult": {
+        "ok": true,
+        "version": "1.4.3",
+        "pid": 61546,
+        "appReady": true,
+        "at": "2026-10-14T23:11:41.640Z"
+      },
+      "baselineType": "readiness-fix candidate"
+    }
+  ],
+  "periodicEvents": {
+    "ok": true,
+    "transport": "live CLI JSONL",
+    "events": [
+      {
+        "at": "2026-10-14T22:53:49.281Z",
+        "status": "checking",
+        "version": null,
+        "available": false
+      },
+      {
+        "at": "2026-10-14T22:53:49.612Z",
+        "status": "available",
+        "version": "1.4.2",
+        "available": true
+      },
+      {
+        "at": "2026-10-14T22:53:49.910Z",
+        "status": "downloading",
+        "version": "1.4.2",
+        "available": true
+      },
+      {
+        "at": "2026-10-14T22:53:53.868Z",
+        "status": "downloaded",
+        "version": "1.4.2",
+        "available": true
+      },
+      {
+        "at": "2026-10-14T22:53:53.985Z",
+        "status": "installing",
+        "version": "1.4.2",
+        "available": true
+      }
+    ]
+  },
+  "macRollback": {
+    "oldVersion": "1.4.0",
+    "candidateVersion": "9.9.9",
+    "startedAt": "2026-10-14T23:09:29.670Z",
+    "rollback": {
+      "durable": {
+        "ok": false,
+        "version": "9.9.9",
+        "error": "재시작한 앱이 바로 종료되었습니다 (71).",
+        "recoveryError": null,
+        "manualRecovery": false,
+        "at": "2026-10-14T23:09:50.730Z"
+      },
+      "helperExit": 1,
+      "installedVersion": "1.4.0",
+      "oldLaunches": 1
+    },
+    "cli": {
+      "appVersion": "1.4.0",
+      "engines": 2,
+      "projects": "기본",
+      "songs": 0
+    },
+    "sentinels": [
+      "settings",
+      "songs",
+      "models"
+    ],
+    "wrongBundle": {
+      "durable": {
+        "ok": false,
+        "version": "9.9.9",
+        "error": "다운로드한 앱의 식별자 또는 버전이 일치하지 않습니다.",
+        "recoveryError": null,
+        "manualRecovery": false,
+        "at": "2026-10-14T23:10:07.644Z"
+      },
+      "installedVersion": "1.4.0",
+      "oldLaunches": 1
+    },
+    "ok": true,
+    "finishedAt": "2026-10-14T23:10:08.170Z"
+  },
+  "sourceFixture": {
+    "ok": true,
+    "checks": [
+      "공식 Git fast-forward·실제 npm ci·의존성 교체·재시작·데이터 보존",
+      "dirty 작업 트리 거부",
+      "diverged HEAD 거부",
+      "새 버전 기동 실패 시 HEAD·node_modules 롤백과 이전 버전 재시작"
+    ]
+  },
+  "releaseCI": {
+    "conclusion": "success",
+    "status": "completed",
+    "steps": [
+      {
+        "conclusion": "success",
+        "name": "Set up job"
+      },
+      {
+        "conclusion": "success",
+        "name": "Check out the exact release tag"
+      },
+      {
+        "conclusion": "success",
+        "name": "Use Node.js 24"
+      },
+      {
+        "conclusion": "success",
+        "name": "Validate version and release notes"
+      },
+      {
+        "conclusion": "success",
+        "name": "Run npm ci --include=dev"
+      },
+      {
+        "conclusion": "success",
+        "name": "Run npm test"
+      },
+      {
+        "conclusion": "success",
+        "name": "Verify real Git source update and startup-failure rollback"
+      },
+      {
+        "conclusion": "success",
+        "name": "Run npm run dist:mac"
+      },
+      {
+        "conclusion": "success",
+        "name": "Run npm run dist:cli"
+      },
+      {
+        "conclusion": "success",
+        "name": "Verify bundles and prepare checksums"
+      },
+      {
+        "conclusion": "success",
+        "name": "Publish complete release as latest"
+      },
+      {
+        "conclusion": "success",
+        "name": "Post Use Node.js 24"
+      },
+      {
+        "conclusion": "success",
+        "name": "Post Check out the exact release tag"
+      },
+      {
+        "conclusion": "success",
+        "name": "Complete job"
+      }
+    ]
+  }
+}

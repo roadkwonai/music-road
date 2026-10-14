@@ -55,6 +55,9 @@
     </span>
     <span class="muted" id="gpuLoad"></span>
     <span class="muted" id="gpuInfo"></span>
+    <button id="updateOpen" class="ghost small update-button hidden" title="새 버전 확인 및 설치">
+      업데이트 <span id="updateBadge" class="update-badge hidden" aria-label="새 업데이트">●</span>
+    </button>
     <button id="aboutOpen" class="ghost small" title="프로그램 정보 · 라이선스 · 업데이트 확인 · 피드백">프로그램 정보</button>
   </div>
 </header>
@@ -492,26 +495,28 @@
   </aside>
 </main>
 
-<!-- 새 버전 알림 -->
+<!-- 업데이트 -->
 <div id="update" class="overlay hidden">
   <div class="setup-card update-card">
     <div class="update-head">
       <span class="update-icon" aria-hidden="true">↻</span>
       <div>
-        <h1>새 버전이 나왔습니다</h1>
+        <h1 id="updateTitle">업데이트</h1>
         <p class="muted"><span id="updateFrom"></span> → <b id="updateTo"></b></p>
       </div>
     </div>
     <pre id="updateNotes" class="notes hidden"></pre>
-    <p class="update-ask">roadkwon.dev 다운로드 페이지로 이동하시겠습니까?</p>
+    <p id="updateStatus" class="update-ask"></p>
+    <p id="updateError" class="error hidden"></p>
+    <div id="updateProgress" class="update-progress hidden"><i id="updateProgressBar"></i></div>
     <div class="update-foot">
-      <label class="update-quiet" id="updateQuietRow"><input type="checkbox" id="updateQuiet"> 일주일 동안 이 창을 표시하지 않음</label>
       <div class="setup-actions">
-        <button id="updateYes" class="primary">예</button>
-        <button id="updateNo" class="ghost">아니요</button>
+        <button id="updateAction" class="primary">다운로드하고 설치</button>
+        <button id="updatePage" class="ghost hidden">GitHub 릴리스 열기</button>
+        <button id="updateClose" class="ghost">닫기</button>
       </div>
     </div>
-    <p class="muted tiny">새 버전을 설치해도 만든 곡과 설치된 AI 엔진은 그대로 남습니다.</p>
+    <p class="muted tiny">업데이트하면 프로그램이 잠시 닫혔다가 다시 열립니다. 만든 곡과 설치된 AI 모델은 그대로 유지됩니다.</p>
   </div>
 </div>
 

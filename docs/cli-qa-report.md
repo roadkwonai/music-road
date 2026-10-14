@@ -1,5 +1,19 @@
 # Road Music CLI 검수 결과
 
+## 1.4.0 GitHub 업데이트 검증 (2026-10-15)
+
+- `npm test`: **119/119 통과**, 실패·건너뜀 없음. JavaScript 60개 구문 검사와 diff 공백 검사도 통과했다. 공개 CLI는 **115개 명령**이다.
+- 다운로드 해시·크기 검증, 파일 변조 거부, 부분 파일 정리, 잘못된 CDN 리디렉션 거부, 다운로드 중 검사 경합, 실패 후 재시도, 설치 명령 시간 초과·SIGTERM 무시 자식 강제 종료를 검증했다.
+- 별도 데이터 폴더의 실제 Electron에서 `update:status`, GitHub `update:check`, `update:watch` 제한 시간 응답을 확인했다. 생성·설치·렌더 준비 단계의 예약으로 설치와 새 작업의 경합을 막는다.
+- `node scripts/verify-cli.js --gpu`: 음원 가져오기·MP3·앨범·SRT·CPU/GPU 720p MP4·서비스 종료까지 통과했다.
+- 1.3.1 앱을 임시 폴더에 복사한 뒤 새 DMG로 **실제 1.4.0 교체·재시작**했다. 곡·모델·설정 보존, 설치 결과 조회, 이전 앱 백업을 확인했다. 사용 중인 앱과 기존 라이브러리는 교체하지 않았다.
+- 실제 renderer에서 새 버전 응답을 주입해 우측 상단 배지, 자동 팝업 없음, 클릭 시 변경 내용·설치 버튼 표시를 확인하고 화면을 검토했다. Git fixture로 fast-forward·의존성 교체와 실패 시 기존 HEAD·의존성 복구를 확인했다.
+- `codesign --verify --deep --strict`와 `hdiutil verify`로 새 앱·DMG를 검사했다. 현재 서명은 애드혹이며 Developer ID·공증·다른 Mac의 Gatekeeper 동작은 검증하지 않았다.
+
+Windows 자동 설치·비-Git ZIP 키트 자동 소스 교체는 지원하지 않는다. Linux 경로는 실제 설치 검증을 하지 않았다. 이 변경에서 모델 재설치·신규 음악 생성·실제 마이크·YuE 검증은 반복하지 않았다. 사용 계약과 배포 방식은 [업데이트 가이드](updates.md)를 따른다.
+
+아래 내용은 1.3.1 CLI 구축 당시의 검증 기록이다.
+
 검수일: 2026-10-15 · 대상: Road Music 1.3.1의 로컬 CLI, Electron 전송 계층, 생성 대기열, renderer 자동화 및 CLI 문서.
 
 ## 판정과 적용 범위

@@ -14,9 +14,9 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 Codex는 세션 시작 시 프로젝트 루트부터 현재 디렉터리까지 지침을 읽는다. Git 프로젝트가 아니면 현재 디렉터리를 기준으로 한다. 따라서 외부 프로젝트에서 Road Music 키트를 제어할 때는 기존 프로젝트의 `AGENTS.md`를 덮어쓰거나 복사하지 말고, 에이전트에게 다음 절대 경로를 읽도록 요청한다.
 
 ```text
-Road Music CLI를 사용하기 전에 /사용자가 설치한 절대 경로/RoadMusic-1.3.1-cli/AGENTS.md,
-/사용자가 설치한 절대 경로/RoadMusic-1.3.1-cli/docs/cli.md,
-/사용자가 설치한 절대 경로/RoadMusic-1.3.1-cli/docs/cli-reference.md를 읽고 지침을 따른다.
+Road Music CLI를 사용하기 전에 /사용자가 설치한 절대 경로/RoadMusic-1.4.0-cli/AGENTS.md,
+/사용자가 설치한 절대 경로/RoadMusic-1.4.0-cli/docs/cli.md,
+/사용자가 설치한 절대 경로/RoadMusic-1.4.0-cli/docs/cli-reference.md를 읽고 지침을 따른다.
 ```
 
 Claude Code는 `CLAUDE.md`에서 코드 펜스 밖의 상대 가져오기 문법 `@AGENTS.md`를 지원한다. 이 키트의 `CLAUDE.md`는 그 한 줄만 두어 지침이 서로 어긋나지 않게 한다. 근거: [Codex AGENTS.md 구성](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude Code 메모리와 가져오기](https://code.claude.com/docs/en/memory).
@@ -24,7 +24,7 @@ Claude Code는 `CLAUDE.md`에서 코드 펜스 밖의 상대 가져오기 문법
 ## 실행 계약
 
 ```bash
-cd "/사용자가 선택한 경로/RoadMusic-1.3.1-cli"
+cd "/사용자가 선택한 경로/RoadMusic-1.4.0-cli"
 node cli/road-music.js schema
 node cli/road-music.js app:state
 ```
@@ -34,5 +34,6 @@ node cli/road-music.js app:state
 - `uncertain:true` 오류는 요청이 실제로 접수됐는지 알 수 없다는 뜻이다. 자동 재제출하지 말고 `service:status`, `queue:list`, `songs:list` 또는 `job:wait`을 조회한다.
 - `--confirm`, `--overwrite`, `--input`, `--output`은 JSON 안이 아닌 CLI 최상위 플래그다. 경로는 사용자가 고른 절대 경로를 쓴다.
 - `about:feedback`, `shell:open`, `about:open`, `update:open-page`, `notices:open`, `song:reveal`, `log:open`은 외부 전송·앱·브라우저 동작을 할 수 있으므로 명시적 요청이 있을 때만 쓴다.
+- 새 버전은 `update:check`, 상태는 `update:status`로 확인한다. 사용자가 업데이트를 요청한 경우 작업·대기열이 없을 때 `update:install`을 실행한다. 설치 인계 뒤 재시작을 기다리고 실제 버전을 다시 확인한다. [업데이트 가이드](updates.md)를 따른다.
 
 CLI 설치와 환경 점검은 [CLI 설치](cli-install.md), 명령별 상세 계약은 [CLI 레퍼런스](cli-reference.md), 검증된 범위는 [CLI 검수 결과](cli-qa-report.md)를 참고한다.

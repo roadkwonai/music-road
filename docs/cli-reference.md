@@ -157,8 +157,12 @@
 | `log:open` | — | — | 로그 위치 열기 |
 | `ui:log` | `text:str≤10000` | — | 앱 로그 기록 |
 | `update:check` | — | `manual:bool` | 업데이트 조회 |
+| `update:status` | — | — | 확인·다운로드·설치 상태와 대상 조회 |
+| `update:download` | — | — | 최신 정식 버전 다운로드·해시 검증 |
+| `update:install` | — | — | 필요 시 다운로드 후 설치 도우미에 인계·재시작 |
+| `update:watch` | — | `timeoutMs:int=3600000`, 1..3600000 | 새 버전 알림 대기; 변화 없으면 `timedOut:true` |
 | `update:quiet-week` | — | — | 업데이트 알림 일주일 숨김 |
-| `update:open-page` | `page:https://roadkwon.dev/...` | — | 브라우저 열기 |
+| `update:open-page` | `page:https://github.com/roadkwonai/music-road/releases/...` | — | Release 페이지 열기 |
 | `about:info` | — | — | 버전·라이선스 |
 | `about:open` | `where:site/apps/privacy/feedback/store` | — | 브라우저 열기 |
 | `about:feedback` | `form` | — | `form.email`(3..320, 이메일), `message`(1..19500), `kind:question/report`, `withSystem:bool`, `withLog:bool`; 외부 전송 |

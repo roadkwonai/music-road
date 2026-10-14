@@ -26,6 +26,7 @@
 - CLI는 이 소스 키트에서 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. `node cli/road-music.js …`로 실행한다. Electron이 개발 의존성으로 선언되어 있어 실행 시에도 설치해야 한다.
 - `npm link`로 `road-music` 전역 명령을 만들 수 있지만 선택 사항이다. 권한 오류가 나도 `sudo`를 쓰지 말고 위의 `node` 명령을 사용한다.
 - `ffmpeg`와 `ffprobe`, ACE 엔진은 CLI와 별도로 준비한다. 설치·생성 전 `setup:check`와 `engines:list`으로 확인한다.
+- 업데이트는 [업데이트 가이드](docs/updates.md)를 따른다. `update:check`와 `update:status`로 대상·버전을 확인하고 사용자가 업데이트를 요청했을 때 `update:install`을 실행한다. 진행·대기 작업을 취소하거나 로컬 수정을 덮어쓰지 않는다. `installing`은 인계 응답이므로 재시작 후 실제 버전·설치 결과를 확인한다.
 - 코드를 변경하면 `npm test`와 변경한 JavaScript의 `node --check`를 실행한다. 실제 엔진·마이크·다른 OS 검증을 생략했다면 결과에 구분해 적는다.
 
 ## 지침의 적용 범위

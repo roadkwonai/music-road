@@ -15,10 +15,10 @@ const MAX_TIMER_TIMEOUT = 2_147_483_647
 const LONG_COMMANDS = new Set([
   'job:wait', 'setup:run', 'engines:install', 'song:generate', 'song:render', 'song:resume',
   'album:export', 'video:preview', 'video:prepare', 'video:render', 'video:finish',
-  'settings:move-models', 'settings:move-songs'
+  'settings:move-models', 'settings:move-songs', 'update:download', 'update:install', 'update:watch'
 ])
 const WAIT_COMMANDS = new Set(['song:generate', 'song:resume', 'song:render'])
-const UNCERTAIN_MUTATIONS = new Set([...WAIT_COMMANDS, 'video:render'])
+const UNCERTAIN_MUTATIONS = new Set([...WAIT_COMMANDS, 'video:render', 'update:install'])
 const BATCH_FIELDS = new Set(['id', 'command', 'params', 'input', 'output', 'confirm', 'overwrite', 'timeout'])
 
 class CliError extends Error {
@@ -232,6 +232,7 @@ function startService ({ userData, env = process.env, spawnProcess = spawn } = {
   const log = fs.openSync(path.join(userData, 'cli-service.log'), 'a')
   const childEnv = { ...env }
   delete childEnv.ELECTRON_RUN_AS_NODE
+  childEnv.ROAD_MUSIC_NODE = process.execPath
   const defaultEnv = { ...env }
   delete defaultEnv.ROADMUSIC_DATA_DIR
   if (env.ROADMUSIC_DATA_DIR || path.resolve(userData) !== defaultUserData({ env: defaultEnv })) childEnv.ROADMUSIC_DATA_DIR = userData
@@ -258,8 +259,8 @@ function remainingTimeout (deadline, timeout) {
 
 function requestPayload (payload, options, deadline, timeout, retried = false) {
   const remaining = remainingTimeout(deadline, timeout)
-  const params = payload.command === 'job:wait'
-    ? { ...payload.params, timeoutMs: retried || payload.params.timeoutMs === undefined ? remaining : payload.params.timeoutMs }
+  const params = (payload.command === 'job:wait' || payload.command === 'update:watch')
+    ? { ...payload.params, timeoutMs: retried || payload.params.timeoutMs === undefined ? remaining : Math.min(payload.params.timeoutMs, remaining) }
     : payload.params
   return request({ ...payload, params, timeout: remaining, endpoint: options.endpoint, onEvent: options.onEvent })
 }

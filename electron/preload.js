@@ -90,9 +90,13 @@ contextBridge.exposeInMainWorld('yue', {
   open: (target) => ipcRenderer.invoke('shell:open', target),
   openLog: () => ipcRenderer.invoke('log:open'),
   log: (text) => ipcRenderer.invoke('ui:log', text),
+  updateStatus: () => ipcRenderer.invoke('update:status'),
   checkUpdate: (opts) => ipcRenderer.invoke('update:check', opts),
+  downloadUpdate: () => ipcRenderer.invoke('update:download'),
+  installUpdate: () => ipcRenderer.invoke('update:install'),
   updateQuietWeek: () => ipcRenderer.invoke('update:quiet-week'),
   openUpdatePage: (page) => ipcRenderer.invoke('update:open-page', page),
+  setRecordingActivity: (active) => ipcRenderer.invoke('recording:activity', active),
   aboutInfo: () => ipcRenderer.invoke('about:info'),
   aboutOpen: (where) => ipcRenderer.invoke('about:open', where),
   sendFeedback: (form) => ipcRenderer.invoke('about:feedback', form),
@@ -105,5 +109,6 @@ contextBridge.exposeInMainWorld('yue', {
   onJobEvent: on('job:event'),
   onJobDone: on('job:done'),
   onJobError: on('job:error'),
-  onWorkerLog: on('worker:log')
+  onWorkerLog: on('worker:log'),
+  onUpdateStatus: on('update:status')
 })

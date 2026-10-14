@@ -9,6 +9,8 @@
 
 const recorder = { stream: null, media: null, chunks: [], started: 0, timer: 0, meter: 0, context: null, take: null, discard: false, stopWait: null, stopPromise: null, stopTimer: 0, stoppingMedia: null }
 const REC_MAX_SECONDS = 300
+const setRecordingActivity = (active) => typeof window.yue.setRecordingActivity === 'function'
+  ? window.yue.setRecordingActivity(active) : Promise.resolve({ ok: true, active })
 
 function recordingFailure (code, error) {
   return { ok: false, code, error }
@@ -40,6 +42,7 @@ function releaseStoppedRecording (media) {
   recorder.media = null
   recorder.stream = null
   recorder.stoppingMedia = null
+  void setRecordingActivity(false)
   resetRecordingUi()
 }
 
@@ -62,6 +65,11 @@ function closeRecorder () {
 
 async function startRecording () {
   if (recorder.media || recorder.stopPromise) return { ok: false, error: 'recording is already active', code: 'busy' }
+  const reservation = await setRecordingActivity(true)
+  if (!reservation.ok) {
+    toast(reservation.message || '업데이트 설치를 준비하는 중에는 녹음을 시작할 수 없습니다.', 7000)
+    return recordingFailure('update_busy', reservation.message)
+  }
   let stream
   try {
     // Music, not a call: no echo cancelling, noise gate or automatic level.
@@ -77,6 +85,7 @@ async function startRecording () {
         ? '연결된 마이크가 없습니다. 마이크를 연결하거나 "파일 고르기"로 녹음 파일을 골라 주세요.'
         : `마이크를 열지 못했습니다: ${error.message}`
     toast(message, 10000)
+    void setRecordingActivity(false)
     return { ok: false, error: message, code: error.name === 'NotAllowedError' ? 'permission' : 'microphone_error' }
   }
   $('recAudio').pause()
@@ -99,6 +108,7 @@ async function startRecording () {
     stopRecordingTracks(stream)
     recorder.media = null
     recorder.stream = null
+    void setRecordingActivity(false)
     resetRecordingUi()
     const message = `녹음을 시작하지 못했습니다: ${error.message || error}`
     toast(message, 7000)

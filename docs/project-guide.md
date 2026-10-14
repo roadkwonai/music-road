@@ -40,7 +40,7 @@ cli/client.js → 로컬 socket/pipe → electron/cli-transport.js
 | 목적 | 대상 |
 | --- | --- |
 | 엔진 설치 | GitHub·PyPI·Hugging Face에서 소스·도구·모델 다운로드 |
-| 업데이트 조회 | `roadkwon.dev/api/version` |
+| 업데이트 조회 | `api.github.com/repos/roadkwonai/music-road/releases/latest` |
 | 공지 조회 | `roadkwon.dev/api/notices` |
 | 사용자가 요청한 오류 신고 | `roadkwon.dev/api/inquiries` |
 | 패키징된 앱의 설치 집계 | `roadkwon.dev/api/installs/ping` |

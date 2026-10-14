@@ -23,5 +23,6 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
   execFileSync('/usr/bin/ditto', ['-x', '-k', result.path, extracted])
   const row = JSON.parse(execFileSync(process.execPath, [path.join(extracted, name, 'cli/road-music.js'), 'schema'], { encoding: 'utf8' }))
   assert.equal(row.ok, true)
-  assert.equal(row.result.commands.length, 111)
+  const source = require('../electron/cli-transport').getSchema()
+  assert.deepEqual(row.result.commands.map(item => item.command), source.commands.map(item => item.command))
 })

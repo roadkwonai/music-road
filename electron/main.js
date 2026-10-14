@@ -36,6 +36,12 @@ const failed = []
 let paused = false
 let queueRestored = false
 const jobResults = new Map()
+let recordingActive = false
+let fileTransferTasks = 0
+let setupRunning = 0
+let activeWork = 0
+let updatePreparing = false
+const updateWatchers = new Set()
 
 // Pin the data folder to a stable name so renaming the product later never orphans
 // an installed runtime or someone's settings.
@@ -130,8 +136,68 @@ const send = (channel, payload) => {
   }
   cliBridge.publish(channel, payload)
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload)
+  if (channel === 'update:status') notifyUpdateWatchers(payload)
 }
 const setupLog = (text) => send('setup:log', text)
+
+const updateWatchKey = (state) => JSON.stringify({
+  status: state && state.status,
+  available: state && state.available,
+  version: state && state.version,
+  error: state && state.error
+})
+
+function notifyUpdateWatchers (state) {
+  if (!state || !(state.status === 'error' || (state.available && ['available', 'downloaded'].includes(state.status)))) return
+  const key = updateWatchKey(state)
+  for (const watcher of updateWatchers) {
+    if (watcher.key === key) continue
+    clearTimeout(watcher.timer)
+    updateWatchers.delete(watcher)
+    watcher.resolve({ ...state, changed: true })
+  }
+}
+
+function updateInput (value, allowed = []) {
+  if (value === undefined) return {}
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.getPrototypeOf(value) !== Object.prototype) {
+    throw Object.assign(new Error('업데이트 요청은 JSON 객체여야 합니다.'), { code: 'INVALID_ARGUMENT' })
+  }
+  for (const key of Object.keys(value)) {
+    if (!allowed.includes(key)) throw Object.assign(new Error('알 수 없는 업데이트 요청 필드: ' + key), { code: 'INVALID_ARGUMENT' })
+  }
+  return value
+}
+
+function waitForUpdate (timeoutMs) {
+  const initial = appUpdate.status()
+  if (initial.status === 'error' || (initial.available && ['available', 'downloaded'].includes(initial.status))) return Promise.resolve({ ...initial, changed: true })
+  return new Promise((resolve) => {
+    const watcher = {
+      key: updateWatchKey(initial),
+      resolve,
+      timer: setTimeout(() => {
+        updateWatchers.delete(watcher)
+        resolve({ ...appUpdate.status(), timedOut: true })
+      }, timeoutMs)
+    }
+    updateWatchers.add(watcher)
+  })
+}
+
+function updateBlocksWork () {
+  return updatePreparing || appUpdate.status().status === 'installing'
+}
+
+function updateBusy () {
+  return Boolean(currentJob || queue.length || installing || setupRunning || activeWork || renderJobs.size || recordingActive || fileTransferTasks || cliBridge.rendererBusy())
+}
+
+async function ensureUpdateDownloaded () {
+  let state = appUpdate.status()
+  if (!['available', 'downloaded'].includes(state.status)) state = await appUpdate.check()
+  return state.status === 'available' ? appUpdate.download() : state
+}
 
 // Durable log next to the settings file; the first place to look when the app
 // misbehaves on someone else's machine.
@@ -1556,6 +1622,9 @@ ipcMain.handle('engines:list', async () => Promise.all(Object.values(ENGINES).ma
 
 let installing = null
 ipcMain.handle('engines:install', async (_e, id) => {
+  if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 AI 엔진을 설치할 수 없습니다.' }
+  activeWork += 1
+  try {
   if (!ENGINES[id]) return { ok: false, message: '알 수 없는 엔진입니다.' }
   if (installing) return { ok: false, message: '다른 엔진을 설치하는 중입니다.' }
   const check = await engineCheck(id)
@@ -1575,6 +1644,9 @@ ipcMain.handle('engines:install', async (_e, id) => {
     return { ok: false, message: error.message }
   } finally {
     installing = null
+  }
+  } finally {
+    activeWork -= 1
   }
 })
 
@@ -1613,7 +1685,9 @@ ipcMain.handle('setup:pick-location', async () => {
 })
 
 ipcMain.handle('setup:run', async () => {
-  try { return await runSetup() } catch (error) { return { ok: false, message: error.message } }
+  if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 설치할 수 없습니다.' }
+  setupRunning += 1
+  try { return await runSetup() } catch (error) { return { ok: false, message: error.message } } finally { setupRunning -= 1 }
 })
 
 ipcMain.handle('projects:list', async () => ({
@@ -1808,6 +1882,9 @@ async function savedCover (value) {
 }
 
 async function startGeneration (payload) {
+  if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 새 작업을 시작할 수 없습니다.' }
+  activeWork += 1
+  try {
   const engine = payload.engine === 'ace' ? 'ace' : 'yue'
   const error = generationError({ ...payload, engine })
   if (error) return { ok: false, message: error }
@@ -1905,6 +1982,9 @@ async function startGeneration (payload) {
   sendQueue()
   pump()
   return { ok: true, jobId, position: currentJob && currentJob.jobId === jobId ? 0 : queue.length }
+  } finally {
+    activeWork -= 1
+  }
 }
 
 // Lyric timing ACE-Step recorded while singing (lyrics.lrc) — the SRT prefers it.
@@ -2335,6 +2415,9 @@ ipcMain.handle('song:save-srt', async (_e, { title, text }) => {
 })
 
 ipcMain.handle('song:export', async (_e, { dir, title, format = 'mp3' }) => {
+  if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 내보낼 수 없습니다.' }
+  if (typeof fileTransferTasks !== 'undefined') fileTransferTasks += 1
+  try {
   const { wav, mp3 } = await audioFiles(dir)
   const target = await dialog.showSaveDialog(win, {
     title: `${format.toUpperCase()}로 내보내기`,
@@ -2364,6 +2447,9 @@ ipcMain.handle('song:export', async (_e, { dir, title, format = 'mp3' }) => {
     log('export failed', error.message)
     return { ok: false, message: `저장하지 못했습니다: ${error.message}` }
   }
+  } finally {
+    if (typeof fileTransferTasks !== 'undefined') fileTransferTasks -= 1
+  }
 })
 
 // ── album export ─────────────────────────────────────────────────────────────
@@ -2371,6 +2457,9 @@ ipcMain.handle('song:export', async (_e, { dir, title, format = 'mp3' }) => {
 // "01. 제목.mp3" in the order they were made, each tagged with title, album and track
 // number so music players and distributors list them properly.
 ipcMain.handle('album:export', async (_e, { format = 'mp3', minRating = 0, numbered = true, dirs } = {}) => {
+  if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 내보낼 수 없습니다.' }
+  if (typeof fileTransferTasks !== 'undefined') fileTransferTasks += 1
+  try {
   if (!['mp3', 'wav'].includes(format)) return { ok: false, message: '알 수 없는 형식입니다.' }
   const album = projectName()
   // Once the songs have been dragged into an order, the list is the running order,
@@ -2453,10 +2542,16 @@ ipcMain.handle('album:export', async (_e, { format = 'mp3', minRating = 0, numbe
   log('album exported', { album, format, target, count: songs.length, failures })
   await rememberExportDir(picked.filePaths[0])
   return { ok: true, path: target, count: songs.length - failures.length, failures, lossy }
+  } finally {
+    if (typeof fileTransferTasks !== 'undefined') fileTransferTasks -= 1
+  }
 })
 
 // One-shot cleanup for libraries recorded before the option existed.
 ipcMain.handle('songs:compact', async () => {
+  if (updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 정리할 수 없습니다.' }
+  activeWork += 1
+  try {
   if (currentJob) return { ok: false, message: '곡을 만드는 중에는 정리할 수 없습니다.' }
   let converted = 0
   let savedBytes = 0
@@ -2479,11 +2574,17 @@ ipcMain.handle('songs:compact', async () => {
   }
   log('compact', { converted, savedBytes, failures })
   return { ok: true, converted, savedGb: Math.round(savedBytes / 1024 ** 3 * 100) / 100, failures }
+  } finally {
+    activeWork -= 1
+  }
 })
 
 // Already installed and the C drive is filling up: the checkpoints are plain files and
 // can be moved after the fact (the Python runtime cannot — its paths are absolute).
 ipcMain.handle('settings:move-models', async () => {
+  if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 모델을 옮길 수 없습니다.' }
+  if (typeof fileTransferTasks !== 'undefined') fileTransferTasks += 1
+  try {
   if (currentJob || queue.length) return { ok: false, message: '곡을 만드는 중에는 옮길 수 없습니다.' }
   const found = findYueModels()
   if (!found) return { ok: false, message: '옮길 YuE2 모델 파일을 찾지 못했습니다.' }
@@ -2534,6 +2635,9 @@ ipcMain.handle('settings:move-models', async () => {
     if (stage) await fsp.rm(stage, { recursive: true, force: true }).catch(() => {})
     log('model move failed', error.message)
     return { ok: false, path: committed ? to : from, message: `옮기지 못했습니다: ${error.message}` }
+  }
+  } finally {
+    if (typeof fileTransferTasks !== 'undefined') fileTransferTasks -= 1
   }
 })
 
@@ -2630,6 +2734,9 @@ async function validateSongLinks (from, links) {
 // new songs are saved there from then on. Across drives nothing is deleted until every
 // file has been copied and its size checked at the new place.
 ipcMain.handle('settings:move-songs', async () => {
+  if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 곡을 옮길 수 없습니다.' }
+  if (typeof fileTransferTasks !== 'undefined') fileTransferTasks += 1
+  try {
   if (currentJob || queue.length) {
     return { ok: false, message: '곡을 만드는 중이거나 대기열에 곡이 있으면 옮길 수 없습니다. 모두 끝난 뒤에 해주세요.' }
   }
@@ -2763,6 +2870,9 @@ ipcMain.handle('settings:move-songs', async () => {
   log('songs moved', from, '→', to)
   send('songs:move-progress', { copied: total, total, done: files.length, count: files.length })
   return { ok: true, path: to, count: files.length, gb: needGb, leftover }
+  } finally {
+    if (typeof fileTransferTasks !== 'undefined') fileTransferTasks -= 1
+  }
 })
 
 // ── playlist video (electron/video.js) ───────────────────────────────────────
@@ -2826,6 +2936,8 @@ ipcMain.handle('video:save-settings', async (_e, video) => {
 // Joins the songs into one track and analyses it; both are cached, so preparing the
 // same songs again — or with a new colour — is instant.
 ipcMain.handle('video:prepare', async (_e, { tracks, fps, analysis: settings }) => {
+  if (updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 영상을 준비할 수 없습니다.' }
+  activeWork += 1
   try {
     const root = await ensureSongsDir()
     const list = (tracks || []).filter((track) => track && typeof track.path === 'string' &&
@@ -2858,6 +2970,8 @@ ipcMain.handle('video:prepare', async (_e, { tracks, fps, analysis: settings }) 
   } catch (error) {
     log('video prepare failed', error.stack || error.message)
     return { ok: false, message: `영상을 준비하지 못했습니다: ${error.message}` }
+  } finally {
+    activeWork -= 1
   }
 })
 
@@ -2888,6 +3002,9 @@ ipcMain.handle('window:fullscreen', (_e, on) => {
 })
 
 ipcMain.handle('assets:import', async () => {
+  if (updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 에셋을 가져올 수 없습니다.' }
+  activeWork += 1
+  try {
   const picked = await dialog.showOpenDialog(win, {
     title: '편집 모드에 쓸 이미지 불러오기',
     properties: ['openFile', 'multiSelections'],
@@ -2910,6 +3027,9 @@ ipcMain.handle('assets:import', async () => {
     }
   }
   return { ok: true, added, assets: await listAssets() }
+  } finally {
+    activeWork -= 1
+  }
 })
 
 ipcMain.handle('assets:remove', async (_e, file) => {
@@ -2993,6 +3113,13 @@ async function stretchRecording (file, targetSeconds) {
 }
 
 // Bytes from the microphone (MediaRecorder, webm/opus) → a WAV take.
+ipcMain.handle('recording:activity', (_e, active) => {
+  if (typeof active !== 'boolean') throw Object.assign(new Error('active는 boolean이어야 합니다.'), { code: 'INVALID_ARGUMENT' })
+  if (active && typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, blocked: true, message: '업데이트 설치를 준비하는 중에는 녹음을 시작할 수 없습니다.' }
+  recordingActive = active
+  return { ok: true, active }
+})
+
 ipcMain.handle('recording:save', async (_e, data) => {
   const temp = path.join(os.tmpdir(), `roadmusic-take-${Date.now()}.webm`)
   try {
@@ -3057,6 +3184,8 @@ ipcMain.handle('tracklist:write', async (_e, index, dataUrl, first) => {
 // Asks where to save, plans the render and starts ffmpeg; the renderer then feeds it
 // frames drawn by the same code as the preview.
 ipcMain.handle('video:start', async (_e, { cycleId, video, name }) => {
+  if (updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 영상을 만들 수 없습니다.' }
+  activeWork += 1
   try {
     const cycle = preparedCycles.get(cycleId)
     if (!cycle) return { ok: false, message: '미리보기를 다시 준비해주세요.' }
@@ -3115,6 +3244,8 @@ ipcMain.handle('video:start', async (_e, { cycleId, video, name }) => {
   } catch (error) {
     log('video start failed', error.stack || error.message)
     return { ok: false, message: `영상을 시작하지 못했습니다: ${error.message}` }
+  } finally {
+    activeWork -= 1
   }
 })
 
@@ -3279,23 +3410,45 @@ ipcMain.handle('log:open', () => {
 })
 
 // ── updates ──────────────────────────────────────────────────────────────────
-// The Microsoft Store build (MSIX) is updated by the Store only. The website build
-// announces a new version and sends the person to the program's page on roadkwon.dev to
-// download it (from 1.2; earlier versions downloaded and ran the installer).
 const STORE = Boolean(process.windowsStore)
 const STORE_PAGE = 'ms-windows-store://pdp/?productid=9PKVCRRFSVQC'
 const WEEK = 7 * 24 * 60 * 60 * 1000
 
-// { manual } — a check the person asked for ignores "don't show for a week".
-ipcMain.handle('update:check', async (_e, { manual = false } = {}) => {
-  if (STORE) return null
-  if (!manual) {
-    const { updateQuietUntil } = await readSettings()
-    if (updateQuietUntil && Date.now() < updateQuietUntil) return null
-  }
+ipcMain.handle('update:status', () => ({ ...appUpdate.status(), preparing: updatePreparing }))
+
+ipcMain.handle('update:check', async (_e, value) => {
+  const { manual = false } = updateInput(value, ['manual'])
+  if (typeof manual !== 'boolean') throw Object.assign(new Error('manual은 boolean이어야 합니다.'), { code: 'INVALID_ARGUMENT' })
   const found = await appUpdate.check()
-  log('update check', found ? { version: found.version, current: found.current, manual } : 'up to date')
+  log('update check', { version: found.version, current: found.current, status: found.status, manual })
   return found
+})
+
+ipcMain.handle('update:download', async (_e, value) => {
+  updateInput(value)
+  return ensureUpdateDownloaded()
+})
+
+ipcMain.handle('update:install', async (_e, value) => {
+  updateInput(value)
+  if (updatePreparing) return { ...appUpdate.status(), preparing: true }
+  updatePreparing = true
+  try {
+    const state = await ensureUpdateDownloaded()
+    const result = state.status === 'downloaded' ? await appUpdate.install() : state
+    if (result.status === 'installing') return { ...result, preparing: true }
+    return result
+  } finally {
+    if (appUpdate.status().status !== 'installing') updatePreparing = false
+  }
+})
+
+ipcMain.handle('update:watch', async (_e, value) => {
+  const { timeoutMs = 3600000 } = updateInput(value, ['timeoutMs'])
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 3600000) {
+    throw Object.assign(new Error('timeoutMs는 1~3600000 정수여야 합니다.'), { code: 'INVALID_ARGUMENT' })
+  }
+  return waitForUpdate(timeoutMs)
 })
 
 ipcMain.handle('update:quiet-week', async () => {
@@ -3304,8 +3457,14 @@ ipcMain.handle('update:quiet-week', async () => {
 })
 
 ipcMain.handle('update:open-page', (_e, page) => {
-  if (STORE) return appUpdate.openInBrowser(STORE_PAGE)
-  return appUpdate.openInBrowser(appUpdate.pageFor(page, appLang))
+  if (STORE) {
+    try { shell.openExternal(STORE_PAGE); return { ok: true } } catch (error) { return { ok: false, error: error.message } }
+  }
+  const target = typeof page === 'string' ? page : appUpdate.status().page
+  if (!/^https:\/\/github\.com\/roadkwonai\/music-road\/releases\//.test(target || '')) {
+    return { ok: false, error: '검증된 GitHub 릴리스 페이지가 없습니다.' }
+  }
+  return appUpdate.openInBrowser(target)
 })
 
 // ── program information ──────────────────────────────────────────────────────
@@ -3330,6 +3489,9 @@ ipcMain.handle('about:open', (_e, where) => {
     // Feedback is written on the site's board (피드백·요청 제안), where others can see it too.
     feedback: `${site}${prefix}/community/request?from=app`,
     store: STORE_PAGE
+  }
+  if (where === 'store') {
+    try { shell.openExternal(STORE_PAGE); return { ok: true } } catch (error) { return { ok: false, error: error.message } }
   }
   return places[where] ? appUpdate.openInBrowser(places[where]) : { ok: false }
 })
@@ -3663,7 +3825,7 @@ async function reportInstall () {
 }
 
 app.whenReady().then(async () => {
-  appUpdate.init({ app, shell, log })
+  appUpdate.init({ app, shell, log, publish: send, isBusy: updateBusy })
   useLanguage(await resolveLanguage().catch(() => 'ko'))
   installEditMenu()
   await createWindow()
@@ -3671,7 +3833,8 @@ app.whenReady().then(async () => {
     webContents: () => win.webContents,
     language: () => appLang,
     status: () => ({ visible: win.isVisible(), busy: Boolean(currentJob), waiting: queue.length,
-      installing, rendering: renderJobs.size, dataDir: userData(), queue: queueState() }),
+      installing, rendering: renderJobs.size, recording: recordingActive, transfers: fileTransferTasks,
+      update: appUpdate.status(), root: app.getAppPath(), mode: appUpdate.status().mode, dataDir: userData(), queue: queueState() }),
     show: () => { win.show(); win.focus() },
     quit: () => { if (worker) stopWorker(); app.quit() },
     roots: async () => ({ songs: await ensureSongsDir(), recordings: recordingsDir(), assets: assetsDir() }),
@@ -3690,6 +3853,12 @@ app.whenReady().then(async () => {
       return win.webContents.executeJavaScript(`Promise.resolve(window.RoadAppReady).then(() => Promise.resolve(window.RoadStudioReady)).then(() => window.RoadCLI.call(${JSON.stringify(command)}, ${JSON.stringify(params)}, ${JSON.stringify(token)}, ${JSON.stringify(output)}))`)
     },
     before: async (request, entry) => {
+      const blockedByUpdate = new Set(['song:generate', 'song:resume', 'song:render', 'setup:run', 'engines:install',
+        'song:export', 'album:export', 'settings:move-models', 'settings:move-songs', 'video:render',
+        'recording:start', 'recording:stop'])
+      if (updateBlocksWork() && blockedByUpdate.has(request.command)) {
+        throw Object.assign(new Error('업데이트 설치를 준비하는 중에는 새 작업을 시작할 수 없습니다.'), { code: 'BUSY' })
+      }
       if (entry.renderer && request.command === 'video:render' && !request.output) {
         throw Object.assign(new Error('video:render에는 --output 파일이 필요합니다.'), { code: 'INVALID_ARGUMENT' })
       }
@@ -3742,9 +3911,10 @@ app.whenReady().then(async () => {
     }
   })
   await cliBridge.listen().catch((error) => log('cli service failed', error.message))
+  appUpdate.start()
   if (!cliService) reportInstall()
 })
-app.on('will-quit', () => { cliBridge.close().catch(() => {}) })
+app.on('will-quit', () => { appUpdate.stop(); cliBridge.close().catch(() => {}) })
 app.on('before-quit', () => cliBridge.notifyStopping())
 app.on('window-all-closed', () => {
   if (worker) { try { worker.stdin.write(JSON.stringify({ cmd: 'quit' }) + '\n') } catch {} worker.kill() }

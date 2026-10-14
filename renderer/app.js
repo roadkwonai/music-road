@@ -2610,32 +2610,48 @@ async function showLocation () {
 }
 
 // ── updates ──────────────────────────────────────────────────────────────────
-// A new version is downloaded from the program's page on roadkwon.dev (the app does not
-// install it itself from 1.2). "Don't show for a week" quiets the automatic check.
 let updateInfo = null
-let updateSkipped = false
 let storeBuild = false // the Microsoft Store copy is updated by the Store
 
-function showUpdate (info) {
-  updateInfo = info
-  $('updateFrom').textContent = `버전 ${info.current}`
-  $('updateTo').textContent = `버전 ${info.version}`
-  $('updateNotes').textContent = info.notes || ''
-  $('updateNotes').classList.toggle('hidden', !info.notes)
-  $('updateNo').classList.toggle('hidden', Boolean(info.mandatory))
-  $('updateQuietRow').classList.toggle('hidden', Boolean(info.mandatory))
-  $('updateQuiet').checked = false
-  $('update').classList.remove('hidden')
+function updateMessage (info) {
+  if (info.error) return info.error
+  if (info.reason) return info.reason
+  return ({
+    idle: '최신 버전을 쓰고 있습니다.',
+    checking: '업데이트를 확인하는 중…',
+    downloading: '업데이트를 다운로드하는 중…',
+    downloaded: '다운로드가 끝났습니다. 설치하면 프로그램이 다시 열립니다.',
+    installing: '업데이트를 설치하는 중입니다. 프로그램이 곧 다시 열립니다.',
+    'no-release': '공개된 안정 릴리스가 아직 없습니다.',
+    unsupported: '이 환경에서는 자동 업데이트를 지원하지 않습니다.'
+  })[info.status] || ''
 }
 
-async function checkUpdate () {
-  if (updateSkipped || running) return // 곡을 만드는 중에 끼어들지 않는다
-  try {
-    const info = await window.yue.checkUpdate()
-    if (info) showUpdate(info)
-  } catch (error) {
-    report('update check', error)
-  }
+function renderUpdate (info, { open = false } = {}) {
+  updateInfo = info || updateInfo
+  const state = updateInfo || {}
+  const available = state.status === 'available' || state.status === 'downloaded'
+  const downloading = state.status === 'downloading'
+  $('updateOpen').classList.toggle('hidden', !available && !downloading)
+  $('updateBadge').classList.toggle('hidden', !available)
+  $('updateFrom').textContent = state.current ? '버전 ' + state.current : ''
+  $('updateTo').textContent = state.version ? '버전 ' + state.version : ''
+  $('updateNotes').textContent = state.notes || ''
+  $('updateNotes').classList.toggle('hidden', !state.notes)
+  $('updateTitle').textContent = state.version ? '새 버전이 나왔습니다' : '업데이트'
+  $('updateStatus').textContent = updateMessage(state)
+  $('updateError').textContent = state.error || ''
+  $('updateError').classList.toggle('hidden', !state.error)
+  const progress = state.progress
+  $('updateProgress').classList.toggle('hidden', !progress)
+  $('updateProgressBar').style.width = progress && progress.total
+    ? String(Math.min(100, progress.received / progress.total * 100)) + '%' : '0%'
+  const canInstall = state.status === 'available' || state.status === 'downloaded'
+  $('updateAction').classList.toggle('hidden', !canInstall)
+  $('updateAction').disabled = !canInstall
+  $('updateAction').textContent = state.status === 'downloaded' ? '설치하고 다시 열기' : '다운로드하고 설치'
+  $('updatePage').classList.toggle('hidden', !state.page || state.mode === 'mac-app')
+  if (open) $('update').classList.remove('hidden')
 }
 
 // ── system gauges ────────────────────────────────────────────────────────────
@@ -2657,23 +2673,24 @@ function showStats (stats) {
 
 function wireUpdate () {
   window.yue.onStats(showStats)
-  const close = async () => {
-    if ($('updateQuiet').checked) await window.yue.updateQuietWeek()
-    updateSkipped = true // 이번에 켜 둔 동안은 다시 묻지 않는다
-    $('update').classList.add('hidden')
+  window.yue.onUpdateStatus((info) => renderUpdate(info))
+  $('updateOpen').onclick = () => renderUpdate(updateInfo, { open: true })
+  $('updateClose').onclick = () => $('update').classList.add('hidden')
+  $('updatePage').onclick = () => window.yue.openUpdatePage(updateInfo && updateInfo.page)
+  $('updateAction').onclick = async () => {
+    $('updateAction').disabled = true
+    try {
+      renderUpdate(await window.yue.installUpdate(), { open: true })
+    } catch (error) {
+      renderUpdate({ ...(updateInfo || {}), status: 'error', error: error.message || '업데이트를 설치하지 못했습니다.' }, { open: true })
+      $('updateAction').disabled = false
+    }
   }
-  $('updateYes').onclick = async () => {
-    await window.yue.openUpdatePage(updateInfo && updateInfo.page)
-    await close()
-  }
-  $('updateNo').onclick = close
   $('versionInfo').title = '프로그램 정보 · 업데이트 확인'
   $('versionInfo').style.cursor = 'pointer'
   $('versionInfo').onclick = openAbout
   wireAbout()
-  // 첫 확인은 boot() 이 화면을 준비한 직후 곧바로 한다(첫 실행 설치 화면일 때는 건너뛴다).
-  // 며칠씩 켜 두는 사람을 위해 여섯 시간마다 한 번 더 본다.
-  setInterval(checkUpdate, 6 * 60 * 60 * 1000)
+  window.yue.updateStatus().then(renderUpdate).catch((error) => report('update status', error))
 }
 
 // ── program information (header button) ──────────────────────────────────────
@@ -2700,13 +2717,12 @@ function wireAbout () {
     $('aboutUpdate').disabled = true
     try {
       const info = await window.yue.checkUpdate({ manual: true })
-      if (info) {
+      if (info.status === 'available' || info.status === 'downloaded') {
         result.classList.add('hidden')
         $('about').classList.add('hidden')
-        updateSkipped = false
-        showUpdate(info)
+        renderUpdate(info, { open: true })
       } else {
-        result.textContent = '최신 버전을 쓰고 있습니다.'
+        result.textContent = updateMessage(info)
       }
     } catch (error) {
       result.textContent = '업데이트를 확인하지 못했습니다. 인터넷 연결을 확인해 주세요.'
@@ -2772,7 +2788,6 @@ async function boot () {
 // The library, the queue and the update check: what opens once the engine screen
 // (if it was shown) is out of the way.
 async function startApp () {
-  checkUpdate() // 기다리지 않고 바로 — 곡 목록을 읽기 전에 시작한다
   queueState = await window.yue.queue()
   await refresh()
 }

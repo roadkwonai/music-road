@@ -4,7 +4,7 @@ Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 
 
 ## 시작하기
 
-CLI는 소스 체크아웃 또는 배포된 `RoadMusic-1.3.1-cli` 소스 키트에서 Node.js로 실행한다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
+CLI는 소스 체크아웃 또는 배포된 `RoadMusic-1.4.0-cli` 소스 키트에서 Node.js로 실행한다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
 
 ```bash
 npm ci --include=dev
@@ -23,6 +23,8 @@ node cli/road-music.js service:show
 ```
 
 `service:status`와 `service:stop`은 자동 시작하지 않는다. `service:start`는 상태 요청으로 서비스를 시작한다. 활성 요청·생성·설치·렌더·대기열이 있을 때 `service:stop`은 `--confirm` 없이는 실패하며, `--confirm`은 진행 중인 작업을 중단할 수 있다.
+
+앱·서비스가 실행 중이면 GitHub 최신 정식 버전을 주기적으로 확인한다. `update:check`로 수동 확인, `update:status`로 상태 조회, `update:watch`로 알림 대기, `update:install`로 다운로드·설치·재시작을 요청한다. 지원되는 설치 방식·진행 작업 보호·재시작 후 확인은 [업데이트 가이드](updates.md)를 따른다.
 
 기본 데이터 폴더는 macOS에서 `~/Library/Application Support/Road Music`이다. 개발·자동화는 실제 라이브러리와 분리한 절대 경로를 지정한다.
 

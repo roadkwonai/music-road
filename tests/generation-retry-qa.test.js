@@ -20,7 +20,7 @@ async function temporaryRoot (t) {
 function generationContext ({ songs, recordings }) {
   const queue = []
   const context = {
-    fs, fsp, path, crypto, queue, currentJob: null,
+    fs, fsp, path, crypto, queue, currentJob: null, activeWork: 0, updateBlocksWork: () => false,
     generationError: () => null,
     engineInstalled: async () => true,
     ensureSongsDir: async () => songs,

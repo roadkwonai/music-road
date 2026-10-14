@@ -7,12 +7,12 @@ Road Music을 맥용 dmg로 만드는 절차입니다. 사용자는 dmg를 열�
 ## 1. 요약
 
 ```bash
-npm install
+npm ci --include=dev
 npm run dist:mac
 npm run dist:cli
-# → dist/RoadMusic-1.3.1-mac-arm64.dmg (약 100MB)
+# → dist/RoadMusic-1.4.0-mac-arm64.dmg (약 100MB)
 # → dist/mac-arm64/Road Music.app (dmg에 들어가는 앱)
-# → dist/RoadMusic-1.3.1-cli.zip (CLI 소스·잠금 파일·AI 지침·가이드)
+# → dist/RoadMusic-1.4.0-cli.zip (CLI 소스·잠금 파일·AI 지침·가이드)
 ```
 
 - **도구:** electron-builder 26.15.3(`devDependencies`에 고정)
@@ -33,7 +33,7 @@ npm run dist:cli
 1. **의존성 설치**
    ```bash
    cd music-road
-   npm install          # lock 파일 그대로 받으려면 npm ci
+   npm ci --include=dev # 잠금 파일의 Electron까지 설치
    ```
    `npm warn install-scripts … not yet covered by allowScripts` 경고가 나와도 됩니다. 확인한 npm 11.19에서는 Electron 설치 스크립트가 그대로 실행됩니다. `node_modules/electron/dist/Electron.app`이 생겼는지 보면 됩니다.
 2. **버전 확인:** `package.json`의 `version`이 dmg 파일 이름과 앱 버전이 됩니다. 업데이트 알림도 이 값과 서버의 버전을 비교합니다.
@@ -41,7 +41,7 @@ npm run dist:cli
    ```bash
    npm run dist:mac     # = electron-builder --mac dmg --arm64
    ```
-   로그 끝에 `building target=DMG arch=arm64 file=dist/RoadMusic-1.3.1-mac-arm64.dmg`가 나오고 오류 없이 끝나면 성공입니다. 처음에는 1~2분, 그다음부터는 수십 초 걸립니다.
+   로그 끝에 `building target=DMG arch=arm64 file=dist/RoadMusic-1.4.0-mac-arm64.dmg`가 나오고 오류 없이 끝나면 성공입니다. 처음에는 1~2분, 그다음부터는 수십 초 걸립니다.
 4. **결과물**
 
    | 경로 | 내용 |
@@ -75,7 +75,7 @@ npm run dist:cli
 | `mac.icon` | Dock·Finder용 아이콘입니다. 맥 아이콘 규격(1024 캔버스에 824px 둥근 사각형, 투명 여백, 그림자)으로 만든 `icon.icns`를 씁니다. `build/icon.png`는 앱 안 로고용 꽉 찬 정사각형이라 그대로 쓰면 Dock에서 다른 아이콘보다 크게 보입니다(8장) |
 | `mac.identity: "-"` | 애드혹 서명입니다. Apple Silicon은 서명 없는 앱을 실행하지 않습니다. 이 값이 없으면 electron-builder는 키체인에서 인증서를 찾고, 없으면 서명을 건너뜁니다 |
 | `mac.hardenedRuntime: false` | 애드혹 서명에 hardened runtime을 켜면, Electron 프레임워크 서명과 맞지 않아 실행에 실패할 수 있습니다. 공증할 때는 켜야 합니다(7장) |
-| `dmg.writeUpdateInfo: false`, `publish: null` | electron-builder의 자동 업데이트(`latest-mac.yml`, blockmap)를 쓰지 않습니다. 앱은 `roadkwon.dev/api/version`으로 직접 업데이트를 확인합니다. 켜 두면 빌드 끝에 `Cannot read properties of null (reading 'channel')`로 실패합니다 |
+| `dmg.writeUpdateInfo: false`, `publish: null` | electron-builder의 자동 업데이트(`latest-mac.yml`, blockmap)를 쓰지 않습니다. 앱은 GitHub Release API로 직접 업데이트를 확인하고 검증한 DMG를 설치합니다. [업데이트 설계](updates.md)를 참고하세요. 켜 두면 빌드 끝에 `Cannot read properties of null (reading 'channel')`로 실패합니다 |
 
 마이크 권한 문구(`NSMicrophoneUsageDescription`)는 Electron 기본값("This app needs access to the microphone")이 들어갑니다. 한국어로 바꾸려면 `mac.extendInfo`에 넣습니다.
 
@@ -132,9 +132,14 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 실제 마이크와 Developer ID 서명·공증은 이번 재빌드에서 검증하지 않았다. 이 DMG는 애드혹 서명이므로 다른 맥에서 다운로드해 열 때 Gatekeeper 경고가 발생할 수 있다.
 
 ## 6. 버전 올리기
-1. `package.json`의 `version`을 올립니다(예: `1.3.1`).
-2. `npm run dist:mac` → `dist/RoadMusic-1.3.1-mac-arm64.dmg`가 나옵니다.
-3. dmg를 올리고, `roadkwon.dev/api/version`이 새 버전과 다운로드 페이지를 알려 주게 합니다. 앱은 `platform=mac-arm64`로 묻습니다.
+
+### 1.4.0 업데이트 설치 검증 (2026-10-15)
+
+새 DMG의 코드 서명·이미지 무결성 검사를 통과했다. 임시 1.3.1 앱을 새 DMG로 교체하는 도우미를 실행해 1.4.0 서비스 재시작, 기존 곡·모델·설정과 이전 앱 백업 보존을 확인했다. CLI·영상 스모크도 통과했다. 실제 사용자 앱은 교체하지 않았다. 상세 검증은 [검수 결과](cli-qa-report.md#140-github-업데이트-검증-2026-10-15)에 있다.
+
+1. `package.json`의 `version`을 올립니다(예: `1.4.0`).
+2. `npm run dist:mac` → `dist/RoadMusic-1.4.0-mac-arm64.dmg`가 나옵니다.
+3. `npm run dist:cli`와 `npm run release:assets`로 CLI ZIP과 체크섬을 만듭니다. 같은 버전의 태그·Release에 DMG, ZIP, `SHA256SUMS.txt`를 게시합니다. 버전 태그를 push하면 GitHub Actions가 빌드·검증 후 Latest Release를 게시합니다. 노트 경로와 절차는 [업데이트 배포](updates.md#새-버전-배포)를 따릅니다.
 4. 사용자가 새 dmg로 덮어 설치해도 곡과 엔진(`~/Library/Application Support/Road Music`)은 그대로 남습니다.
 
 ## 7. 다른 사람에게 배포하기: 서명과 공증
@@ -208,7 +213,7 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 - [ ] `LICENSE`가 앱 안에 들어 있다. 원저작자 MIT 고지를 지우지 않는다
 - [ ] 서명·공증을 했거나, 받는 사람에게 [시작하기 2.3](getting-started.md#23-처음-열-때-나오는-경고)을 안내한다
 - [ ] 받는 사람에게 `brew install ffmpeg`를 안내한다
-- [ ] `roadkwon.dev`의 `/api/version`, `/api/notices`, `/api/inquiries`, `/api/installs/ping`을 준비했다. 서버가 없어도 앱은 동작하지만 알림·공지·피드백이 조용히 실패한다
+- [ ] GitHub 최신 정식 Release에 버전과 일치하는 DMG·CLI ZIP·SHA256SUMS.txt가 있다. 업데이트는 GitHub를 사용하며 공지·문의·설치 집계는 기존 `roadkwon.dev` API를 사용한다
 - [ ] 상용 배포라면 YuE2(CC BY-NC 4.0)를 안내하거나 쓰지 않는다
 - [ ] 5장의 확인 항목을 새 dmg로 돌렸다
 

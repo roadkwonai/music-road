@@ -84,6 +84,7 @@ async function main () {
     return rows
   }, []))
   const mode = options.mode || 'cli'
+  const baselineVersion = options['baseline-version'] || '1.4.0'
   assert.ok(['gui', 'cli', 'source'].includes(mode), 'mode must be gui, cli or source')
   const expected = options['expected-version']
   assert.match(expected || '', /^\d+\.\d+\.\d+$/)
@@ -109,7 +110,7 @@ async function main () {
     parseArgs(args) // Invalid test arguments must fail, rather than look like a stopped service.
     const result = await command(process.execPath, [path.join(repository, 'cli/road-music.js'), ...args], env, repository, timeout + 5000)
     const row = JSON.parse(result.stdout.trim())
-    if (!row.ok && optional && (row.error.code === 'SERVICE_STOPPED' ||
+    if (!row.ok && optional && (['SERVICE_STOPPED', 'CONNECTION_LOST'].includes(row.error.code) ||
       (row.error.code === 'connection' && /ENOENT|ECONNREFUSED|ECONNRESET/.test(row.error.message)))) return null
     assert.equal(row.ok, true, `${name}: ${result.stdout} ${result.stderr}`)
     assert.equal(result.code, 0)
@@ -122,7 +123,8 @@ async function main () {
   const port = await freePort()
   if (mode === 'source') {
     source = path.join(root, 'source')
-    await run('git', ['clone', '--branch', 'v1.4.0', 'https://github.com/roadkwonai/music-road.git', source])
+    await run('git', ['clone', 'https://github.com/roadkwonai/music-road.git', source])
+    await run('git', ['checkout', '--detach', options['baseline-ref'] || 'v1.4.0'], source)
     await run('npm', ['ci', '--include=dev', '--no-audit', '--no-fund'], source, 300000)
     executable = path.join(source, 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
     args = [source, '--roadmusic-service']
@@ -134,6 +136,8 @@ async function main () {
   }
   await fs.writeFile(path.join(data, 'settings.json'), JSON.stringify({ language: 'ko', engineSetupSkipped: true,
     songsDir: path.join(data, 'Songs'), updateSentinel: 'keep-settings' }))
+  await fs.mkdir(path.join(data, 'updates'))
+  await fs.writeFile(path.join(data, 'updates/installer-result.json'), JSON.stringify({ ok: true, version: '0.0.1', pid: 1, appReady: true }))
   for (const folder of ['Songs', 'models']) {
     await fs.mkdir(path.join(data, folder))
     await fs.writeFile(path.join(data, folder, 'preserved.txt'), `keep-${folder}`)
@@ -149,7 +153,7 @@ async function main () {
     const started = await until(() => cli('service:status', {}, { optional: true }), Boolean, 45000, 'baseline service')
     oldPid = started.pid
     evidence.before = (await cli('app:state')).version
-    assert.equal(evidence.before, '1.4.0')
+    assert.equal(evidence.before, baselineVersion)
     if (mode === 'gui') renderer = await connectRenderer(port)
     const originalAudio = path.join(root, 'before-update.wav')
     await run('ffmpeg', ['-v', 'error', '-f', 'lavfi', '-i', 'sine=frequency=330:duration=1', originalAudio])
@@ -219,8 +223,13 @@ async function main () {
     }, row => row && row.state.version === expected && row.service.pid !== oldPid, 180000, 'new app version and PID')
     assert.equal(after.service.visible, mode === 'gui')
     evidence.after = { version: after.state.version, pidChanged: after.service.pid !== oldPid, visible: after.service.visible }
-    const installed = await until(() => cli('update:status'), state => state.installerResult?.ok === true, 15000, 'installer result')
+    const installed = await until(() => cli('update:status'), state => state.installerResult?.ok === true && state.installerResult?.version === expected, 15000, 'installer result for the requested version')
     assert.equal(installed.installerResult.version, expected)
+    evidence.installerReadyAcknowledged = installed.installerResult.appReady === true
+    if (options['require-ready'] === 'true') {
+      assert.equal(installed.installerResult.appReady, true)
+      assert.equal(installed.installerResult.pid, after.service.pid)
+    }
     if (bundle) {
       const info = JSON.parse(await run('/usr/bin/plutil', ['-convert', 'json', '-o', '-', path.join(bundle, 'Contents/Info.plist')]))
       assert.equal(info.CFBundleShortVersionString, expected)

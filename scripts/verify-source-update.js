@@ -69,14 +69,39 @@ async function writeLauncher (base) {
   const launcher = path.join(base, 'external-launcher.js')
   await fs.writeFile(launcher, `#!/usr/bin/env node
 'use strict'
+const crypto = require('node:crypto')
 const fs = require('node:fs')
+const net = require('node:net')
+const os = require('node:os')
 const path = require('node:path')
 const root = path.resolve(process.cwd(), process.argv[2] || '.')
 const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version
 const marker = process.env.SOURCE_UPDATE_MARKER
 if (marker) fs.appendFileSync(marker, JSON.stringify({ pid: process.pid, version, root, dataDir: process.env.ROADMUSIC_DATA_DIR || null }) + '\\n')
-if (process.env.SOURCE_UPDATE_FAIL_VERSION === version) process.exit(86)
-setInterval(() => {}, 1000)
+if (process.env.SOURCE_UPDATE_FAIL_VERSION === version) process.exit(71)
+const dataDir = path.resolve(process.env.ROADMUSIC_DATA_DIR || '')
+const endpoint = path.join(os.tmpdir(), 'road-music-' + crypto.createHash('sha256').update(dataDir).digest('hex').slice(0, 16) + '.sock')
+try { fs.unlinkSync(endpoint) } catch (error) { if (error.code !== 'ENOENT') throw error }
+const server = net.createServer(socket => {
+  let pending = ''
+  socket.setEncoding('utf8')
+  socket.on('data', chunk => {
+    pending += chunk
+    let end
+    while ((end = pending.indexOf('\\n')) !== -1) {
+      const line = pending.slice(0, end); pending = pending.slice(end + 1)
+      if (!line) continue
+      const request = JSON.parse(line)
+      socket.write(JSON.stringify({ id: request.id, result: { pid: process.pid, update: { current: version } } }) + '\\n')
+    }
+  })
+})
+function stop () {
+  server.close(() => { try { fs.unlinkSync(endpoint) } catch (error) { if (error.code !== 'ENOENT') process.exitCode = 1 } })
+}
+process.once('SIGTERM', stop)
+process.once('SIGINT', stop)
+server.listen(endpoint)
 `)
   await fs.chmod(launcher, 0o700)
   return launcher

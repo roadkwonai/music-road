@@ -2,6 +2,21 @@
 
 Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 로컬 JSON 요청으로 호출한다. 독립 음악 엔진이나 네트워크 API가 아니다. 현재 설치 버전의 `schema`가 명령·필드의 기준이며, 전체 표는 [CLI 레퍼런스](cli-reference.md)에 있다.
 
+## 목차
+
+- [시작하기](#toc-1)
+- [입출력 계약](#toc-2)
+- [공통 플래그](#toc-3)
+- [권장 작업 순서](#toc-4)
+- [생성 입력의 핵심 제약](#toc-5)
+- [곡 저장과 관리](#toc-6)
+- [영상](#toc-7)
+- [연결 끊김과 재시작](#toc-8)
+- [JSONL 배치](#toc-9)
+- [사용 경계](#toc-10)
+
+<a id="toc-1"></a>
+
 ## 시작하기
 
 CLI는 소스 체크아웃 또는 배포된 `RoadMusic-1.4.0-cli` 소스 키트에서 Node.js로 실행한다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
@@ -34,6 +49,8 @@ ROADMUSIC_DATA_DIR="/tmp/road-music-cli" node cli/road-music.js service:start
 
 CLI 제어 요청은 macOS/Linux의 사용자 전용 Unix 소켓 또는 Windows named pipe를 쓴다. 원격 제어 TCP 포트는 열지 않는다. 다만 영상 렌더링 중 프레임 전달을 빠르게 하기 위해서만 임시 HTTP 서버를 `127.0.0.1`에 열며, 렌더마다 만든 토큰이 맞는 요청만 받는다. 사용할 수 없으면 IPC 전송으로 돌아간다.
 
+<a id="toc-2"></a>
+
 ## 입출력 계약
 
 정상 응답은 stdout의 JSON 한 줄이다.
@@ -54,6 +71,8 @@ CLI 제어 요청은 macOS/Linux의 사용자 전용 Unix 소켓 또는 Windows 
 {"type":"event","channel":"job:started","payload":{"jobId":"JOB_ID","title":"..."}}
 ```
 
+<a id="toc-3"></a>
+
 ## 공통 플래그
 
 | 플래그 | 동작 |
@@ -73,9 +92,13 @@ CLI 제어 요청은 macOS/Linux의 사용자 전용 Unix 소켓 또는 Windows 
 
 `--wait`의 반대 플래그는 없다. 기본값은 즉시 반환이다. `--input`, `--output`, `--confirm`, `--overwrite`는 `--json` 안이 아닌 최상위 플래그다.
 
+<a id="toc-4"></a>
+
 ## 권장 작업 순서
 
 먼저 상태와 실제 허용값을 읽고, 이후 작업에는 앞선 응답의 `dir`, `jobId`, `path`를 그대로 넣는다. 아래의 `/absolute/path/from/...` 값은 형식 검증용 절대 경로 예시이며, 실제 호출에서는 앞선 응답의 값을 사용한다. `JOB_ID`도 실제 응답의 작업 ID로 교체한다.
+
+`setup:check`는 현재 플랫폼에서 지원하는 엔진을 모두 점검하며, 플랫폼 미지원 엔진은 `skipped`에 이유를 남긴다. 엔진별 상세 결과는 `engines`에서 확인한다.
 
 ```bash
 node cli/road-music.js engines:list
@@ -112,6 +135,8 @@ node cli/road-music.js job:wait --events --json '{"jobId":"JOB_ID","timeoutMs":3
 
 `job:wait`은 성공 시 `{ "ok": true, "song": { ... } }`, 작업 실패 시 `{ "ok": false, ... }`를 반환한다. 대기 시간이 끝나면 `TIMEOUT` 오류를 반환하지만 작업 자체는 계속 실행된다.
 
+<a id="toc-5"></a>
+
 ## 생성 입력의 핵심 제약
 
 | 필드 | 제약 |
@@ -136,6 +161,8 @@ node cli/road-music.js song:generate --json '{"title":"허밍에서 만든 곡",
 
 `recording:start`/`recording:stop`은 OS 마이크 권한과 실제 입력 장치가 필요하다. 권한 요청을 처리하려면 `service:show`가 필요할 수 있다.
 
+<a id="toc-6"></a>
+
 ## 곡 저장과 관리
 
 목록 응답의 절대 `dir`을 곡 식별자로 사용한다. `song:detail`, `song:clone`, `song:srt`, `player:play`은 `dir`, `id`, `folder` 중 하나를 받지만 `id`가 중복될 수 있으므로 `dir`이 안전하다.
@@ -150,6 +177,8 @@ node cli/road-music.js album:export --json '{"format":"mp3","minRating":0,"numbe
 
 `song:srt`에서 `save:true`이면 `--output`도 필요하다. `song:export`는 `mp3` 또는 `wav` 파일을, `album:export`는 폴더를 쓴다. 파일 출력은 곡 라이브러리 밖이어야 한다. 이미 있는 파일은 `--overwrite`가 필요하다. 저장 명령은 대상 폴더의 임시 파일에 먼저 만든 뒤 최종 경로로 반영하므로, 실패하면 기존 출력 파일을 보존한다. 명령이 받지 않는 `--input`, `--output`, `--overwrite`와 저장 형식에 맞지 않는 출력 확장자는 오류가 된다.
 
+<a id="toc-7"></a>
+
 ## 영상
 
 완성 영상에는 저수준 프레임 명령이 아니라 `video:render`를 쓴다. `tracks`에는 `songs:list`에서 얻은 완료 곡 `dir`을 전달하고 `--output`에는 MP4 파일을 준다.
@@ -160,6 +189,8 @@ node cli/road-music.js video:render --events --json '{"tracks":["/absolute/path/
 
 `video:preview`는 미리보기를 준비하고, `video:state`, `video:seek`, `video:play`, `video:pause`, `video:chapters`로 제어한다. `video:configure`는 현재 화면 설정을 부분 병합하며 `save:true`일 때 저장한다. `video:cancel`은 준비 단계 또는 렌더 단계에서 보류 상태를 반환할 수 있다. 배경·오버레이는 로컬 `path` 또는 호스트가 없거나 `localhost`인 `file:` URL만 받으며 원격 URL과 Windows UNC 경로는 거부한다. 위치와 크기는 화면 비율 좌표이고 허용 범위는 [레퍼런스](cli-reference.md#video)에 있다. GPU 인코더(`renderer:"gpu"`)의 가용성과 결과는 드라이버·하드웨어에 달려 있다.
 
+<a id="toc-8"></a>
+
 ## 연결 끊김과 재시작
 
 `job:wait`은 일시적인 연결 끊김 또는 서비스 재시작 후 남은 대기 시간 안에서만 재연결한다. 생성·재개·악보 렌더·영상 렌더 요청은 중복 실행을 막기 위해 자동 재제출하지 않는다. 이 요청 중 연결이 끊기면 오류에 `uncertain:true`가 붙을 수 있으므로 `service:status`, `queue:list`, `job:wait` 또는 결과 곡 목록으로 처리 여부를 확인한 뒤 사용자가 재시도한다.
@@ -167,6 +198,8 @@ node cli/road-music.js video:render --events --json '{"tracks":["/absolute/path/
 명시적인 `service:stop`이 이벤트로 확인되면 대기 중인 작업은 `SERVICE_STOPPED`, `uncertain:true`, `retry:false`로 끝나며 CLI가 서비스를 자동으로 다시 시작하지 않는다. 다시 시작하려면 작업 상태를 확인한 뒤 별도로 `service:start`을 호출한다.
 
 대기열과 최근 작업 결과는 데이터 폴더의 `queue.json`에 저장된다. 재시작 시 대기·실패 작업과 최근 완료/실패 결과를 복원하며, 보존 한도는 실패 작업 8개와 결과 64개다. 커버·녹음 원본은 재시도할 작업이 참조하는 동안 정리 대상에서 제외된다.
+
+<a id="toc-9"></a>
 
 ## JSONL 배치
 
@@ -182,6 +215,8 @@ node cli/road-music.js batch --no-start < requests.jsonl
 ```
 
 성공 행은 `{ "id": "state", "ok": true, "result": ... }`, 실패 행은 `{ "id": "state", "ok": false, "error": { "code", "message", "details" } }`이다. 실행 오류가 있는 행은 종료 코드 `1`, 인수·스키마 오류가 한 행이라도 있으면 `2`다.
+
+<a id="toc-10"></a>
 
 ## 사용 경계
 

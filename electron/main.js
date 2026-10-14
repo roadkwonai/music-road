@@ -710,6 +710,31 @@ async function engineCheck (id) {
   return { ok: problems.length === 0, gpu, drive, freeGb, needGb: engine.needGb, problems, warnings }
 }
 
+function setupSkipReason (id) {
+  if (MAC && id === 'yue') return 'YuE2는 macOS에서 지원하지 않습니다.'
+  return null
+}
+
+async function setupCheck () {
+  const results = await Promise.all(Object.keys(ENGINES).map(async (id) => {
+    const reason = setupSkipReason(id)
+    return reason ? { id, reason } : { id, check: await engineCheck(id) }
+  }))
+  const engines = Object.fromEntries(results.filter(({ check }) => check).map(({ id, check }) => [id, check]))
+  const skipped = results.filter(({ reason }) => reason).map(({ id, reason }) => ({ id, reason }))
+  const checks = Object.values(engines)
+  const primary = checks.find((check) => check.ok) || engines.ace || checks[0]
+  const ok = checks.some((check) => check.ok)
+  return {
+    ...primary,
+    ok,
+    problems: ok ? [] : checks.flatMap((check) => check.problems),
+    warnings: [...new Set(checks.flatMap((check) => check.warnings))],
+    engines,
+    skipped
+  }
+}
+
 const preflight = () => engineCheck('yue')
 
 async function runSetup () {
@@ -1601,7 +1626,7 @@ ipcMain.handle('app:state', async () => {
     store: Boolean(process.windowsStore), repair }
 })
 
-ipcMain.handle('setup:check', () => preflight())
+ipcMain.handle('setup:check', () => setupCheck())
 
 // The engine screen: what each engine needs, whether this PC has it, and installing.
 ipcMain.handle('engines:list', async () => Promise.all(Object.values(ENGINES).map(async (engine) => ({

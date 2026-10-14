@@ -1,0 +1,52 @@
+{
+  "repository": "https://github.com/ace-step/ACE-Step-1.5",
+  "commit": "ca1e85fe9430179831e6bc6be790c332190a3866",
+  "commitDate": "2026-08-29T08:25:18Z",
+  "retrievedOn": "2026-10-15",
+  "timezone": "Asia/Seoul",
+  "license": "MIT",
+  "files": [
+    {
+      "path": "en/Tutorial.md",
+      "source": "docs/en/Tutorial.md",
+      "url": "https://raw.githubusercontent.com/ace-step/ACE-Step-1.5/ca1e85fe9430179831e6bc6be790c332190a3866/docs/en/Tutorial.md",
+      "sha256": "79ff45ae2040fe9205affdb23700214e6c1228b278ce9034b23485af3b992485",
+      "bytes": 48790
+    },
+    {
+      "path": "en/INFERENCE.md",
+      "source": "docs/en/INFERENCE.md",
+      "url": "https://raw.githubusercontent.com/ace-step/ACE-Step-1.5/ca1e85fe9430179831e6bc6be790c332190a3866/docs/en/INFERENCE.md",
+      "sha256": "fc76c3deb3346d57b09c9ecdb71217aee0de7ba0f22f71db89a9fb0905f955ba",
+      "bytes": 40049
+    },
+    {
+      "path": "en/ace_step_musicians_guide.md",
+      "source": "docs/en/ace_step_musicians_guide.md",
+      "url": "https://raw.githubusercontent.com/ace-step/ACE-Step-1.5/ca1e85fe9430179831e6bc6be790c332190a3866/docs/en/ace_step_musicians_guide.md",
+      "sha256": "df00e45d71377f05f09ae10cd16df0f1dde2b7e2e188b804969a4941bb84c5c9",
+      "bytes": 31224
+    },
+    {
+      "path": "ko/Tutorial.md",
+      "source": "docs/ko/Tutorial.md",
+      "url": "https://raw.githubusercontent.com/ace-step/ACE-Step-1.5/ca1e85fe9430179831e6bc6be790c332190a3866/docs/ko/Tutorial.md",
+      "sha256": "4b3239582038b217580843654ab6a75c42dc01846e17ddaaf382d6e53d983f56",
+      "bytes": 24168
+    },
+    {
+      "path": "ko/INFERENCE.md",
+      "source": "docs/ko/INFERENCE.md",
+      "url": "https://raw.githubusercontent.com/ace-step/ACE-Step-1.5/ca1e85fe9430179831e6bc6be790c332190a3866/docs/ko/INFERENCE.md",
+      "sha256": "26e633cb788e85396255aed3b0d1ec2fa2fd9fcf2b0fad356760186e033b70b7",
+      "bytes": 10635
+    },
+    {
+      "path": "LICENSE",
+      "source": "LICENSE",
+      "url": "https://raw.githubusercontent.com/ace-step/ACE-Step-1.5/ca1e85fe9430179831e6bc6be790c332190a3866/LICENSE",
+      "sha256": "05a6bce42a62636d2cfb24139cc008b6b899754e244175814bb5dd2f4a485357",
+      "bytes": 1064
+    }
+  ]
+}

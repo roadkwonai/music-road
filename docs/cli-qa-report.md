@@ -1,5 +1,16 @@
 # Road Music CLI 검수 결과
 
+## 목차
+
+- [1.4.0 GitHub 업데이트 검증 (2026-10-15)](#toc-1)
+- [판정과 적용 범위](#toc-2)
+- [실행 증거](#toc-3)
+- [발견한 문제와 수정](#toc-4)
+- [문서와 재현](#toc-5)
+- [미검증과 남은 한계](#toc-6)
+
+<a id="toc-1"></a>
+
 ## 1.4.0 GitHub 업데이트 검증 (2026-10-15)
 
 - `npm test`: **119/119 통과**, 실패·건너뜀 없음. JavaScript 60개 구문 검사와 diff 공백 검사도 통과했다. 공개 CLI는 **115개 명령**이다.
@@ -16,6 +27,8 @@ Windows 자동 설치·비-Git ZIP 키트 자동 소스 교체는 지원하지 �
 
 검수일: 2026-10-15 · 대상: Road Music 1.3.1의 로컬 CLI, Electron 전송 계층, 생성 대기열, renderer 자동화 및 CLI 문서.
 
+<a id="toc-2"></a>
+
 ## 판정과 적용 범위
 
 검수 중 발견한 데이터 보존·동시 실행·작업 대기·녹음 오류를 수정하고 회귀 테스트를 추가했다. 아래 표는 실제 실행, 오류 주입 테스트, 미실행을 구분한다. 공개 스키마에 명령이 있다는 사실만으로 해당 기능을 실제 검증한 것으로 계산하지 않는다.
@@ -23,6 +36,8 @@ Windows 자동 설치·비-Git ZIP 키트 자동 소스 교체는 지원하지 �
 독립 코드 리뷰 최종 판정은 `APPROVE`, 아키텍처 검토는 `CLEAR / APPROVE`다. 발견한 차단·주요 결함은 수정과 재검증을 완료했다.
 
 테스트는 별도 임시 데이터 폴더와 곡 라이브러리에서 실행했다. 실제 ACE 생성만 기존 설치 모델을 재사용했으며, 사용자의 실제 곡 라이브러리나 모델 위치를 옮기지 않았다. 성공한 통합 검증은 테스트 서비스를 종료하고 임시 파일을 지운다.
+
+<a id="toc-3"></a>
 
 ## 실행 증거
 
@@ -66,6 +81,8 @@ OMX LSP 진단 도구는 `Transport closed`로 실행할 수 없었다. 따라�
 
 추가로 2160p·60 FPS·CPU 영상이 실제 렌더 단계에 들어간 뒤 취소했다. `cancelled` 오류, 기존 덮어쓰기 대상 파일의 바이트 보존, staging·렌더 임시 폴더 정리, idle 상태 복귀 및 이후 설정 명령의 성공을 확인했다.
 
+<a id="toc-4"></a>
+
 ## 발견한 문제와 수정
 
 | 문제 | 수정과 회귀 검증 |
@@ -94,6 +111,8 @@ OMX LSP 진단 도구는 `Transport closed`로 실행할 수 없었다. 따라�
 
 주요 수정 파일은 `cli/client.js`, `electron/cli-{catalog,transport,generation}.js`, `electron/main.js`, `electron/preload.js`, `renderer/cli-api.js`, `renderer/studio.js`, `renderer/recorder.js`, `package.json`이며 대응 테스트는 `tests/`에 있다. 새 런타임 의존성은 추가하지 않았다.
 
+<a id="toc-5"></a>
+
 ## 문서와 재현
 
 사용 순서·응답·플래그는 [CLI 가이드](cli.md), 공개 명령과 중첩 필드의 전체 표는 [CLI 레퍼런스](cli-reference.md), 호출 경계는 [CLI 설계](cli-design.md)에 정리했다. 현재 실행 버전의 `schema`가 최종 입력 계약이다.
@@ -108,6 +127,8 @@ node scripts/verify-cli.js --generation --gpu
 ```
 
 실제 생성 검증은 기본 Road Music 데이터 폴더에 ACE-Step 설치가 완료되어 있어야 한다. 영상·음원 검증은 `ffmpeg`와 `ffprobe`가 필요하다. 위 스크립트의 `--player`는 실제 소리를 재생하며 GPU·생성 검증은 시간을 사용한다. 하드웨어 경합을 피하려면 무거운 검증은 순서대로 실행한다.
+
+<a id="toc-6"></a>
 
 ## 미검증과 남은 한계
 

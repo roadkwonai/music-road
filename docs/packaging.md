@@ -4,6 +4,21 @@ Road Music을 맥용 dmg로 만드는 절차입니다. 사용자는 dmg를 열�
 
 소스를 수정해도 이미 설치된 앱의 `app.asar`에는 자동으로 반영되지 않습니다. 개발 실행은 재실행하고, 설치한 앱은 새 DMG의 앱으로 교체합니다. 같은 앱 ID와 데이터 경로를 사용하므로 기존 곡·엔진·설정은 유지됩니다.
 
+## 목차
+
+- [1. 요약](#toc-1)
+- [2. 준비물](#toc-2)
+- [3. 빌드 절차](#toc-3)
+- [4. 설정 설명](#toc-4)
+- [5. 만든 뒤 확인](#toc-5)
+- [6. 버전 올리기](#toc-6)
+- [7. 다른 사람에게 배포하기: 서명과 공증](#toc-7)
+- [8. 아이콘 바꾸기](#toc-8)
+- [9. 배포 전 확인 목록](#toc-9)
+- [10. 문제 해결](#toc-10)
+
+<a id="toc-1"></a>
+
 ## 1. 요약
 
 ```bash
@@ -20,6 +35,8 @@ npm run dist:cli
 - **서명:** 애드혹 서명. 인증서 없이 이 맥에서 바로 열립니다. 다른 사람에게 배포하려면 7장의 서명·공증이 필요합니다.
 - **ffmpeg와 AI 엔진은 dmg에 넣지 않습니다.** ffmpeg는 사용자가 Homebrew로 설치하고, 엔진은 앱이 첫 실행 때 받습니다.
 
+<a id="toc-2"></a>
+
 ## 2. 준비물
 
 | 항목 | 확인 |
@@ -29,7 +46,10 @@ npm run dist:cli
 | 인터넷 | 첫 빌드 때 Electron 33.4.11 zip과 dmg 도구를 받습니다(이후 캐시 사용) |
 | macOS 기본 도구 | `codesign`, `hdiutil`, `iconutil`, `sips`는 macOS에 들어 있습니다. 공증 결과를 확인하는 `xcrun stapler`만 Xcode Command Line Tools가 필요합니다(`xcode-select --install`) |
 
+<a id="toc-3"></a>
+
 ## 3. 빌드 절차
+
 1. **의존성 설치**
    ```bash
    cd music-road
@@ -53,7 +73,10 @@ npm run dist:cli
 
    `dist/`는 `.gitignore`에 들어 있습니다.
 
+<a id="toc-4"></a>
+
 ## 4. 설정 설명
+
 설정은 모두 `package.json`의 `build` 필드에 있습니다.
 
 ```json
@@ -79,7 +102,10 @@ npm run dist:cli
 
 마이크 권한 문구(`NSMicrophoneUsageDescription`)는 Electron 기본값("This app needs access to the microphone")이 들어갑니다. 한국어로 바꾸려면 `mac.extendInfo`에 넣습니다.
 
+<a id="toc-5"></a>
+
 ## 5. 만든 뒤 확인
+
 1.3.0 빌드에서 아래 항목을 확인했습니다(M1 Ultra, macOS 26). 마이크로 직접 녹음하는 것만 시험하지 못했습니다.
 
 ```bash
@@ -131,6 +157,8 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 
 실제 마이크와 Developer ID 서명·공증은 이번 재빌드에서 검증하지 않았다. 이 DMG는 애드혹 서명이므로 다른 맥에서 다운로드해 열 때 Gatekeeper 경고가 발생할 수 있다.
 
+<a id="toc-6"></a>
+
 ## 6. 버전 올리기
 
 ### 1.4.0 업데이트 설치 검증 (2026-10-15)
@@ -142,7 +170,10 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 3. `npm run dist:cli`와 `npm run release:assets`로 CLI ZIP과 체크섬을 만듭니다. 같은 버전의 태그·Release에 DMG, ZIP, `SHA256SUMS.txt`를 게시합니다. 버전 태그를 push하면 GitHub Actions가 빌드·검증 후 Latest Release를 게시합니다. 노트 경로와 절차는 [업데이트 배포](updates.md#새-버전-배포)를 따릅니다.
 4. 사용자가 새 dmg로 덮어 설치해도 곡과 엔진(`~/Library/Application Support/Road Music`)은 그대로 남습니다.
 
+<a id="toc-7"></a>
+
 ## 7. 다른 사람에게 배포하기: 서명과 공증
+
 > 이 장은 절차만 정리했습니다. 이 맥에는 Developer ID 인증서가 없어서 실행해 보지 않았습니다.
 
 애드혹 서명 dmg를 인터넷이나 메신저로 받은 사용자는 처음 열 때 macOS 경고를 봅니다. 경고 없이 열리게 하려면 Apple의 Developer ID로 서명하고 공증해야 합니다.
@@ -181,7 +212,10 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 
 앱이 받아서 실행하는 `uv`, Python, 엔진 라이브러리는 앱 번들 밖(`~/Library/Application Support`)에 있습니다. 그래서 앱 서명에는 영향을 주지 않습니다. 다만 hardened runtime을 켠 빌드에서 엔진 설치와 곡 생성이 되는지는 아직 확인하지 않았습니다. 처음 서명 빌드를 만들면 5장의 확인 항목을 다시 돌려 보세요.
 
+<a id="toc-8"></a>
+
 ## 8. 아이콘 바꾸기
+
 지금 아이콘은 Road Music용으로 새로 만든 것입니다. 밤길 도로가 지평선의 이퀄라이저 막대로 이어지는 그림이며, 원본 ssok "S" 마크를 대신합니다. 그림은 ChatGPT 이미지 생성으로 만들었습니다. 같은 그림으로 다시 만들 때는 `build/icon.png`를 그대로 입력으로 쓰면 됩니다.
 
 아이콘 파일은 두 개이고, 한 장의 그림에서 함께 만듭니다.
@@ -207,7 +241,10 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
    ```
 4. 다시 빌드합니다. Dock 아이콘이 예전 것으로 보이면 macOS 아이콘 캐시 때문이니 앱을 `Applications`에 다시 복사하세요.
 
+<a id="toc-9"></a>
+
 ## 9. 배포 전 확인 목록
+
 - [ ] `version`을 올렸다
 - [ ] 아이콘이 의도한 것인지 확인했다(8장)
 - [ ] `LICENSE`가 앱 안에 들어 있다. 원저작자 MIT 고지를 지우지 않는다
@@ -216,6 +253,8 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 - [ ] GitHub 최신 정식 Release에 버전과 일치하는 DMG·CLI ZIP·SHA256SUMS.txt가 있다. 업데이트는 GitHub를 사용하며 공지·문의·설치 집계는 기존 `roadkwon.dev` API를 사용한다
 - [ ] 상용 배포라면 YuE2(CC BY-NC 4.0)를 안내하거나 쓰지 않는다
 - [ ] 5장의 확인 항목을 새 dmg로 돌렸다
+
+<a id="toc-10"></a>
 
 ## 10. 문제 해결
 

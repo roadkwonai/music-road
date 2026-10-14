@@ -17,7 +17,8 @@ async function packageCli (outputDir = path.join(root, 'dist')) {
     await fs.mkdir(kit)
     const entries = ['cli', 'electron', 'renderer', 'python', 'docs', 'tests', 'scripts',
       'package.json', 'package-lock.json', 'README.md', 'LICENSE', 'AGENTS.md', 'CLAUDE.md',
-      'build/icon.png', 'build/icon.icns', 'prompts/cli-workflows.md']
+      'build/icon.png', 'build/icon.icns', 'prompts/cli-workflows.md', 'prompts/ace-review.md',
+      'skills/road-music-ace']
     for (const entry of entries) {
       const destination = path.join(kit, entry)
       await fs.mkdir(path.dirname(destination), { recursive: true })

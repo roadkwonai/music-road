@@ -2,6 +2,20 @@
 
 이 문서는 `electron/cli-catalog.js`와 `electron/cli-transport.js`의 공개 스키마를 사람이 읽기 좋게 정리한 목록이다. 실행 중인 버전에서 `node cli/road-music.js schema`를 실행한 결과가 최종 기준이다. 내부 프레임·픽셀 전송 명령은 공개 API가 아니므로 포함하지 않는다.
 
+## 목차
+
+- [표기](#toc-1)
+- [공통 입력 모양](#toc-2)
+- [서비스·설치·프로젝트](#toc-3)
+- [곡·생성·악보·내보내기](#toc-4)
+- [대기열·프리셋·자산·설정](#toc-5)
+- [가사·프롬프트·재생·영상](#toc-6)
+- [녹음·창·외부 동작](#toc-7)
+- [배치 요청](#toc-8)
+- [시간 제한·재시도·출력 안전성](#toc-9)
+
+<a id="toc-1"></a>
+
 ## 표기
 
 - **필수**는 JSON 객체에서 반드시 넣어야 하는 필드다. 나머지는 선택 사항이다. 카탈로그 명령의 객체는 표에 적힌 필드 외의 키를 허용하지 않는다. 전송 계층의 `job:wait` 같은 보조 명령은 스키마의 별도 규칙을 따른다.
@@ -9,6 +23,8 @@
 - `path`는 비어 있지 않은 문자열이다. `abs-path`는 `/` 또는 Windows 드라이브 문자로 시작하는 절대 경로다.
 - `†`는 `--confirm`이 필요하다. `입력`과 `출력`은 JSON이 아니라 각각 `--input`, `--output` 플래그다.
 - `곡`은 `songs:list`가 돌려준 절대 `dir`을 뜻한다. `song:*`의 곡 경로, 커버 곡, 영상 트랙은 현재 라이브러리 안의 실제 곡 폴더여야 한다.
+
+<a id="toc-2"></a>
 
 ## 공통 입력 모양
 
@@ -45,6 +61,8 @@
 
 `piano`, `acoustic guitar`, `classical guitar`, `electric guitar`, `bass guitar`, `upright bass`, `drums`, `brushed drums`, `percussion`, `violin`, `viola`, `cello`, `string ensemble`, `harp`, `flute`, `clarinet`, `oboe`, `saxophone`, `trumpet`, `trombone`, `french horn`, `brass section`, `pipe organ`, `Rhodes electric piano`, `synthesizer`, `synth pads`, `celesta`, `glockenspiel`, `sleigh bells`, `music box`, `marimba`, `vibraphone`, `ukulele`, `mandolin`, `harmonica`, `accordion`, `orchestra`.
 
+<a id="toc-3"></a>
+
 ## 서비스·설치·프로젝트
 
 | 명령 | 필수 | 선택 | 입력/출력·효과 |
@@ -66,6 +84,8 @@
 | `projects:list` | — | — | 프로젝트 목록 |
 | `projects:select`, `projects:create` | `name:path` | — | 프로젝트 선택/생성 |
 | `projects:rename` | `from:path`, `to:path` | — | 이름에는 경로 구분자 불가 |
+
+<a id="toc-4"></a>
 
 ## 곡·생성·악보·내보내기
 
@@ -96,9 +116,13 @@
 
 ### `song:generate` 필드
 
+필드별 실제 효과·우선순위·엔진 차이와 복사 가능한 JSON은 [음악 생성 옵션](music-options.md), 장르별 요청은 [프롬프트 모음](genre-prompts.md)을 참고한다.
+
 `title:str≤200`, `style:str≤2000`, `lyrics:str≤20000`, `engine:ace/yue`(기본 `ace`), `count:int 1..8`, `instrumental:bool`, `soundEffect:bool`, `targetSeconds:num 1..600|null`, `seed:int 0..2147483647|null`, `mode:song/plan`, `cot:full/melody/off`, `abc:str≤100000`, `advanced:advanced`, `parts:parts`, `coverAudio:{dir:abs-path, title:str≤200, strength:0.1..1}|null`, `recording:{path:abs-path, strength:0.1..1, targetSeconds:int 0..600}|null`, `bpm:int 40..220`.
 
 `style` 또는 `parts.genre`는 스타일 설명에 쓴다. 효과음은 ACE에서만 가능하며 가사·악보·커버·녹음·계획 모드와 함께 쓸 수 없다. 커버와 녹음도 ACE만 가능하다. 유효성 검사는 스키마 다음에 생성 규칙을 추가로 적용한다.
+
+<a id="toc-5"></a>
 
 ## 대기열·프리셋·자산·설정
 
@@ -124,6 +148,8 @@
 | `settings:move-models` † | — | — | 대상 폴더: `--output DIR`; YuE2가 쓰는 모델 저장소만 검증·복사해 이동 |
 | `settings:move-songs` † | — | — | 대상 폴더: `--output DIR`; 검증 후 라이브러리 이동 |
 
+<a id="toc-6"></a>
+
 ## 가사·프롬프트·재생·영상
 
 | 명령 | 필수 | 선택 | 입력/출력·효과 |
@@ -144,6 +170,8 @@
 | `video:cancel` | — | `jobId:path` | 현재 렌더 취소 요청 |
 | `video:background` | `kind:image/video` | — | 입력 파일: `--input FILE` |
 | `editor:state`, `editor:open`, `editor:close` | — | — | 영상 편집기 |
+
+<a id="toc-7"></a>
 
 ## 녹음·창·외부 동작
 
@@ -169,9 +197,13 @@
 | `notices:latest` | — | — | 공지 조회 |
 | `notices:open` | `url:https://roadkwon.dev/...` | — | 브라우저 열기 |
 
+<a id="toc-8"></a>
+
 ## 배치 요청
 
 `batch`는 stdin JSONL만 받으며 `--events`, `--no-start` 외의 공통 플래그를 받지 않는다. 각 줄은 `{ "command": "group:action", "params": {}, "id"?: "...", "input"?: ["/absolute/path"], "output"?: "/absolute/path", "confirm"?: true, "overwrite"?: true, "timeout"?: 1000 }` 형식이다. 오류·성공 모두 줄 단위 JSON으로 반환한다.
+
+<a id="toc-9"></a>
 
 ## 시간 제한·재시도·출력 안전성
 

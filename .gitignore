@@ -18,4 +18,5 @@ __pycache__/
 /models/
 /video-cache/
 /assets/
+/outputs/
 /prompts/info.md

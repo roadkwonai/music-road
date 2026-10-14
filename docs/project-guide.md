@@ -2,6 +2,16 @@
 
 Road Music은 ssokMusic Free 1.3.0(MIT)을 바탕으로 Apple Silicon 지원과 AI용 CLI를 추가한 로컬 음악 제작 앱이다. 원저작자와 수정 사항의 고지는 [LICENSE](../LICENSE)에 있다.
 
+## 목차
+
+- [기능과 사용 흐름](#toc-1)
+- [지원 범위와 엔진](#toc-2)
+- [코드 구조](#toc-3)
+- [외부 통신](#toc-4)
+- [개발과 배포](#toc-5)
+
+<a id="toc-1"></a>
+
 ## 기능과 사용 흐름
 
 - 가사·스타일·악기·BPM·길이로 보컬 또는 연주곡을 생성한다. 한 요청에서 최대 8곡을 대기열에 제출할 수 있다.
@@ -11,6 +21,8 @@ Road Music은 ssokMusic Free 1.3.0(MIT)을 바탕으로 Apple Silicon 지원과 
 - 이미지·영상 배경, 스펙트럼 4종, 7밴드 EQ, 로고·트랙리스트, 반복 길이, 720p–4K·30/60 FPS 영상과 챕터를 만든다.
 
 CLI 작업 순서는 [빠른 시작](quickstart.md), 전체 앱 동작은 [상세 가이드](guide.md)에 있다.
+
+<a id="toc-2"></a>
 
 ## 지원 범위와 엔진
 
@@ -23,6 +35,8 @@ CLI 작업 순서는 [빠른 시작](quickstart.md), 전체 앱 동작은 [상�
 
 엔진·모델은 앱이 따로 다운로드하며 저장소나 DMG에 포함되지 않는다. Node.js는 CLI·소스 실행·빌드에 필요하고, `ffmpeg`와 `ffprobe`는 변환·영상에 필요하다. 준비물과 설치는 [CLI 설치](cli-install.md)를 참고한다.
 
+<a id="toc-3"></a>
+
 ## 코드 구조
 
 ```text
@@ -32,6 +46,8 @@ cli/client.js → 로컬 socket/pipe → electron/cli-transport.js
 ```
 
 `cli/`는 JSON/JSONL과 서비스 시작·작업 대기를 담당한다. `electron/`는 앱·파일·엔진·대기열, `renderer/`는 화면과 제한된 자동화, `python/`는 음악 워커다. CLI는 임의 JavaScript 실행이나 원격 제어 TCP 서버를 제공하지 않는다. 영상 프레임 전송에는 토큰을 검증하는 임시 loopback HTTP 서버를 사용할 수 있다. 자세한 경계는 [CLI 설계](cli-design.md)에 있다.
+
+<a id="toc-4"></a>
 
 ## 외부 통신
 
@@ -46,6 +62,8 @@ cli/client.js → 로컬 socket/pipe → electron/cli-transport.js
 | 패키징된 앱의 설치 집계 | `roadkwon.dev/api/installs/ping` |
 
 오류 신고에 로그를 붙이면 곡 제목 등 실행 기록이 포함될 수 있다. AI는 외부 전송을 사용자의 명시적 요청 범위에서만 실행한다. CLI 자체에 OpenAI API 키나 MCP 설정은 필요하지 않으며, 호출하는 AI 도구의 설치·인증은 별도다.
+
+<a id="toc-5"></a>
 
 ## 개발과 배포
 

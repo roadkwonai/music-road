@@ -2,6 +2,16 @@
 
 AI나 터미널에서 설치부터 첫 곡 저장까지 진행하는 순서다. 전체 명령은 [CLI 레퍼런스](cli-reference.md), GUI 사용은 [시작하기](getting-started.md)를 참고한다.
 
+## 목차
+
+- [1. 설치와 지침 읽기](#toc-1)
+- [2. 상태와 엔진 확인](#toc-2)
+- [3. 프로젝트와 첫 곡](#toc-3)
+- [4. MP3와 영상 저장](#toc-4)
+- [5. 계속 사용하거나 문제 진단](#toc-5)
+
+<a id="toc-1"></a>
+
 ## 1. 설치와 지침 읽기
 
 Node.js 24를 준비하고 저장소를 받는다. 배포 CLI ZIP을 쓰는 경우에는 압축을 푼 폴더에서 `npm ci` 단계부터 진행한다.
@@ -16,6 +26,8 @@ node cli/road-music.js schema
 Electron이 개발 의존성으로 선언되어 있어 실행 시에도 `--include=dev`가 필요하다. 처음 설치할 때는 인터넷이 필요하다. macOS의 음원 변환·영상 도구는 `brew install ffmpeg`로 준비한다. 이 패키지는 `ffprobe`도 제공한다.
 
 AI는 먼저 [AGENTS.md](../AGENTS.md)를 읽고 [CLI 사용법](cli.md)을 따른다. Claude Code는 [CLAUDE.md](../CLAUDE.md)의 공통 지침 가져오기를 사용한다. 외부 프로젝트에서 실행할 때는 키트의 절대 경로를 알려야 한다. [AI 사용 가이드](ai-cli.md)에 예시가 있다.
+
+<a id="toc-2"></a>
 
 ## 2. 상태와 엔진 확인
 
@@ -37,6 +49,8 @@ node cli/road-music.js engines:install --events --json '{"id":"ace"}'
 
 AI는 사용자가 설치를 요청하지 않았다면 미설치 상태를 보고하고 자동 다운로드하지 않는다. 자세한 준비물은 [CLI 설치](cli-install.md)와 [엔진 설치 안내](getting-started.md)에 있다.
 
+<a id="toc-3"></a>
+
 ## 3. 프로젝트와 첫 곡
 
 프로젝트 목록에 같은 이름이 있으면 생성 대신 `projects:select`를 사용한다.
@@ -56,6 +70,8 @@ node cli/road-music.js job:wait --events --json '{"jobId":"JOB_ID","timeoutMs":3
 
 시간 초과는 생성 자체를 취소하지 않는다. 연결 오류에 `uncertain:true`가 있으면 중복 제출하지 말고 `service:status`, `queue:list`, `songs:list`과 작업 결과를 먼저 확인한다.
 
+<a id="toc-4"></a>
+
 ## 4. MP3와 영상 저장
 
 아래 예시의 `/absolute/path/from/songs-list`는 완료 곡 응답의 `dir`로 바꾸고, 출력 파일도 실제 절대 경로로 지정한다. 출력은 곡 라이브러리 밖에 저장한다.
@@ -66,6 +82,8 @@ node cli/road-music.js video:render --events --json '{"tracks":["/absolute/path/
 ```
 
 영상 명령은 자체적으로 렌더 완료를 반환하므로 `--wait`을 붙이지 않는다. 기존 출력 파일은 기본적으로 덮어쓰지 않는다. 결과 파일 경로와 성공 JSON을 확인한다. 여러 곡의 앨범·SRT·영상 작업은 [작업 프롬프트](../prompts/cli-workflows.md)를 참고한다.
+
+<a id="toc-5"></a>
 
 ## 5. 계속 사용하거나 문제 진단
 

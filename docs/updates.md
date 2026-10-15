@@ -57,7 +57,7 @@ node cli/road-music.js cli:update:install \
 
 `cli:update:install`이 반환한 새 경로로 이후 명령을 실행한다. 전역 `road-music` 링크가 예전 키트를 가리키면 자동으로 바꾸지 않는다.
 
-공개 파일의 실제 감지·다운로드·설치 결과는 [CLI 독립 업데이트 검증](cli-update-qa-report.md)에 기록했다.
+새 공개 파일의 전환·다운로드·설치 결과는 [앱·CLI 0.1.0 초기화 검증](version-reset-qa-report.md)에 기록했다. [첫 CLI 배포 검증](cli-update-qa-report.md)은 초기화 전의 역사 기록이다.
 
 <a id="ai"></a>
 

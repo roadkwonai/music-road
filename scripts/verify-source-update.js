@@ -11,6 +11,8 @@ const { spawn } = require('node:child_process')
 const helper = path.resolve(__dirname, '../electron/update-installer.js')
 const origin = 'https://github.com/roadkwonai/music-road.git'
 const oldVersion = '1.4.0'
+// v1.4.0 is republished, so this historical updater fixture must not follow its mutable tag.
+const oldReleaseCommit = '99a4908d74f5259124b442f777cb9af866f488bf'
 const newVersion = '1.4.1'
 const commandTimeout = 120_000
 const installerTimeout = 16 * 60_000
@@ -109,8 +111,10 @@ server.listen(endpoint)
 
 async function cloneRelease (base, name) {
   const root = path.join(base, name)
-  await run('/usr/bin/git', ['clone', '--branch', `v${oldVersion}`, '--single-branch', origin, root])
+  await run('/usr/bin/git', ['clone', '--no-checkout', '--single-branch', origin, root])
+  await git(root, ['checkout', '--detach', oldReleaseCommit])
   assert.equal(await git(root, ['remote', 'get-url', 'origin']), origin)
+  assert.equal(await git(root, ['rev-parse', 'HEAD']), oldReleaseCommit)
   assert.equal(JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8')).version, oldVersion)
   await fs.mkdir(path.join(root, 'node_modules'), { recursive: true })
   await fs.writeFile(path.join(root, 'node_modules', 'old-dependency-sentinel'), 'old dependencies')

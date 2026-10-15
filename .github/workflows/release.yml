@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ inputs.tag || github.ref_name }}
+  group: road-music-app-release
   cancel-in-progress: false
 
 jobs:
@@ -42,7 +42,12 @@ jobs:
         id: release_notes
         env:
           RELEASE_NOTES_FILE: ${{ runner.temp }}/release-notes.md
+          RELEASES_JSON: ${{ runner.temp }}/releases.json
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          gh api "repos/$GH_REPO/releases?per_page=100" --paginate --slurp > "$RELEASES_JSON"
+          node scripts/release-version.js --product app --tag "$RELEASE_TAG" --releases-json "$RELEASES_JSON"
           PACKAGE_VERSION="$(node -p 'require("./package.json").version')"
           export PACKAGE_VERSION
           if [ "$RELEASE_TAG" != "v$PACKAGE_VERSION" ]; then

@@ -121,11 +121,15 @@ function parseChecksum (value, name) {
   }
   return null
 }
-async function download (asset, destination) {
+async function releaseChecksum (asset) {
   const sums = await request(asset.sumsUrl, REQUEST_MS, 0, true)
   if (!sums.ok) fail('UPDATE_NETWORK', `체크섬 다운로드 실패(HTTP ${sums.status})`)
   const digest = parseChecksum(await text(sums), asset.name)
   if (!digest) fail('UPDATE_VERIFY', 'SHA256SUMS.txt에 CLI 설치 파일 체크섬이 없습니다.')
+  return digest
+}
+async function download (asset, destination) {
+  const digest = await releaseChecksum(asset)
   const response = await request(asset.url, DOWNLOAD_MS, 0, true)
   if (!response.ok || !response.body) fail('UPDATE_NETWORK', `CLI 업데이트 다운로드 실패(HTTP ${response.status})`)
   const contentLength = Number(response.headers.get('content-length') || 0)
@@ -142,6 +146,7 @@ async function download (asset, destination) {
     }
   } finally { clearTimeout(timeout); stream.releaseLock(); await file.close() }
   if (bytes !== asset.size || hash.digest('hex') !== digest) fail('UPDATE_VERIFY', 'CLI 업데이트 파일 무결성 검증에 실패했습니다.')
+  return digest
 }
 function unsafeEntry (entry) {
   return !entry || entry.includes('\\') || entry.startsWith('/') || entry.split('/').some(part => part === '..')
@@ -181,10 +186,11 @@ async function verifyKit (root, version, installDependencies = true) {
   if (output?.result?.cliVersion !== version || output.result.appVersion !== app.version) fail('UPDATE_VERIFY', '새 CLI 버전 확인 결과가 설치 대상과 일치하지 않습니다.')
   return { cliPath, cliVersion: version, appVersion: app.version }
 }
-async function existingKit (target, version) {
+async function existingKit (target, version, asset) {
   let marker
   try { marker = JSON.parse(await fsp.readFile(path.join(target, '.road-music-cli-install.json'), 'utf8')) } catch { fail('UPDATE_VERIFY', '기존 CLI 설치 완료 표식이 없어 재사용할 수 없습니다.') }
   if (marker?.cliVersion !== version || !safeVersion(marker.appVersion)) fail('UPDATE_VERIFY', '기존 CLI 설치 완료 표식이 올바르지 않습니다.')
+  if (!/^[a-f0-9]{64}$/.test(marker.archiveSha256 || '') || marker.archiveSha256 !== await releaseChecksum(asset)) fail('UPDATE_VERIFY', '기존 CLI의 배포 체크섬이 현재 Release와 다릅니다. 기존 폴더를 보존하고 targetDir에 새 경로를 지정하세요.')
   const verified = await verifyKit(target, version, false)
   return { ...verified, cliPath: path.join(target, 'cli', 'road-music.js') }
 }
@@ -239,7 +245,7 @@ async function install (params = {}) {
   if (!params.targetDir) await protectGitWorktree(target)
   if (fs.existsSync(target)) {
     if (!defaultTarget) fail('TARGET_EXISTS', 'targetDir은 존재하지 않는 새 폴더여야 합니다.')
-    const verified = await existingKit(target, found.version)
+    const verified = await existingKit(target, found.version, found.asset)
     const result = { ...verified, command: `${shellQuote(nodeExecutable())} ${shellQuote(verified.cliPath)}` }
     await writeCurrent({ cliVersion: result.cliVersion, cliPath: result.cliPath })
     return result
@@ -249,10 +255,10 @@ async function install (params = {}) {
   const stage = await fsp.mkdtemp(path.join(parent, '.road-music-cli-stage-'))
   try {
     const archive = path.join(stage, found.asset.name)
-    await download(found.asset, archive)
+    const archiveSha256 = await download(found.asset, archive)
     const extracted = await extract(archive, stage, found.version)
     const verified = await verifyKit(extracted, found.version)
-    await fsp.writeFile(path.join(extracted, '.road-music-cli-install.json'), JSON.stringify({ cliVersion: verified.cliVersion, appVersion: verified.appVersion }), { mode: 0o600 })
+    await fsp.writeFile(path.join(extracted, '.road-music-cli-install.json'), JSON.stringify({ cliVersion: verified.cliVersion, appVersion: verified.appVersion, archiveSha256 }), { mode: 0o600 })
     try { await fsp.mkdir(target, { mode: 0o700 }) } catch (error) { if (error?.code === 'EEXIST') fail('TARGET_EXISTS', '동일한 설치 대상이 이미 있습니다.'); throw error }
     try { await fsp.rename(extracted, target) } catch (error) { await fsp.rmdir(target).catch(() => {}); throw error }
     const result = { cliPath: path.join(target, 'cli', 'road-music.js'), cliVersion: verified.cliVersion, appVersion: verified.appVersion, command: `${shellQuote(nodeExecutable())} ${shellQuote(path.join(target, 'cli', 'road-music.js'))}` }

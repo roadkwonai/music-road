@@ -9,7 +9,8 @@
 <p align="center">한국어 가사 · 보컬과 연주곡 · MP3/WAV · 가사 자막 · 플레이리스트 영상</p>
 
 <p align="center">
-  <a href="https://github.com/roadkwonai/music-road/releases/latest"><img src="https://img.shields.io/github/v/release/roadkwonai/music-road?style=flat-square&amp;color=172942&amp;label=release" alt="최신 정식 Release"></a>
+  <a href="https://github.com/roadkwonai/music-road/releases/tag/v0.1.0"><img src="https://img.shields.io/badge/app%20release-v0.1.0-172942?style=flat-square" alt="Road Music 앱 Release v0.1.0"></a>
+  <a href="https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.0"><img src="https://img.shields.io/badge/CLI%20release-v0.1.0-172942?style=flat-square" alt="Road Music CLI Release v0.1.0"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-172942?style=flat-square" alt="MIT License"></a>
   <a href="docs/cli-install.md"><img src="https://img.shields.io/badge/CLI-Node.js%2024-172942?style=flat-square" alt="CLI 실행 환경 Node.js 24"></a>
   <a href="docs/ace-prompt-guide.md"><img src="https://img.shields.io/badge/engine-ACE--Step%201.5-172942?style=flat-square" alt="ACE-Step 1.5"></a>
@@ -225,7 +226,7 @@ DMG의 앱을 `Applications`로 복사하면 GUI를 사용할 수 있으며 Node
 > [!NOTE]
 > 현재 앱은 애드혹 서명이며 Apple 공증을 받지 않았습니다. 실제 검증 환경과 OS별 제한은 [검수 결과](docs/cli-qa-report.md)에 있습니다.
 
-현재 앱 정식 버전은 1.4.0이며 앱 Release의 Latest가 앱 업데이트 대상입니다. CLI는 독립 0.1.0부터 `cli-vX.Y.Z` Release와 `RoadMusic-CLI-X.Y.Z.zip`을 사용합니다.
+현재 앱과 CLI의 정식 버전은 각각 0.1.0입니다. 앱 Release의 Latest가 앱 업데이트 대상이며, CLI는 `cli-v0.1.0` Release와 `RoadMusic-CLI-0.1.0.zip`을 사용합니다. 공통 초기 번호라도 앱과 CLI는 서로의 태그·asset·체크섬·설치 경로를 공유하지 않습니다.
 
 앱과 CLI의 업데이트 방식은 다릅니다. 앱 서비스는 시작 시와 15분마다 앱 Release를 확인합니다. CLI는 AI 세션의 첫 연결에서 한 번 확인하며 상시 감시하지 않습니다.
 
@@ -240,6 +241,9 @@ node cli/road-music.js cli:update:install --timeout 1800000
 ```
 
 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 맡긴 경우에만 설치합니다. 앱 설치는 앱을 교체·재시작할 수 있고, CLI 설치는 새 경로에만 설치합니다. 자세한 확인·복구·배포 기준은 [업데이트 가이드](docs/updates.md)를 참고하세요.
+
+> [!NOTE]
+> 기존 1.4.x 앱과 이전 공개 CLI 0.1.0 키트는 새 0.1.0보다 숫자가 높거나 같으므로 자동 전환되지 않습니다. 앱 0.1.0 DMG와 새 CLI 0.1.0 ZIP을 각각 새 위치에 한 번 수동 설치한 뒤부터 해당 제품의 0.1.1 이상 업데이트 알림을 받습니다. 이 전환은 설치된 앱·곡·모델·기존 CLI 폴더를 자동으로 변경하지 않습니다.
 
 <a id="toc-5"></a>
 

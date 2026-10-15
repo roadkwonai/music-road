@@ -183,6 +183,22 @@ test('default target is reused only after its completed-install marker verifies'
   await assert.rejects(update.install(), /완료 표식/)
 })
 
+test('default target with a legacy or different release checksum is preserved and requires a new folder', async t => {
+  const f = await fixture(t)
+  const first = await update.install()
+  const markerPath = path.join(f.cliHome, '0.1.1', '.road-music-cli-install.json')
+  const original = JSON.parse(await fs.readFile(markerPath, 'utf8'))
+  await fs.writeFile(markerPath, JSON.stringify({ cliVersion: '0.1.1', appVersion: '1.4.0' }))
+  await assert.rejects(update.install(), /배포 체크섬/)
+  await fs.writeFile(markerPath, JSON.stringify(original))
+  const saved = global.fetch
+  global.fetch = async url => String(url) === `${releaseBase}SHA256SUMS.txt`
+    ? new Response(`${'0'.repeat(64)}  RoadMusic-CLI-0.1.1.zip\n`) : saved(url)
+  await assert.rejects(update.install(), /배포 체크섬/)
+  assert.equal(await fs.readFile(markerPath, 'utf8'), JSON.stringify(original))
+  await fs.access(first.cliPath)
+})
+
 test('install refuses symlink entries inside an otherwise valid CLI root before extraction', async t => {
   const f = await fixture(t)
   await fs.symlink('package.json', path.join(f.kit.kit, 'linked-package'))

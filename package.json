@@ -1,7 +1,7 @@
 {
   "name": "road-music",
   "productName": "Road Music",
-  "version": "1.4.0",
+  "version": "0.1.0",
   "description": "Road Music - 로컬 GPU로 노래를 만드는 무료 AI 작곡 프로그램",
   "main": "electron/main.js",
   "bin": {

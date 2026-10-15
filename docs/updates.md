@@ -2,7 +2,7 @@
 
 [Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
 
-Road Music 앱과 CLI는 별도 버전과 별도 GitHub Release를 사용한다. 앱 정식 버전은 `package.json`과 `vX.Y.Z` 태그를 따르며, 현재 기준은 1.4.0이다. CLI 정식 버전은 `cli/package.json`과 `cli-vX.Y.Z` 태그를 따르며, 현재 기준은 0.1.0이다. 앱 최신 Release와 CLI 최신 Release를 서로 대체하지 않는다.
+Road Music 앱과 CLI는 별도 버전과 별도 GitHub Release를 사용한다. 앱 정식 버전은 `package.json`과 `vX.Y.Z` 태그를 따르며, 현재 기준은 0.1.0이다. CLI 정식 버전은 `cli/package.json`과 `cli-vX.Y.Z` 태그를 따르며, 현재 기준은 0.1.0이다. 같은 초기 번호라도 앱 최신 Release와 CLI 최신 Release를 서로 대체하지 않는다.
 
 <a id="consolidated-140"></a>
 
@@ -29,6 +29,10 @@ node cli/road-music.js update:install --events --timeout 1800000
 
 `update:install`은 앱을 내려받아 교체하고 서비스를 재시작할 수 있다. 설치 전 PID와 목표 앱 버전을 기록한다. 설치 인계 응답 뒤에는 `service:status --no-start`, `update:status --no-start`, `app:state --no-start`로 새 PID·목표 버전·이번 설치 결과를 확인한다. 진행 중인 생성·렌더·대기열·로컬 수정은 취소하거나 덮어쓰지 않는다.
 
+### 1.4.x에서 0.1.0으로 전환
+
+앱 버전은 0.1.0부터 다시 시작한다. 이미 설치된 1.4.x는 0.1.0보다 숫자상 높으므로 자동 업데이트 후보가 아니다. 사용자가 앱 0.1.0 DMG를 한 번 수동으로 설치해 전환해야 하며, 설치된 앱·곡·모델·설정을 자동으로 내리거나 교체하지 않는다. 전환한 앱은 0.1.1 이상의 앱 Release만 업데이트 알림 대상으로 삼는다.
+
 <a id="cli"></a>
 
 ## CLI 업데이트
@@ -39,13 +43,17 @@ CLI는 `cli-v*` 정식 Release만 조회한다. `cli:update:*`는 앱을 시작�
 node cli/road-music.js cli:version
 node cli/road-music.js cli:update:check
 node cli/road-music.js cli:update:install \
-  --json '{"targetDir":"/absolute/path/road-music-cli-0.1.0"}' \
+  --json '{"targetDir":"/absolute/path/road-music-cli-0.1.0-reset"}' \
   --timeout 1800000
 ```
 
 `cli:update:check`은 읽기 전용이며 `cli-v*` 태그 중 현재 CLI보다 높은 정식 버전과 노트를 반환한다. 앱의 `/releases/latest` 결과를 CLI 최신 버전으로 사용하지 않는다. 조회 오류는 “최신”으로 바꾸지 않으며, 현재 CLI를 계속 사용하고 오류를 보고한다.
 
 `cli:update:install`은 새 빈 폴더에 `RoadMusic-CLI-X.Y.Z.zip`을 설치한다. `targetDir`를 생략하면 사용자 CLI 저장소의 `X.Y.Z` 폴더를 사용한다. 기존 폴더를 덮어쓰지 않으며 `sudo`도 사용하지 않는다. 설치 뒤 반환된 `cliPath`에서 `--version`, `schema`, `prompt:knowledge`를 실행해 설치본을 검증한다. 새 AI 세션은 `ROADMUSIC_CLI_HOME`이 있으면 그 아래의 `current.json`, 없으면 `~/.local/share/road-music/cli/current.json`을 먼저 확인해 이 경로를 찾는다.
+
+### CLI 0.1.0 재초기화 전환
+
+이번 CLI 0.1.0 재초기화만 같은 버전을 다시 배포하는 명시적 예외다. 이전 공개 0.1.0 키트에는 앱 소스 `1.4.0`이 동봉되어 있어 버전 숫자만으로 새 0.1.0을 알릴 수 없다. 이전 키트는 `cli:update:check`으로 새 버전을 받지 못하므로, 새 0.1.0 ZIP을 새 빈 폴더에 수동 설치하거나 `cli:update:install --json '{"targetDir":"/새/빈/절대/경로"}'`을 사용한다. 기본 설치 폴더가 이미 있으면 현재 Release의 `SHA256SUMS.txt`와 설치 표식의 `archiveSha256`이 일치할 때만 재사용하며, 표식이 없거나 다르면 기존 폴더를 보존하고 새 `targetDir`을 요구한다.
 
 `cli:update:install`이 반환한 새 경로로 이후 명령을 실행한다. 전역 `road-music` 링크가 예전 키트를 가리키면 자동으로 바꾸지 않는다.
 
@@ -75,7 +83,9 @@ node cli/road-music.js cli:update:check
 | 앱 | `package.json` | `vX.Y.Z` | Latest | `RoadMusic-X.Y.Z-mac-arm64.dmg`, `RoadMusic-X.Y.Z-source.zip` |
 | CLI | `cli/package.json` | `cli-vX.Y.Z` | Latest 아님 | `RoadMusic-CLI-X.Y.Z.zip` |
 
-앱 릴리스는 앱 버전만 올리고 `release.yml`로 DMG와 앱 소스 ZIP을 게시한다. CLI 릴리스는 CLI 버전만 올리고 `release-cli.yml`로 CLI ZIP을 게시한다. 두 제품은 같은 GitHub 저장소를 쓰지만, 태그·노트·체크섬·asset을 공유하지 않는다. 이미 공개한 태그·Release·asset은 변경하거나 재사용하지 않는다.
+앱 릴리스는 앱 버전만 올리고 `release.yml`로 DMG와 앱 소스 ZIP을 게시한다. CLI 릴리스는 CLI 버전만 올리고 `release-cli.yml`로 CLI ZIP을 게시한다. 두 제품은 같은 GitHub 저장소를 쓰지만, 태그·노트·체크섬·asset을 공유하지 않는다.
+
+이번 앱·CLI 0.1.0 초기화만 사용자 요청에 따른 예외다. 그 뒤 CI는 `scripts/release-version.js --product app|cli --tag TAG --releases-json FILE`로 제품별 최신 정식 Release를 확인하고, 해당 제품의 바로 다음 패치, 다음 마이너의 `.0`, 또는 다음 메이저의 `.0.0`만 허용한다. 같은 버전 재배포, 역행, 번호 건너뛰기, 다른 제품 태그는 거부하며, 각 제품의 manifest와 릴리스 노트도 같은 버전이어야 한다.
 
 <a id="limits"></a>
 
@@ -85,4 +95,4 @@ node cli/road-music.js cli:update:check
 
 CLI 설치가 실패하면 기존 CLI·앱·데이터는 그대로 둔다. 새 폴더에 설치했으므로 해당 폴더와 오류를 확인한 뒤 다시 시도한다. 실제 앱 업데이트의 설치 실패와 복구 규칙은 앱 상태 응답과 [CLI 검수 결과](cli-qa-report.md)를 따른다.
 
-이전 공유 번호의 CLI에는 독립 업데이트 명령이 없을 수 있다. 이 경우 [CLI 설치](cli-install.md)에 따라 `cli-v0.1.0` 키트를 새 폴더에 한 번 설치한 뒤 새 지침을 사용한다.
+이전 공유 번호의 CLI에는 독립 업데이트 명령이 없을 수 있다. 공개 CLI 0.1.0의 이전 키트는 당시 동봉 앱 소스 `1.4.0`을 보존하는 역사 배포이고, 새 CLI 0.1.0은 앱 0.1.0 소스를 동봉한다. 둘은 같은 CLI 버전이라 자동 알림으로 구분되지 않으므로 위의 새 폴더 수동 전환 절차를 쓴다. 이후 CLI 0.1.1 이상은 CLI 채널에서 독립적으로 알린다.

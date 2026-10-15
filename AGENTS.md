@@ -45,7 +45,7 @@
 - `ffmpeg`와 `ffprobe`, ACE 엔진은 CLI와 별도로 준비한다. 설치·생성 전 `setup:check`와 `engines:list`으로 확인한다.
 - 엔진·모델 다운로드는 사용자가 설치를 요청한 경우에만 실행한다. 음악 생성만 요청했는데 모델이 없으면 미설치 상태를 보고한다.
 - 업데이트는 [업데이트 가이드](docs/updates.md)를 따른다. 앱은 `update:*`, CLI는 `cli:update:*`만 쓴다. 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 위임했을 때만 설치한다. `cli:update:install` 뒤에는 반환된 `cliPath`에서 버전·스키마·지식 조회를 검증하고 이후 명령도 그 경로로 실행한다. 기존 폴더·앱·모델·곡·Git 작업 폴더를 덮어쓰거나 재시작하지 않는다.
-- 새 정식 버전은 제품별로 배포한다. 앱은 `package.json`·`vX.Y.Z` 태그·`RoadMusic-X.Y.Z-*` asset을, CLI는 `cli/package.json`·`cli-vX.Y.Z` 태그·`RoadMusic-CLI-X.Y.Z.zip` asset을 사용한다. 앱 Release만 Latest이며 공개된 태그·Release·노트는 수정하지 않는다.
+- 새 정식 버전은 제품별로 배포한다. 앱은 `package.json`·`vX.Y.Z` 태그·`RoadMusic-X.Y.Z-*` asset을, CLI는 `cli/package.json`·`cli-vX.Y.Z` 태그·`RoadMusic-CLI-X.Y.Z.zip` asset을 사용한다. 앱 Release만 Latest이며 현재 앱·CLI는 각각 `0.1.0`이다. 이번 0.1.0 재초기화만 명시적 예외로 기존 공개 CLI 0.1.0을 백업·철회 후 새 자산으로 바꾼다. 이후 CI는 같은 제품의 최신 정식 Release 다음 버전만 허용하며, 다른 제품 태그·동일 버전·역행·번호 건너뛰기를 거부한다. 앱 1.4.x와 이전 CLI 0.1.0 키트는 수동 전환 후 해당 제품의 0.1.1 이상만 알린다.
 - 코드를 변경하면 `npm test`와 변경한 JavaScript의 `node --check`를 실행한다. 실제 엔진·마이크·다른 OS 검증을 생략했다면 결과에 구분해 적는다.
 
 ## 지침의 적용 범위

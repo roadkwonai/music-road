@@ -65,7 +65,12 @@ function persist (force = false) {
 function setState (next) { state = { ...blank(next.status || state.status), ...state, ...next, current: current(), mode: mode() }; persist(next.status !== 'downloading').catch(() => {}); return publish() }
 function init (next) {
   opt = { ...opt, ...(next || {}) }
-  try { const saved = JSON.parse(fs.readFileSync(statePath(), 'utf8')); if (saved?.status === 'downloaded' && saved.asset?.path && fs.existsSync(saved.asset.path)) state = { ...blank('downloaded'), ...saved } } catch {}
+  state = blank()
+  try {
+    const saved = JSON.parse(fs.readFileSync(statePath(), 'utf8'))
+    if (saved?.status === 'downloaded' && saved.current === current() && safeVersion(saved.version) && compare(saved.version, current()) > 0 &&
+      saved.asset?.name === assetName(saved.version) && isDownloadUrl(saved.asset.url, `v${saved.version}`, saved.asset.name) && saved.asset.path && fs.existsSync(saved.asset.path)) state = { ...blank('downloaded'), ...saved }
+  } catch {}
   try {
     const result = JSON.parse(fs.readFileSync(path.join(updatesDir(), 'installer-result.json'), 'utf8'))
     if (result?.ok === false) state = { ...blank('idle'), version: result.version || state.version, reason: '이전 설치 시도가 실패했습니다. 다시 확인하거나 재시도할 수 있습니다.' }
@@ -183,6 +188,7 @@ async function install () {
   if (state.status === 'installing') return status()
   installing = (async () => {
     if (opt.isBusy?.()) return setState({ status: 'error', error: '진행 중인 작업이 있어 업데이트를 설치할 수 없습니다.' })
+    if (!safeVersion(current()) || !safeVersion(state.version) || compare(state.version, current()) <= 0) return setState(blank('error', { error: '현재 앱보다 높은 버전만 자동으로 설치할 수 있습니다. 업데이트를 다시 확인하세요.' }))
     if (state.status !== 'downloaded' || !state.asset?.path || !fs.existsSync(state.asset.path)) return setState({ status: 'error', error: '검증된 다운로드 파일이 없습니다.' })
     try {
       if (!(await verifiedFile(state.asset))) return setState({ status: 'error', error: '다운로드 파일이 변경되었거나 손상되었습니다. 다시 다운로드하세요.' })

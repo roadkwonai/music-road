@@ -27,7 +27,7 @@ Road Music을 맥용 dmg로 만드는 절차입니다. 사용자는 dmg를 열�
 npm ci --include=dev
 npm run dist:mac
 npm run dist:cli
-# → dist/RoadMusic-1.4.0-mac-arm64.dmg (약 100MB)
+# → dist/RoadMusic-0.1.0-mac-arm64.dmg (약 100MB)
 # → dist/mac-arm64/Road Music.app (dmg에 들어가는 앱)
 # → dist/RoadMusic-CLI-0.1.0.zip (독립 CLI 소스·잠금 파일·AI 지침·가이드)
 ```
@@ -63,7 +63,7 @@ npm run dist:cli
    ```bash
    npm run dist:mac     # = electron-builder --mac dmg --arm64
    ```
-   로그 끝에 `building target=DMG arch=arm64 file=dist/RoadMusic-1.4.0-mac-arm64.dmg`가 나오고 오류 없이 끝나면 성공입니다. 처음에는 1~2분, 그다음부터는 수십 초 걸립니다.
+   로그 끝에 `building target=DMG arch=arm64 file=dist/RoadMusic-0.1.0-mac-arm64.dmg`가 나오고 오류 없이 끝나면 성공입니다. 처음에는 1~2분, 그다음부터는 수십 초 걸립니다.
 4. **결과물**
 
    | 경로 | 내용 |
@@ -163,13 +163,13 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 
 ## 6. 버전 올리기
 
-### 1.4.0 업데이트 설치 검증 (2026-10-15)
+### 과거 1.4.0 업데이트 설치 검증 (2026-10-15)
 
-새 DMG의 코드 서명·이미지 무결성 검사를 통과했다. 임시 1.3.1 앱을 새 DMG로 교체하는 도우미를 실행해 1.4.0 서비스 재시작, 기존 곡·모델·설정과 이전 앱 백업 보존을 확인했다. CLI·영상 스모크도 통과했다. 실제 사용자 앱은 교체하지 않았다. 상세 검증은 [검수 결과](cli-qa-report.md#140-github-업데이트-검증-2026-10-15)에 있다.
+이 기록은 당시 1.4.0 DMG의 코드 서명·이미지 무결성 검사와 임시 1.3.1 앱에서의 교체·재시작, 곡·모델·설정·이전 앱 백업 보존, CLI·영상 스모크를 확인한 결과다. 현재 0.1.0의 검증 결과로 바꾸지 않는다. 실제 사용자 앱은 교체하지 않았다. 상세 기록은 [검수 결과](cli-qa-report.md#140-github-업데이트-검증-2026-10-15)에 있다.
 
-1. `package.json`의 `version`을 올립니다(예: `1.4.0`).
-2. `npm run dist:mac` → `dist/RoadMusic-1.4.0-mac-arm64.dmg`가 나옵니다.
-3. 앱 Release는 [릴리스 노트](../releases/README.md)에 앱 버전 날짜 노트를 만들고 `npm run release:note -- resolve --version X.Y.Z`로 검증합니다. `npm run dist:mac`, `npm run dist:source`, `npm run release:assets -- --product app`은 `vX.Y.Z` Release에 DMG·앱 소스 ZIP·체크섬을 게시합니다. CLI는 별도 `cli/package.json` 버전과 `cli-vX.Y.Z` 태그를 쓰며 `npm run dist:cli`, `npm run release:assets -- --product cli`로 `RoadMusic-CLI-X.Y.Z.zip`만 게시합니다. 앱 Release만 Latest입니다. 절차는 [업데이트 배포](updates.md#release)를 따릅니다.
+1. `package.json`의 `version`을 올립니다(초기 앱 Release는 `0.1.0`).
+2. `npm run dist:mac` → `dist/RoadMusic-0.1.0-mac-arm64.dmg`가 나옵니다.
+3. 앱 Release는 [릴리스 노트](../releases/README.md)에 앱 버전 날짜 노트를 만들고 `npm run release:note -- resolve --version X.Y.Z`로 검증합니다. `npm run dist:mac`, `npm run dist:source`, `npm run release:assets -- --product app`은 `vX.Y.Z` Release에 DMG·앱 소스 ZIP·체크섬을 게시합니다. CLI는 별도 `cli/package.json` 버전과 `cli-vX.Y.Z` 태그를 쓰며 `npm run dist:cli`, `npm run release:assets -- --product cli`로 `RoadMusic-CLI-X.Y.Z.zip`만 게시합니다. 앱 Release만 Latest입니다. CI는 제품별 최신 정식 Release 다음 버전, 같은 제품 manifest·노트만 허용합니다. 절차는 [업데이트 배포](updates.md#release)를 따릅니다.
 4. 사용자가 새 dmg로 덮어 설치해도 곡과 엔진(`~/Library/Application Support/Road Music`)은 그대로 남습니다.
 
 <a id="toc-7"></a>

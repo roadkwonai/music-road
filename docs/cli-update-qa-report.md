@@ -1,5 +1,7 @@
 # CLI 0.1.0 독립 업데이트 검증
 
+> **초기화 전 검증 기록입니다.** 아래 ZIP 해시와 앱 소스 `1.4.0`은 철회된 첫 CLI 0.1.0 배포물의 증거이며, 새 0.1.0 설치 파일의 해시가 아닙니다. 현재 파일은 [제품별 Release](https://github.com/roadkwonai/music-road/releases)와 각 Release의 `SHA256SUMS.txt`를 기준으로 확인하세요. 당시 소스는 [고정 커밋](https://github.com/roadkwonai/music-road/tree/3f2542fc5ad0f2f9f92cbbdc7535af3bef598d71)에 남아 있습니다.
+
 검증일: 2026-10-15 · 환경: macOS Apple Silicon, Node.js 24 · 배포 커밋: `3f2542fc5ad0f2f9f92cbbdc7535af3bef598d71`
 
 [사용 방법](updates.md#cli) · [AI 확인 순서](updates.md#ai) · [CLI Release](https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.0)

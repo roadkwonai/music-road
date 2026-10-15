@@ -138,7 +138,7 @@ function invoke (value, capture = false) {
   if (result.status !== 0) process.exit(result.status || 1)
   if (capture) return result.stdout.trim()
 }
-const intercepted = args[0] === '-C' && args[3] === 'fetch' && args[4] === '--no-tags' && args[5] === 'origin' && args[6] === requested && args.length === 7
+const intercepted = args.length === 6 && args[0] === '-C' && args[2] === 'fetch' && args[3] === '--no-tags' && args[4] === 'origin' && args[5] === requested
 if (!intercepted) {
   invoke(args)
 } else {
@@ -215,6 +215,7 @@ async function successCase (base, fixtureHelper, gitFixture, launcher) {
     assert.equal(JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8')).version, newVersion)
     assert.equal(await git(root, ['rev-parse', 'HEAD']), newReleaseCommit)
     assert.equal(await git(root, ['cat-file', '-t', updateRef]), 'tag')
+    assert.equal(await git(root, ['cat-file', '-t', `refs/tags/roadmusic-source-fixture-v${newVersion}`]), 'tag')
     assert.equal(await git(root, ['rev-parse', `${updateRef}^{commit}`]), newReleaseCommit)
     await fs.access(path.join(root, 'node_modules', 'electron', 'package.json'))
     await assert.rejects(fs.access(path.join(root, 'node_modules', 'old-dependency-sentinel')))

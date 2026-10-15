@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cli-release-${{ inputs.tag || github.ref_name }}
+  group: road-music-cli-release
   cancel-in-progress: false
 
 jobs:
@@ -41,7 +41,12 @@ jobs:
         id: release_notes
         env:
           RELEASE_NOTES_FILE: ${{ runner.temp }}/release-notes.md
+          RELEASES_JSON: ${{ runner.temp }}/releases.json
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          gh api "repos/$GH_REPO/releases?per_page=100" --paginate --slurp > "$RELEASES_JSON"
+          node scripts/release-version.js --product cli --tag "$RELEASE_TAG" --releases-json "$RELEASES_JSON"
           CLI_VERSION="$(node -p 'require("./cli/package.json").version')"
           if [ "$RELEASE_TAG" != "cli-v$CLI_VERSION" ]; then
             echo "Tag/CLI version mismatch" >&2

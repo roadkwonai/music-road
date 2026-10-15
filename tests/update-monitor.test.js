@@ -14,7 +14,7 @@ test('service start checks immediately and its 15-minute timer publishes a newly
   let interval
   let period
   let cleared = false
-  let version = '1.4.0'
+  let version = '0.1.0'
   const events = []
   global.setInterval = (callback, ms) => { interval = callback; period = ms; return token }
   global.clearInterval = id => { assert.equal(id, token); cleared = true }
@@ -32,18 +32,18 @@ test('service start checks immediately and its 15-minute timer publishes a newly
     Object.assign(global, original)
     await fs.rm(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 20 })
   })
-  update.init({ app: { getVersion: () => '1.4.0', getAppPath: () => path.join(root, 'source'), getPath: () => userData, isPackaged: false },
+  update.init({ app: { getVersion: () => '0.1.0', getAppPath: () => path.join(root, 'source'), getPath: () => userData, isPackaged: false },
     publish: (channel, state) => events.push({ channel, ...state }) })
   update.start()
   await update.check()
   assert.equal(update.status().status, 'idle')
   assert.equal(period, 15 * 60 * 1000)
-  version = '1.4.1'
+  version = '0.1.1'
   interval()
   await update.check()
-  assert.equal(update.status().version, '1.4.1')
+  assert.equal(update.status().version, '0.1.1')
   assert.equal(update.status().available, true)
-  assert.ok(events.some(event => event.channel === 'update:status' && event.status === 'available' && event.version === '1.4.1'))
+  assert.ok(events.some(event => event.channel === 'update:status' && event.status === 'available' && event.version === '0.1.1'))
   update.stop()
   assert.equal(cleared, true)
 })

@@ -124,7 +124,7 @@ async function main () {
   if (mode === 'source') {
     source = path.join(root, 'source')
     await run('git', ['clone', 'https://github.com/roadkwonai/music-road.git', source])
-    await run('git', ['checkout', '--detach', options['baseline-ref'] || 'v1.4.0'], source)
+    await run('git', ['checkout', '--detach', options['baseline-ref'] || 'c7070c269bc2d06f7e3962d2db963410921789f2'], source)
     await run('npm', ['ci', '--include=dev', '--no-audit', '--no-fund'], source, 300000)
     executable = path.join(source, 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
     args = [source, '--roadmusic-service']

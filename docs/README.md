@@ -78,7 +78,7 @@
 | 앱 asset과 독립 CLI 키트 | `RoadMusic-X.Y.Z-source.zip` · `RoadMusic-CLI-X.Y.Z.zip` |
 | 최신 지식 조회·찬송가 리메이크 | [CCM 상세 가이드](ccm-prompts.md) · [찬송가 리메이크 가이드](hymn-remake-guide.md) |
 
-이미 공개된 태그·파일을 교체하지 않고 다음 버전에 수정 내용을 기록합니다. 날짜 노트와 실제 GitHub Release 발행은 별개의 단계입니다.
+앱과 CLI는 각각 0.1.0부터 번호를 시작합니다. 앱 Release만 Latest이며 CLI Release는 `cli-v*` 태그로 조회합니다. 공통 초기 번호라도 manifest·태그·asset·체크섬·설치 경로는 분리합니다. 기존 1.4.x 앱과 이전 공개 CLI 0.1.0 키트는 새 0.1.0으로 자동 전환되지 않으므로 새 위치에 한 번 수동 설치한 뒤 해당 제품의 0.1.1 이상 알림을 받습니다. 이후 CI는 제품별 바로 다음 버전과 같은 manifest·노트만 허용합니다. 날짜 노트와 실제 GitHub Release 발행은 별개의 단계입니다.
 
 <a id="verification"></a>
 

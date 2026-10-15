@@ -15,6 +15,7 @@ ACE를 사용할 때는 매 요청마다 [ACE 공식 가이드 적용 절차](ac
 - [빠른 사용법](#quick-start)
 - [프롬프트 작성 원칙](#prompt-basics)
 - [장르 카탈로그](#genre-catalog)
+- [CCM·워십 중심 제작](#ccm)
 - [상세 복사 프롬프트](#detailed-prompts)
 - [한 줄 요청 모음](#one-line-requests)
 - [요청한 5곡 묶음](#requested-five-song-set)
@@ -78,9 +79,36 @@ AGENTS.md와 docs/cli.md를 따라 아래 곡을 Road Music CLI로 1곡 생성�
 | 재즈 보컬 | `Korean vocal jazz, smoky, intimate` | 86 | piano, upright bass, brushed drums | 여유로운 리드, 기본 |
 | 보사노바 | `Korean bossa nova, breezy, gentle` | 96 | classical guitar, upright bass, percussion | 가벼운 리드, 기본 |
 | 소울 가스펠풍 | `Korean soul pop, warm, uplifting` | 90 | piano, bass guitar, drums | 힘있는 리드, Chorus의 격려 문장 반복 |
+| 모던 CCM 워십 | `Korean contemporary worship, warm female lead, congregational unison, gradual build` | 76 | piano, acoustic guitar, drums | 은혜·동행의 고백, Chorus 반복·Bridge |
+| 소그룹 복음성가 | `Korean acoustic gospel, mixed unison vocals, simple singalong chorus, warm` | 86 | acoustic guitar, piano, percussion | 담백한 공동체 감사, 짧은 Chorus |
+| 새 찬송 형식 | `Korean modern hymn, clear female lead, hymnlike melody, reverent` | 82 | acoustic guitar, piano, violin | 절마다 논리적으로 이어지는 창작 가사 |
+| 가스펠 콰이어 워십 | `Korean gospel worship, soulful female lead, mixed choir responses, joyful` | 104 | piano, bass guitar, drums | 실제 가사로 응답 문장 배치 |
+| 피아노 기도 CCM | `Korean piano prayer song, soft female lead, spacious pauses, intimate` | 64 | piano | 고난에서 신뢰로, 쉼이 있는 가사 |
+| 묵상 CCM 연주 | `contemplative Christian ambient instrumental, soft motifs, spacious` | 60 | piano, synth pads, harp | 연주곡, `theme` |
 | 영화적 발라드 | `Korean cinematic ballad, expansive` | 70 | piano, string ensemble, orchestra | 서사적 Chorus, Bridge 뒤 확장 |
 | 게임·영상 테마 | `cinematic instrumental, hopeful, evolving` | 96 | orchestra, piano, french horn | 연주곡, `theme` |
 | 앰비언트 휴식 | `ambient instrumental, calm, spacious` | 60 | synth pads, piano, flute | 연주곡, `loop` |
+
+<a id="ccm"></a>
+
+## CCM·워십 중심 제작
+
+CCM을 주로 만들 때는 [전용 상세 가이드](ccm-prompts.md)에서 먼저 목적과 스타일을 고른다. **48개 레시피·상세 요청 12개·한국어 창작 가사 8편·완전한 CLI JSON 8개**와 과거·2025~2026 자료, 보컬·회중·박자·악기·공간감 조절법을 제공한다. 표의 수치는 제작 출발값이며 신곡 인기 순위나 품질 보장이 아니다.
+
+```text
+docs/ccm-prompts.md의 C17로 한국어 여성 모던 워십 1곡을 준비해줘.
+76 BPM, 180초, piano·acoustic guitar·drums, strict=false로 설정해줘.
+가사는 은혜와 주님의 동행을 고백하고 마지막 후렴은 회중이 함께 부르는 의도로 설계해줘.
+최종 가사·caption·JSON을 검증해 보여주고 승인 후 생성해줘.
+```
+
+```text
+docs/ccm-prompts.md에서 C05의 과거 복음성가 질감과 C27의 CCM R&B를 비교해줘.
+같은 한국어 창작 가사를 먼저 검토받고, 승인 후 각 설정으로 1곡씩 별도 생성해줘.
+시대·음반 자료에서 확인한 사실과 새로 제안한 편곡·옵션을 구분해줘.
+```
+
+CCM 전체를 한 장르로 간주하지 않고 회중 예배·개인 감상·특송·묵상 연주를 나눈다. 기존 소울 가스펠풍 레시피의 격려 문장만으로 신앙의 대상이 분명한 CCM이 되는 것은 아니므로 가사의 주제·대상도 정한다.
 
 <a id="detailed-prompts"></a>
 

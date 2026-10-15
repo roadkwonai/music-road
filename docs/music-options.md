@@ -67,11 +67,13 @@ node cli/road-music.js song:generate --file song.json --events --wait
 | 곡 길이 | `targetSeconds` | 엔진별 처리 범위 적용; 최종 길이는 파일로 확인 |
 | 비교 후보 | `count`, `seed` | 여러 작업을 제출하고 seed를 달리한다 |
 | 후렴 위치·반복 | `lyrics`의 섹션과 가사 | 보컬곡은 직접 구성해야 한다 |
-| 조성·박자 | `style`의 `A minor`, `6/8 feel` 등 | 독립 옵션이 아니므로 정확한 준수는 확인이 필요하다 |
+| 조성·박자 | `style`의 `A minor`, `six eight time` 등 | 독립 옵션이 아니므로 정확한 준수는 확인이 필요하다. `/`는 태그 구분자로 정리되므로 박자는 슬래시 없는 표현 사용 |
 | MP3·WAV | 완료 후 `song:export` | 생성 JSON에 `format`을 넣지 않는다 |
 | 최신 인기 스타일 조사 | AI에게 검색 요청 | CLI 옵션이 아니며 출처·집계 기간을 별도 기록한다 |
 
 `language`, `vocalGender`, `voice`, `key`, `negativePrompt`, `quality` 같은 임의 필드를 `song:generate`에 추가하면 안 된다. 지원되지 않는 키는 거부된다. API는 [전체 레퍼런스](cli-reference.md), 최신 허용값은 실행 버전의 `schema`가 기준이다.
+
+CCM을 주로 만든다면 [CCM 세부 옵션](ccm-prompts.md#options)과 [완전한 JSON 8개](ccm-prompts.md#json)를 참고한다. 회중·콰이어·기도·절기 표현도 위의 같은 공개 필드로 구성한다.
 
 <a id="basic"></a>
 

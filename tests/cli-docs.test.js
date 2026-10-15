@@ -80,7 +80,7 @@ test('CLI 레퍼런스는 공개 스키마의 모든 명령을 포함한다', ()
 })
 
 test('CLI 사용법의 --json 예제는 파서와 스키마를 통과한다', () => {
-  const guide = ['README.md', 'docs/cli.md', 'docs/quickstart.md', 'docs/music-options.md', 'docs/ace-prompt-guide.md', 'docs/lyrics-tags.md'].map(read).join('\n')
+  const guide = ['README.md', 'docs/cli.md', 'docs/quickstart.md', 'docs/music-options.md', 'docs/ace-prompt-guide.md', 'docs/lyrics-tags.md', 'docs/ccm-prompts.md'].map(read).join('\n')
   const commands = guide.split('\n')
     .filter(line => line.includes('node cli/road-music.js') && line.includes('--json'))
     .map(line => shellWords(line.slice(line.indexOf('node cli/road-music.js') + 'node cli/road-music.js'.length).trim()))
@@ -108,7 +108,7 @@ test('가사 태그 문서의 전달 결과와 권장 예시는 실제 정리 �
 })
 
 test('음악 옵션 가이드의 JSON 예제는 생성 입력 검증과 정규화를 통과한다', () => {
-  const guide = ['docs/music-options.md', 'docs/ace-prompt-guide.md'].map(read).join('\n')
+  const guide = ['docs/music-options.md', 'docs/ace-prompt-guide.md', 'docs/ccm-prompts.md'].map(read).join('\n')
   const blocks = [...guide.matchAll(/```json\n([\s\S]*?)```/g)]
   assert.ok(blocks.length > 0, '검증할 음악 생성 예제가 없습니다')
   for (const [, block] of blocks) {
@@ -124,6 +124,65 @@ test('음악 옵션 가이드의 JSON 예제는 생성 입력 검증과 정규�
         assert.ok(Array.from(request.lyrics).length <= 4096, `${input.title}: ACE 가사가 잘립니다`)
       }
     }
+  }
+})
+
+test('CCM 장르 카탈로그의 48개 레시피는 실제 생성 스키마와 제한을 통과한다', () => {
+  const document = read('docs/ccm-prompts.md')
+  const rows = [...document.matchAll(/^\|\s*(C\d{2})\s*\|\s*([^|]+?)\s*\|\s*`([^`]+)`\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*`([^`]+)`\s*\|\s*(보컬|연주곡)\s*\|\s*$/gm)]
+  assert.equal(rows.length, 48, 'CCM 레시피 표는 C01~C48 48행이어야 합니다')
+  assert.deepEqual(rows.map(([, id]) => id), Array.from({ length: 48 }, (_, index) => `C${String(index + 1).padStart(2, '0')}`), 'CCM ID가 C01~C48 순서로 정확히 있어야 합니다')
+
+  for (const [, id, title, style, bpm, seconds, instrumentText, kind] of rows) {
+    const instruments = instrumentText.split(',').map(value => value.trim()).filter(Boolean)
+    assert.ok(instruments.length >= 1 && instruments.length <= 3, `${id}: 악기는 1~3개여야 합니다`)
+    assert.ok(Number.isInteger(Number(bpm)) && Number(bpm) >= 40 && Number(bpm) <= 220, `${id}: BPM 범위 오류`)
+    assert.ok(Number.isInteger(Number(seconds)) && Number(seconds) >= 1 && Number(seconds) <= 600, `${id}: 길이 범위 오류`)
+    const instrumental = kind === '연주곡'
+    const lyrics = instrumental
+      ? ''
+      : '[Verse]\n작은 빛을 따라 오늘도 걸어가\n[Pre-Chorus]\n두 손 모아 마음을 열어\n[Chorus]\n주의 사랑 안에 서리라\n[Bridge]\n우리의 노래 하늘에 닿도록'
+    const input = {
+      title,
+      engine: 'ace',
+      style,
+      lyrics,
+      instrumental,
+      targetSeconds: Number(seconds),
+      count: 1,
+      parts: { instruments, bpm: Number(bpm), strict: false }
+    }
+    const { paramsValue } = validate('song:generate', input)
+    const [request] = prepareRequests(paramsValue)
+    assert.ok(request.style.trim(), `${id}: 스타일이 비었습니다`)
+    assert.ok(Array.from(request.style).length <= 512, `${id}: ACE caption이 잘립니다`)
+    assert.ok(Array.from(request.lyrics).length <= 4096, `${id}: ACE 가사가 잘립니다`)
+    for (const tag of style.split(',').map(value => value.trim()).filter(Boolean)) assert.ok(request.style.includes(tag), `${id}: style 태그가 정리 과정에서 사라졌습니다: ${tag}`)
+    if (instrumental) {
+      const lines = request.lyrics.split('\n')
+      for (const tag of ['[Intro]', '[Verse]', '[Chorus]', '[Bridge]', '[Outro]']) assert.ok(lines.includes(tag), `${id}: ${tag} 태그가 사라졌습니다`)
+    } else {
+      const lines = request.lyrics.split('\n')
+      for (const tag of ['[Verse]', '[Pre-Chorus]', '[Chorus]', '[Bridge]']) assert.ok(lines.includes(tag), `${id}: ${tag} 태그가 사라졌습니다`)
+      assert.match(request.lyrics, /작은 빛을 따라 오늘도 걸어가/)
+      assert.match(request.lyrics, /주의 사랑 안에 서리라/)
+    }
+  }
+})
+
+test('CCM 상세 가사 예시는 cleanLyrics 후 태그와 본문을 유지한다', () => {
+  const document = read('docs/ccm-prompts.md')
+  const examples = [...document.matchAll(/```lyrics\n([\s\S]*?)```/g)]
+  assert.equal(examples.length, 8, 'CCM 문서에는 8개의 lyrics 예시가 있어야 합니다')
+  for (const [, lyrics] of examples) {
+    const source = lyrics.trim()
+    const cleaned = cleanLyrics(source).text
+    assert.ok(Array.from(cleaned).length <= 4096, 'CCM 가사 예시가 ACE 가사 제한을 초과합니다')
+    const sourceLines = source.split(/\r?\n/).filter(Boolean)
+    const cleanedLines = cleaned.split(/\r?\n/).filter(Boolean)
+    const sourceTags = sourceLines.filter(line => /^\[[A-Za-z-]+\]$/.test(line))
+    for (const tag of sourceTags) assert.ok(cleanedLines.includes(tag), `${tag} 태그가 cleanLyrics 후 사라졌습니다`)
+    for (const line of sourceLines.filter(line => !/^\[[A-Za-z-]+\]$/.test(line))) assert.ok(cleaned.includes(line), `가사 본문이 cleanLyrics 후 사라졌습니다: ${line}`)
   }
 })
 

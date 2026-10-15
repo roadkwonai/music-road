@@ -116,6 +116,33 @@ node cli/road-music.js engines:list
 
 CLI 자체에 작사·웹 리서치 AI가 내장된 구조는 아닙니다. AI 에이전트가 [동봉 스킬](skills/road-music-ace/SKILL.md)과 공식 문서를 참고해 입력을 만들고, CLI가 로컬 엔진으로 생성합니다. MCP 서버는 포함하지 않습니다.
 
+**CCM으로 시작하기**
+
+```text
+docs/ccm-prompts.md의 C17을 참고해 한국어 여성 모던 워십 1곡을 준비해줘.
+76 BPM, 180초, 피아노·어쿠스틱 기타·드럼, 은혜와 동행의 고백으로 해줘.
+가사·프롬프트·옵션을 검증해 먼저 보여주고 승인 후 생성해줘.
+```
+
+<details>
+<summary><strong>CCM 상세 요청 프롬프트 펼치기</strong></summary>
+
+```text
+기존 Road Music CLI 설치를 찾아 AGENTS.md와 docs/ccm-prompts.md를 읽어줘.
+제목 "주의 손을 따라", 한국어 창작 가사, 따뜻한 여성 리드의 모던 워십 1곡을 준비해줘.
+76 BPM, 180초, seed 42, piano·acoustic guitar·drums, strict=false로 해줘.
+첫 절은 담백하게, 후렴은 함께 따라 부르기 쉽게, 마지막 후렴은 넓게 펼쳐줘.
+가사는 일상에서 받은 은혜→주님의 동행→이웃을 향한 응답으로 전개해줘.
+Verse·Chorus·Verse·Chorus·Bridge·Chorus를 실제 한국어 가사로 작성하고,
+장르·보컬·공간감은 짧은 style 태그로 옮겨줘. 미지원 전용 옵션은 추가하지 마.
+최종 caption 512자·정리 가사 4,096자 이내인지 검증하고 전체 안을 먼저 보여줘.
+승인 후 1곡을 생성하고 음원·실제 가사·caption·옵션·참고 근거를 제공해줘.
+```
+
+</details>
+
+[CCM 상세 가이드 →](docs/ccm-prompts.md) 과거·최근 근거, **48개 스타일·상세 요청 12개·창작 가사 8편·CLI JSON 8개**에서 복음성가·회중 워십·가스펠·묵상·절기별로 고를 수 있습니다.
+
 **장르별로 요청하기**
 
 ```text
@@ -161,6 +188,7 @@ flowchart LR
 | Verse·Chorus 등 구간의 의미와 배치 | [가사 태그](docs/lyrics-tags.md) |
 | 보컬·악기·BPM·길이·seed·실행 JSON | [음악 생성 옵션](docs/music-options.md) |
 | 장르별 간단 요청과 상세 레시피 | [장르별 프롬프트](docs/genre-prompts.md) |
+| CCM·워십을 중심으로 제작 | [CCM 48개 스타일·가사·세부 옵션](docs/ccm-prompts.md) |
 
 AI가 기존 CLI 설치 폴더를 찾아 그 안의 지침을 읽습니다. 다른 프로젝트의 지침 파일은 덮어쓰지 않습니다. 채팅이 오디오 첨부를 지원하지 않으면 실제 파일 링크로 받습니다.
 
@@ -201,6 +229,7 @@ node cli/road-music.js update:install --events --timeout 1800000
 | 설치하고 첫 곡 완성 | [CLI 설치](docs/cli-install.md) · [빠른 시작](docs/quickstart.md) · [GUI 시작](docs/getting-started.md) |
 | 다른 AI에서 사용 | [AI 사용·새 세션](docs/ai-cli.md) · [작사 스킬](skills/road-music-ace/SKILL.md) · [검수 역할](prompts/ace-review.md) |
 | 음악과 가사 설계 | [ACE 가이드](docs/ace-prompt-guide.md) · [옵션](docs/music-options.md) · [태그](docs/lyrics-tags.md) · [장르](docs/genre-prompts.md) |
+| CCM을 주로 제작 | [CCM 상세 프롬프트·48개 레시피](docs/ccm-prompts.md) |
 | 조사·검토·내보내기 | [리서치](docs/music-research.md) · [검토 규칙](docs/music-review.md) · [작업 프롬프트](prompts/cli-workflows.md) |
 | 명령과 구현 확인 | [CLI 사용법](docs/cli.md) · [레퍼런스](docs/cli-reference.md) · [프로젝트 안내](docs/project-guide.md) |
 | 업데이트·릴리스·검증 | [업데이트](docs/updates.md) · [릴리스 노트](releases/README.md) · [검수 결과](docs/cli-qa-report.md) |

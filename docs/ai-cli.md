@@ -19,27 +19,41 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 
 ### 복사할 프롬프트
 
-`[설치 폴더 절대 경로]`에는 `cli/road-music.js`와 `AGENTS.md`가 함께 있는 키트 루트를 넣는다. 저장소·앱·CLI는 이미 설치된 상태이므로 새로 clone하거나 설치하지 않는다.
+사용자는 설치 경로를 입력하지 않고 아래 프롬프트를 그대로 사용한다. AI가 기존 CLI를 탐색하고 `cli/road-music.js`, `AGENTS.md`, 이 문서가 함께 있는 키트 루트를 확인한다. 저장소·앱·CLI는 이미 설치된 상태이므로 새로 clone하거나 설치하지 않는다.
 
 ```text
-로드뮤직 앱과 CLI는 이미 설치돼 있어. CLI 폴더: [설치 폴더 절대 경로]
-그 안의 AGENTS.md와 docs/ai-cli.md에 따라 새 세션을 준비해줘.
-재설치 없이 연결·ACE 준비 상태를 확인하고, 이후 음악 요청은 동봉 스킬과 공식 가이드로 처리해줘.
+로드뮤직 앱과 CLI는 이미 설치돼 있어. 이 컴퓨터에서 기존 CLI 설치 폴더를 자동으로 찾아줘.
+찾은 폴더의 AGENTS.md와 docs/ai-cli.md에 따라 재설치 없이 연결·ACE 준비 상태를 확인해줘.
+이후 음악 요청은 동봉 스킬과 공식 가이드로 처리해줘.
 ```
 
 ### AI가 준비할 내용
 
 | 순서 | 수행할 일 | 완료 기준 |
 | --- | --- | --- |
-| 1. 기존 CLI 찾기 | 제공한 절대 경로의 `cli/road-music.js`와 `AGENTS.md` 확인. 경로가 없으면 기존 전역 `road-music` 명령의 실제 위치부터 확인 | 실제 키트 루트와 실행 명령 확보 |
+| 1. 기존 CLI 찾기 | 아래 [자동 탐색 순서](#find-cli)에 따라 전역 명령·현재 작업 폴더·기존 설치 파일 탐색 | 사용자의 경로 입력 없이 실제 키트 루트와 실행 명령 확보 |
 | 2. 지침 연결 | 그 루트의 `AGENTS.md`, 이 문서와 동봉 스킬을 읽고 가사·태그·검토·공식 원문의 위치를 확인 | 다른 프로젝트의 지침을 덮어쓰지 않고 참고 경로 연결 |
 | 3. 실행 계약 확인 | `schema`와 `service:status --no-start`로 공개 명령·현재 서비스 설치본·데이터 폴더 확인 | 실행 파일과 연결 대상이 의도한 설치본인지 확인 |
 | 4. 현재 상태 조회 | `app:state`, `engines:list`, `projects:list`, `songs:list`, `setup:check` 순으로 조회 | 엔진 준비 여부·현재 프로젝트·대기 작업과 플랫폼 제외 항목 파악 |
 | 5. 준비 결과 보고 | 설치 루트·절대 경로 호출 명령·실제 앱/서비스 버전·엔진 상태·기본 검토 정책 요약 | 새 세션에서 곧바로 음악 요청을 받을 수 있음 |
 
+<a id="find-cli"></a>
+
+<details>
+<summary><strong>설치 폴더 자동 탐색 순서 — AI용</strong></summary>
+
+1. **전역 명령:** `road-music`의 실행 위치를 확인한다. macOS·Linux는 `command -v road-music`, Windows는 `Get-Command road-music`을 사용한다. 심볼릭 링크의 실제 경로를 따라가며 npm 실행 래퍼인 경우 `npm root -g` 아래의 `road-music` 패키지도 확인한다.
+2. **현재 작업 폴더:** 작업 폴더와 상위 프로젝트에서 `cli/road-music.js`를 찾는다. `music-road` 저장소나 `RoadMusic-버전-cli` 키트가 후보이며, 폴더 이름만으로 확정하지 않는다.
+3. **기존 설치 파일:** macOS는 `mdfind 'kMDItemFSName == "road-music.js"'`로 먼저 찾는다. 검색 결과가 없거나 다른 OS라면 사용자 홈의 프로젝트·다운로드 폴더부터 파일명 `road-music.js`를 검색한다. 필요하면 홈 범위로 넓히되 `.git`, `node_modules`, 가상환경, 캐시·모델·음원 라이브러리는 제외한다. 전역 npm 패키지는 1단계에서 별도로 확인한다.
+4. **후보 검증:** 실제 경로 기준으로 중복을 제거하고 `package.json`의 이름 `road-music`, `cli/road-music.js`, `AGENTS.md`, `docs/ai-cli.md`가 함께 있는지 확인한다. 전역 명령이 가리키는 설치본을 우선하고, 지침을 읽은 뒤 `schema`와 `service:status --no-start`로 실행 버전·연결 대상도 점검한다. GUI의 `.app`이나 곡·모델 데이터 폴더를 CLI 키트로 선택하지 않는다.
+
+찾은 절대 경로는 AI가 현재 대화에서 기억하고 후속 명령에 사용한다. 여러 설치본 중 안전하게 선택할 수 없거나 끝내 찾지 못한 경우에만 검색 범위·후보·부족한 파일을 보고한다. 검색 실패를 이유로 설치·업데이트·전역 스킬 등록을 시작하지 않는다.
+
+</details>
+
 렌더·미리보기 등 진행 작업이 있으면 화면 상태를 바꾸는 조회를 섞지 않고 해당 항목을 보류한다. 서비스를 공유 중인 설치본이 예상과 다르거나 필수 실행 환경이 없으면 확인한 상태와 부족한 항목을 보고한다. 연결 실패를 이유로 앱·모델을 재설치하거나 기존 서비스를 강제로 종료하지 않는다.
 
-다른 디렉터리에서는 파일 경로를 절대 경로로 호출한다. 아래 예시는 설치 위치로 바꾼다.
+다른 디렉터리에서는 AI가 자동 탐색으로 찾은 절대 경로로 호출한다. 아래는 호출 구조의 예시이며, 사용자에게 이 경로를 작성하도록 요구하지 않는다.
 
 ```bash
 node "/absolute/path/to/music-road/cli/road-music.js" schema
@@ -64,18 +78,7 @@ AI는 설치 루트와 실행 명령을 **현재 대화의 문맥**으로 유지
 | [`prompts/cli-workflows.md`](../prompts/cli-workflows.md) | 반복 작업용 프롬프트 5개 | 자동 로드하지 않는다. 작업 시작 전에 명시적으로 읽는다. |
 | [CLI 사용법](cli.md)·[레퍼런스](cli-reference.md) | 명령 순서·입력 스키마 | 자동 로드하지 않는다. 실제 요청 전 필요한 부분을 읽는다. |
 
-Codex는 세션 시작 시 프로젝트 루트부터 현재 디렉터리까지 지침을 읽는다. Git 프로젝트가 아니면 현재 디렉터리를 기준으로 한다. 따라서 외부 프로젝트에서 Road Music 키트를 제어할 때는 기존 프로젝트의 `AGENTS.md`를 덮어쓰거나 복사하지 말고, 에이전트에게 다음 절대 경로를 읽도록 요청한다.
-
-```text
-Road Music CLI를 사용하기 전에 /사용자가 설치한 절대 경로/RoadMusic-버전-cli/AGENTS.md,
-/사용자가 설치한 절대 경로/RoadMusic-버전-cli/docs/cli.md,
-/사용자가 설치한 절대 경로/RoadMusic-버전-cli/docs/cli-reference.md를 읽고 지침을 따른다.
-ACE로 음악을 만들거나 가사·옵션을 설계할 때는 요청마다
-/사용자가 설치한 절대 경로/RoadMusic-버전-cli/docs/ace-prompt-guide.md를 먼저 읽고
-그 안에 연결된 로컬 공식 원문의 해당 부분도 참고한다.
-가사·프롬프트 작업에는 같은 키트의 skills/road-music-ace/SKILL.md와
-docs/lyrics-tags.md, docs/music-review.md도 읽고 기본 검토 또는 명시적 자동 위임을 적용한다.
-```
+Codex는 세션 시작 시 프로젝트 루트부터 현재 디렉터리까지 지침을 읽는다. Git 프로젝트가 아니면 현재 디렉터리를 기준으로 한다. 외부 프로젝트에서 Road Music을 제어할 때는 [자동 탐색](#find-cli)으로 확정한 루트의 지침·스킬·필요한 공식 문서를 AI가 절대 경로로 읽는다. 다른 프로젝트의 `AGENTS.md`를 덮어쓰거나 복사하지 않으며, 사용자가 설치 경로를 찾아 입력할 필요도 없다.
 
 Claude Code는 `CLAUDE.md`에서 코드 펜스 밖의 상대 가져오기 문법 `@AGENTS.md`를 지원한다. 이 키트의 `CLAUDE.md`는 그 한 줄만 두어 지침이 서로 어긋나지 않게 한다. 근거: [Codex AGENTS.md 구성](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude Code 메모리와 가져오기](https://code.claude.com/docs/en/memory).
 
@@ -84,7 +87,7 @@ Claude Code는 `CLAUDE.md`에서 코드 펜스 밖의 상대 가져오기 문법
 ## 실행 계약
 
 ```bash
-cd "/사용자가 선택한 경로/RoadMusic-버전-cli"
+# AI가 자동 탐색으로 찾은 CLI 폴더에서 실행
 node cli/road-music.js schema
 node cli/road-music.js app:state
 ```

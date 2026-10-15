@@ -1,3 +1,5 @@
+> 철회 기록: 앱과 CLI를 공유 버전 1.4.4로 잘못 묶었던 배포 노트입니다. 현재 배포 안내는 [제품별 릴리스](../README.md)를 따릅니다. 아래 내용은 당시 검증·변경 기록으로 보존합니다.
+
 <!-- road-music-release: {"date":"2026-10-15","slug":"hymn-remake-knowledge","version":"1.4.4","title":"찬송가 리메이크 지식과 원문 보존"} -->
 
 # Road Music 1.4.4 — 찬송가 리메이크 지식과 원문 보존
@@ -24,4 +26,4 @@
 
 검증한 앱 환경은 macOS Apple Silicon입니다. 앱은 애드혹 서명이며 Apple 공증을 받지 않았습니다.
 
-[원전 20곡·리메이크 16가지](https://github.com/roadkwonai/music-road/blob/v1.4.4/docs/hymn-remake-guide.md) · [CCM 상세 가이드](https://github.com/roadkwonai/music-road/blob/v1.4.4/docs/ccm-prompts.md) · [원문 보존·추천 규칙](https://github.com/roadkwonai/music-road/blob/v1.4.4/docs/music-review.md#preserve-input) · [CLI 지식 조회](https://github.com/roadkwonai/music-road/blob/v1.4.4/docs/cli.md#knowledge)
+[원전 20곡·리메이크 16가지](https://github.com/roadkwonai/music-road/blob/5a7d60f3253735218cf0e09507f22df7d9816c1a/docs/hymn-remake-guide.md) · [CCM 상세 가이드](https://github.com/roadkwonai/music-road/blob/5a7d60f3253735218cf0e09507f22df7d9816c1a/docs/ccm-prompts.md) · [원문 보존·추천 규칙](https://github.com/roadkwonai/music-road/blob/5a7d60f3253735218cf0e09507f22df7d9816c1a/docs/music-review.md#preserve-input) · [CLI 지식 조회](https://github.com/roadkwonai/music-road/blob/5a7d60f3253735218cf0e09507f22df7d9816c1a/docs/cli.md#knowledge)

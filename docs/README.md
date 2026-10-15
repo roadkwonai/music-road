@@ -72,11 +72,11 @@
 
 | 작업 | 문서 |
 | --- | --- |
-| 설치된 앱·CLI 업데이트 | [업데이트 가이드](updates.md) |
+| 설치된 앱·CLI 업데이트 | [업데이트 가이드](updates.md): 앱 Latest와 `cli-v*` Release를 구분 |
 | 날짜 기반 릴리스 노트 작성·GitHub Release 연결 | [릴리스 노트](../releases/README.md) |
 | DMG·CLI 키트 빌드·서명·배포 준비 | [패키징](packaging.md) |
-| 통합 배포와 이전 기록 | [1.4.0 통합 노트](../releases/2026-10-15-road-music-1-4-0.md) · [전체 GitHub Releases](https://github.com/roadkwonai/music-road/releases) |
-| 최신 지식 조회·찬송가 리메이크 | [1.4.4 노트](../releases/2026-10-15-hymn-remake-knowledge.md) |
+| 앱 asset과 독립 CLI 키트 | `RoadMusic-X.Y.Z-source.zip` · `RoadMusic-CLI-X.Y.Z.zip` |
+| 최신 지식 조회·찬송가 리메이크 | [CCM 상세 가이드](ccm-prompts.md) · [찬송가 리메이크 가이드](hymn-remake-guide.md) |
 
 이미 공개된 태그·파일을 교체하지 않고 다음 버전에 수정 내용을 기록합니다. 날짜 노트와 실제 GitHub Release 발행은 별개의 단계입니다.
 

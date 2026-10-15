@@ -6,10 +6,11 @@
 
 ## 작업 순서
 
-1. `app:state`, `engines:list`, `projects:list`, `songs:list`을 읽어 현재 상태를 확인한다.
-2. 곡·프로젝트·내보내기 작업에는 목록 응답의 절대 `dir`과 `path`를 그대로 사용한다. 이름이나 추측한 경로로 대체하지 않는다.
-3. 모든 최종 응답은 stdout JSON 한 줄로 읽고, `--events` 진행 JSONL은 stderr에서만 읽는다.
-4. `song:generate`, `song:resume`, `song:render`은 먼저 받은 `jobId`를 `job:wait`으로 확인한다. 영상 렌더는 명령 자체의 완료 응답을 확인한다. 연결 오류에 `uncertain:true`가 있으면 자동 재제출하지 말고 `service:status`, `queue:list`, `songs:list`으로 실행 여부를 확인한다.
+1. CLI에 처음 연결하는 세션에서는 `cli:version`, `cli:update:check`을 읽기 전용으로 한 번 실행한다. 새 CLI가 있으면 현재·최신 버전, 노트, 설치 대상만 알린다. 음악 요청만으로 업데이트·재설치·상시 감시를 시작하지 않는다.
+2. `app:state`, `engines:list`, `projects:list`, `songs:list`을 읽어 현재 상태를 확인한다.
+3. 곡·프로젝트·내보내기 작업에는 목록 응답의 절대 `dir`과 `path`를 그대로 사용한다. 이름이나 추측한 경로로 대체하지 않는다.
+4. 모든 최종 응답은 stdout JSON 한 줄로 읽고, `--events` 진행 JSONL은 stderr에서만 읽는다.
+5. `song:generate`, `song:resume`, `song:render`은 먼저 받은 `jobId`를 `job:wait`으로 확인한다. 영상 렌더는 명령 자체의 완료 응답을 확인한다. 연결 오류에 `uncertain:true`가 있으면 자동 재제출하지 말고 `service:status`, `queue:list`, `songs:list`으로 실행 여부를 확인한다.
 
 ## 음악 요청 해석
 
@@ -40,11 +41,11 @@
 - AI 설치 요청은 [설치 범위별 절차](docs/cli-install.md#ai에게-설치를-맡길-때)를 따른다. 기존 설치를 우선 재사용하고, CLI만 요청한 경우 앱·엔진·모델을 설치하거나 업데이트하지 않는다. 설치 검증을 위한 생성도 전체 설치 요청에만 포함한다.
 - GUI용 dmg는 `/Applications`로 복사해 실행한다. GUI만 사용할 때 Node.js는 필요 없다.
 - CLI는 이 소스 키트에서 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. `node cli/road-music.js …`로 실행한다. Electron이 개발 의존성으로 선언되어 있어 실행 시에도 설치해야 한다.
-- `npm link`로 `road-music` 전역 명령을 만들 수 있지만 선택 사항이다. 권한 오류가 나도 `sudo`를 쓰지 말고 위의 `node` 명령을 사용한다.
+- 키트의 `cli` 하위 폴더에서 `npm link`로 독립 `road-music-cli`의 전역 명령을 만들 수 있지만 선택 사항이다. 권한 오류가 나도 `sudo`를 쓰지 말고 위의 `node` 명령을 사용한다.
 - `ffmpeg`와 `ffprobe`, ACE 엔진은 CLI와 별도로 준비한다. 설치·생성 전 `setup:check`와 `engines:list`으로 확인한다.
 - 엔진·모델 다운로드는 사용자가 설치를 요청한 경우에만 실행한다. 음악 생성만 요청했는데 모델이 없으면 미설치 상태를 보고한다.
-- 업데이트는 [업데이트 가이드](docs/updates.md)를 따른다. `update:check`와 `update:status`로 대상·버전을 확인하고 사용자가 업데이트를 요청했을 때 `update:install`을 실행한다. 진행·대기 작업을 취소하거나 로컬 수정을 덮어쓰지 않는다. `installing`은 인계 응답이므로 재시작 후 실제 버전·설치 결과를 확인한다.
-- 새 정식 버전을 배포할 때는 [릴리스 노트](releases/README.md)를 읽고 `releases/YYYY-MM-DD-kebab-title.md`에 사용자 변경·설치 영향·검증·제한을 작성한다. 안정 버전은 `package.json`·`vX.Y.Z` 태그·메타데이터와 일치해야 하며, 공개된 태그·Release·노트는 수정하지 않는다.
+- 업데이트는 [업데이트 가이드](docs/updates.md)를 따른다. 앱은 `update:*`, CLI는 `cli:update:*`만 쓴다. 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 위임했을 때만 설치한다. `cli:update:install` 뒤에는 반환된 `cliPath`에서 버전·스키마·지식 조회를 검증하고 이후 명령도 그 경로로 실행한다. 기존 폴더·앱·모델·곡·Git 작업 폴더를 덮어쓰거나 재시작하지 않는다.
+- 새 정식 버전은 제품별로 배포한다. 앱은 `package.json`·`vX.Y.Z` 태그·`RoadMusic-X.Y.Z-*` asset을, CLI는 `cli/package.json`·`cli-vX.Y.Z` 태그·`RoadMusic-CLI-X.Y.Z.zip` asset을 사용한다. 앱 Release만 Latest이며 공개된 태그·Release·노트는 수정하지 않는다.
 - 코드를 변경하면 `npm test`와 변경한 JavaScript의 `node --check`를 실행한다. 실제 엔진·마이크·다른 OS 검증을 생략했다면 결과에 구분해 적는다.
 
 ## 지침의 적용 범위

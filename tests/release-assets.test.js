@@ -6,19 +6,19 @@ const os = require('node:os')
 const path = require('node:path')
 const crypto = require('node:crypto')
 
-test('release manifest hashes only the matching version artifacts and rejects missing or empty files', async t => {
+test('app release manifest hashes only the matching app artifacts and rejects missing or empty files', async t => {
   const { prepareAssets } = require('../scripts/release-assets')
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'road-release-'))
   t.after(() => fs.rm(root, { recursive: true, force: true }))
   await fs.writeFile(path.join(root, 'package.json'), JSON.stringify({ version: '1.4.0' }))
   await fs.mkdir(path.join(root, 'dist'))
-  const names = ['RoadMusic-1.4.0-mac-arm64.dmg', 'RoadMusic-1.4.0-cli.zip']
+  const names = ['RoadMusic-1.4.0-mac-arm64.dmg', 'RoadMusic-1.4.0-source.zip']
   await fs.writeFile(path.join(root, 'dist', names[0]), 'app fixture')
   await assert.rejects(prepareAssets(root), /ENOENT/)
   await fs.writeFile(path.join(root, 'dist', names[1]), '')
   await assert.rejects(prepareAssets(root), /empty/i)
   await fs.writeFile(path.join(root, 'dist', names[1]), 'cli fixture')
-  await fs.writeFile(path.join(root, 'dist', 'RoadMusic-1.3.1-cli.zip'), 'stale')
+  await fs.writeFile(path.join(root, 'dist', 'RoadMusic-CLI-0.1.0.zip'), 'unrelated CLI release')
   const result = await prepareAssets(root)
   assert.equal(result.version, '1.4.0')
   assert.deepEqual(result.assets.map(file => path.basename(file)), [...names, 'SHA256SUMS.txt'])
@@ -28,4 +28,25 @@ test('release manifest hashes only the matching version artifacts and rejects mi
   assert.equal(manifest.trim().split('\n').length, 2)
   await fs.writeFile(path.join(root, 'package.json'), JSON.stringify({ version: '1.4.0-rc.1' }))
   await assert.rejects(prepareAssets(root), /stable/i)
+})
+
+test('CLI release manifest uses only its own manifest version and never app assets', async t => {
+  const { prepareAssets } = require('../scripts/release-assets')
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'road-cli-release-'))
+  t.after(() => fs.rm(root, { recursive: true, force: true }))
+  await fs.writeFile(path.join(root, 'package.json'), JSON.stringify({ version: '1.4.0' }))
+  await fs.mkdir(path.join(root, 'cli'), { recursive: true })
+  await fs.writeFile(path.join(root, 'cli', 'package.json'), JSON.stringify({ name: 'road-music-cli', version: '0.1.0', private: true }))
+  await fs.mkdir(path.join(root, 'dist'))
+  await fs.writeFile(path.join(root, 'dist', 'RoadMusic-1.4.0-mac-arm64.dmg'), 'app fixture')
+  await fs.writeFile(path.join(root, 'dist', 'RoadMusic-0.1.0-cli.zip'), 'wrong legacy name')
+  await assert.rejects(prepareAssets(root, { product: 'cli' }), /RoadMusic-CLI-0\.1\.0\.zip/)
+  const name = 'RoadMusic-CLI-0.1.0.zip'
+  await fs.writeFile(path.join(root, 'dist', name), 'cli fixture')
+  const result = await prepareAssets(root, { product: 'cli' })
+  assert.equal(result.version, '0.1.0')
+  assert.deepEqual(result.assets.map(file => path.basename(file)), [name, 'SHA256SUMS.txt'])
+  const manifest = await fs.readFile(path.join(root, 'dist', 'SHA256SUMS.txt'), 'utf8')
+  assert.match(manifest, new RegExp(`  ${name.replace('.', '\\.')}$`, 'm'))
+  assert.doesNotMatch(manifest, /RoadMusic-1\.4\.0-mac-arm64\.dmg/)
 })

@@ -29,7 +29,7 @@ npm run dist:mac
 npm run dist:cli
 # → dist/RoadMusic-1.4.0-mac-arm64.dmg (약 100MB)
 # → dist/mac-arm64/Road Music.app (dmg에 들어가는 앱)
-# → dist/RoadMusic-1.4.0-cli.zip (CLI 소스·잠금 파일·AI 지침·가이드)
+# → dist/RoadMusic-CLI-0.1.0.zip (독립 CLI 소스·잠금 파일·AI 지침·가이드)
 ```
 
 - **도구:** electron-builder 26.15.3(`devDependencies`에 고정)
@@ -70,7 +70,7 @@ npm run dist:cli
    |---|---|
    | `dist/RoadMusic-<버전>-mac-arm64.dmg` | 배포 파일 |
    | `dist/mac-arm64/Road Music.app` | dmg에 들어간 앱. 바로 실행해 볼 수 있습니다 |
-   | `dist/RoadMusic-<버전>-cli.zip` | `npm run dist:cli`로 만드는 CLI 설치용 소스 키트 |
+| `dist/RoadMusic-CLI-<cli-version>.zip` | `npm run dist:cli`로 만드는 독립 CLI 설치용 소스 키트 |
    | `dist/builder-debug.yml` | 빌드 설정 기록(배포하지 않음) |
 
    `dist/`는 `.gitignore`에 들어 있습니다.
@@ -169,7 +169,7 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 
 1. `package.json`의 `version`을 올립니다(예: `1.4.0`).
 2. `npm run dist:mac` → `dist/RoadMusic-1.4.0-mac-arm64.dmg`가 나옵니다.
-3. [릴리스 노트](../releases/README.md)에 버전에 맞는 날짜 노트를 만들고 `npm run release:note -- resolve --version X.Y.Z`로 검증합니다. 이어서 `npm run dist:cli`와 `npm run release:assets`로 CLI ZIP과 체크섬을 만듭니다. 같은 버전의 태그·Release에 DMG, ZIP, `SHA256SUMS.txt`를 게시합니다. 버전 태그를 push하면 GitHub Actions가 빌드·검증 후 Latest Release를 게시합니다. 노트 경로와 절차는 [업데이트 배포](updates.md#새-버전-배포)를 따릅니다.
+3. 앱 Release는 [릴리스 노트](../releases/README.md)에 앱 버전 날짜 노트를 만들고 `npm run release:note -- resolve --version X.Y.Z`로 검증합니다. `npm run dist:mac`, `npm run dist:source`, `npm run release:assets -- --product app`은 `vX.Y.Z` Release에 DMG·앱 소스 ZIP·체크섬을 게시합니다. CLI는 별도 `cli/package.json` 버전과 `cli-vX.Y.Z` 태그를 쓰며 `npm run dist:cli`, `npm run release:assets -- --product cli`로 `RoadMusic-CLI-X.Y.Z.zip`만 게시합니다. 앱 Release만 Latest입니다. 절차는 [업데이트 배포](updates.md#release)를 따릅니다.
 4. 사용자가 새 dmg로 덮어 설치해도 곡과 엔진(`~/Library/Application Support/Road Music`)은 그대로 남습니다.
 
 <a id="toc-7"></a>
@@ -252,7 +252,7 @@ CLI ZIP을 별도 임시 폴더에 풀고 `NODE_ENV=production npm ci --include=
 - [ ] `LICENSE`가 앱 안에 들어 있다. 원저작자 MIT 고지를 지우지 않는다
 - [ ] 서명·공증을 했거나, 받는 사람에게 [시작하기 2.3](getting-started.md#23-처음-열-때-나오는-경고)을 안내한다
 - [ ] 받는 사람에게 `brew install ffmpeg`를 안내한다
-- [ ] GitHub 최신 정식 Release에 버전과 일치하는 DMG·CLI ZIP·SHA256SUMS.txt가 있다. 업데이트는 GitHub를 사용하며 공지·문의·설치 집계는 기존 `roadkwon.dev` API를 사용한다
+- [ ] 앱 Release(`vX.Y.Z`)에는 같은 앱 버전의 DMG·소스 ZIP·SHA256SUMS.txt가 있고, CLI Release(`cli-vX.Y.Z`)에는 같은 CLI 버전의 CLI ZIP·SHA256SUMS.txt가 있다. 앱만 Latest로 지정한다. 업데이트는 GitHub를 사용하며 공지·문의·설치 집계는 기존 `roadkwon.dev` API를 사용한다
 - [ ] 상용 배포라면 YuE2(CC BY-NC 4.0)를 안내하거나 쓰지 않는다
 - [ ] 5장의 확인 항목을 새 dmg로 돌렸다
 

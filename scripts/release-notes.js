@@ -126,6 +126,28 @@ async function resolveReleaseNote (projectRoot, version, options = {}) {
   return resolved
 }
 
+async function resolveCliReleaseNote (projectRoot, version, options = {}) {
+  assertStableVersion(version)
+  let manifest
+  try { manifest = JSON.parse(await fs.readFile(path.join(projectRoot, 'cli', 'package.json'), 'utf8')) } catch { fail('cli/package.json의 version을 읽을 수 없습니다.') }
+  if (manifest.name !== 'road-music-cli' || manifest.private !== true || manifest.version !== version) fail('요청 버전이 cli/package.json 버전과 일치하지 않습니다.')
+  const notePath = path.join(projectRoot, 'releases', 'cli', `v${version}.md`)
+  let body
+  try { body = await fs.readFile(notePath, 'utf8') } catch { fail(`CLI 버전 ${version}의 릴리스 노트가 없습니다.`) }
+  if (!body.trim()) fail(`releases/cli/v${version}.md: 공개할 릴리스 본문이 없습니다.`)
+  const resolved = { path: notePath, body: `# Road Music CLI v${version}\n\n${body.trim()}\n`, title: `Road Music CLI v${version}` }
+  if (options.output !== undefined) {
+    if (typeof options.output !== 'string' || !options.output || /[\r\n]/.test(options.output)) fail('출력 경로가 잘못되었습니다.')
+    await fs.writeFile(options.output, resolved.body)
+  }
+  if (options.githubOutput !== undefined) {
+    if (typeof options.githubOutput !== 'string' || !options.githubOutput || /[\r\n]/.test(options.githubOutput)) fail('GitHub 출력 경로가 잘못되었습니다.')
+    if (options.output === undefined) fail('GitHub 출력에는 --output이 필요합니다.')
+    await fs.appendFile(options.githubOutput, `release_note_path=${options.output}\nrelease_title=${resolved.title}\n`)
+  }
+  return resolved
+}
+
 async function createReleaseNote (projectRoot, options) {
   const date = assertDate(options.date || todayInSeoul())
   const slug = assertSlug(options.slug)
@@ -167,7 +189,7 @@ async function createReleaseNote (projectRoot, options) {
 
 function parseArguments (argv) {
   const [command, ...rest] = argv
-  if (!['create', 'resolve'].includes(command)) fail('사용법: release-notes.js create|resolve [옵션]')
+  if (!['create', 'resolve', 'resolve-cli'].includes(command)) fail('사용법: release-notes.js create|resolve|resolve-cli [옵션]')
   const values = {}
   for (let index = 0; index < rest.length; index += 2) {
     const option = rest[index]
@@ -189,7 +211,8 @@ async function main () {
   }
   for (const key of Object.keys(values)) if (!['--version', '--output', '--github-output'].includes(key)) fail(`알 수 없는 옵션: ${key}`)
   if (!values['--version']) fail('resolve에는 --version이 필요합니다.')
-  const result = await resolveReleaseNote(root, values['--version'], { output: values['--output'], githubOutput: values['--github-output'] })
+  const resolver = command === 'resolve-cli' ? resolveCliReleaseNote : resolveReleaseNote
+  const result = await resolver(root, values['--version'], { output: values['--output'], githubOutput: values['--github-output'] })
   console.log(JSON.stringify({ path: result.path, title: result.title, source: result.source }))
 }
 
@@ -198,4 +221,4 @@ if (require.main === module) main().catch(error => {
   process.exitCode = 1
 })
 
-module.exports = { createReleaseNote, readDatedNotes, resolveReleaseNote, todayInSeoul }
+module.exports = { createReleaseNote, readDatedNotes, resolveReleaseNote, resolveCliReleaseNote, todayInSeoul }

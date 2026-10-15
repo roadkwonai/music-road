@@ -1,0 +1,6 @@
+{
+  "name": "road-music-cli",
+  "version": "0.1.0",
+  "bin": { "road-music": "road-music.js" },
+  "private": true
+}

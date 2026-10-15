@@ -76,7 +76,7 @@ function init (next) {
 
 function safeVersion (value) { return VERSION.test(String(value || '')) }
 function compare (a, b) { if (!safeVersion(a) || !safeVersion(b)) return 0; const aa = String(a).split('.').map(Number); const bb = String(b).split('.').map(Number); return aa[0] - bb[0] || aa[1] - bb[1] || aa[2] - bb[2] }
-function assetName (version) { return mode() === 'mac-app' ? `RoadMusic-${version}-mac-${process.arch}.dmg` : `RoadMusic-${version}-cli.zip` }
+function assetName (version) { return mode() === 'mac-app' ? `RoadMusic-${version}-mac-${process.arch}.dmg` : `RoadMusic-${version}-source.zip` }
 function isReleaseUrl (value) { try { const u = new URL(value); return u.protocol === 'https:' && u.href.startsWith(RELEASE_ROOT) } catch { return false } }
 function isDownloadUrl (value, tag, name) { try { const u = new URL(value); return u.protocol === 'https:' && !u.username && !u.password && !u.port && u.hostname === 'github.com' && u.pathname === `/${REPOSITORY}/releases/download/${tag}/${name}` } catch { return false } }
 function isRedirectUrl (value) { try { const u = new URL(value); return u.protocol === 'https:' && !u.username && !u.password && !u.port && /^(github-releases|release-assets|objects)\.githubusercontent\.com$/.test(u.hostname) } catch { return false } }
@@ -115,7 +115,18 @@ async function readBody (res, limit, timeout = REQUEST_MS) {
     return Buffer.concat(chunks).toString('utf8')
   } finally { clearTimeout(timer); reader.releaseLock() }
 }
-async function latest () { const res = await response(API); if (res.status === 404) return null; if (!res.ok) throw new Error(`업데이트 서버가 HTTP ${res.status}을 반환했습니다.`); return normalizeRelease(JSON.parse(await readBody(res, MAX_TEXT_BYTES))) }
+async function latest () {
+  const res = await response(API)
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`업데이트 서버가 HTTP ${res.status}을 반환했습니다.`)
+  const release = JSON.parse(await readBody(res, MAX_TEXT_BYTES))
+  if (!String(release?.tag_name || '').startsWith('cli-v')) return normalizeRelease(release)
+  const list = await response(API.replace('/latest', '?per_page=30'))
+  if (!list.ok) throw new Error(`앱 릴리스 조회가 HTTP ${list.status}을 반환했습니다.`)
+  const releases = JSON.parse(await readBody(list, MAX_TEXT_BYTES))
+  if (!Array.isArray(releases)) throw new Error('앱 릴리스 목록 형식이 올바르지 않습니다.')
+  return releases.map(normalizeRelease).filter(Boolean).sort((a, b) => compare(b.version, a.version))[0] || null
+}
 async function check () {
   if (checking) return checking
   if (state.status === 'downloading' || state.status === 'installing') return status()

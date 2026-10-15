@@ -1,5 +1,7 @@
 # 업데이트 전 과정 검증
 
+> 과거 검증 기록: 아래 1.4.1~1.4.4 공유 버전 태그·릴리스는 제품 버전 분리 과정에서 철회했습니다. 결과의 실제 버전·날짜는 바꾸지 않았으며, 옛 공개 다운로드를 사용하는 재현 명령은 현재 그대로 실행할 수 없습니다. 현재 설치는 [앱 1.4.0 / CLI 0.1.0 안내](../releases/README.md), 고정 커밋 기반 소스 복구 검사는 `scripts/verify-source-update.js`를 따릅니다.
+
 검증일: 2026-10-15. 환경: macOS Apple Silicon, Node.js 24, 실제 GitHub 정식 Release.
 
 [Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)

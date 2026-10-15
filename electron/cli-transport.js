@@ -8,6 +8,8 @@ const { constants } = require('node:fs')
 const { AsyncLocalStorage } = require('node:async_hooks')
 const { EventEmitter } = require('node:events')
 const catalog = require('./cli-catalog')
+const appVersion = require('../package.json').version
+const cliVersion = require('../cli/package.json').version
 
 const MAX_BYTES = 16 * 1024 * 1024
 const endpoint = userData => {
@@ -41,15 +43,21 @@ async function canonical (file) {
 
 const extraCommands = [
   { command: 'cli:schema', description: '모든 명령과 JSON 입력 형식', params: { type: 'object', properties: {} } },
+  { command: 'cli:version', description: 'CLI·앱·프로토콜 버전', params: { type: 'object', properties: {} } },
+  { command: 'cli:update:check', description: 'GitHub의 CLI 전용 릴리스를 확인', params: { type: 'object', properties: {}, additionalProperties: false } },
+  { command: 'cli:update:install', description: '새 폴더에 CLI 전용 릴리스를 설치', params: { type: 'object', properties: { targetDir: { type: 'string', format: 'absolute-path' } }, additionalProperties: false } },
   { command: 'cli:status', description: '서비스 PID, 화면 및 대기열 상태', params: { type: 'object', properties: {} } },
   { command: 'cli:stop', description: '작업 없는 서비스를 종료; 실행 중이면 confirm 필요', params: { type: 'object', properties: {} } },
   { command: 'cli:show', description: '공유 중인 앱 화면 표시', params: { type: 'object', properties: {} } },
   { command: 'app:language', description: '현재 화면 언어를 조회합니다.', params: { type: 'object', properties: {} } },
   { command: 'job:wait', description: '지정 생성 작업의 완료 또는 실패까지 대기', params: { type: 'object', required: ['jobId'], properties: { jobId: { type: 'string' }, timeoutMs: { type: 'integer', minimum: 1, maximum: 3600000 } } } }
 ]
+function getVersion () {
+  return { cliVersion, appVersion, protocolVersion: catalog.schema().version }
+}
 function getSchema () {
   const schema = catalog.schema()
-  return { ...schema, commands: [...schema.commands, ...extraCommands],
+  return { ...schema, ...getVersion(), commands: [...schema.commands, ...extraCommands],
     request: { command: 'group:action', params: {}, input: ['absolute paths'], output: 'absolute path', confirm: false, overwrite: false },
     transport: 'local JSON Lines', events: 'stderr', completion: 'song:generate returns jobId; job:wait waits for it' }
 }
@@ -221,11 +229,14 @@ function createBridge ({ ipcMain, dialog, userData, runtime = {} }) {
     for (const key of ['confirm', 'overwrite']) if (message[key] !== undefined && typeof message[key] !== 'boolean') fail('INVALID_ARGUMENT', `${key}는 boolean이어야 합니다.`)
     const request = { ...message, params: message.params === undefined ? {} : message.params }
     if (!plain(request.params)) fail('INVALID_ARGUMENT', 'params는 JSON 객체여야 합니다.')
-    if (stopping && !['cli:status', 'cli:schema'].includes(request.command)) fail('SERVICE_STOPPING', '서비스를 종료하는 중입니다.')
+    if (stopping && !['cli:status', 'cli:schema', 'cli:version', 'cli:update:check', 'cli:update:install'].includes(request.command)) fail('SERVICE_STOPPING', '서비스를 종료하는 중입니다.')
     if (request.command === 'cli:schema') return getSchema()
+    if (request.command === 'cli:version') return getVersion()
+    if (request.command === 'cli:update:check') return require('../cli/update').check(request.params)
+    if (request.command === 'cli:update:install') return require('../cli/update').install(request.params)
     if (request.command === 'cli:status') {
       const status = runtime.status ? runtime.status() : {}
-      return { ok: true, pid: process.pid, ...status, stopping, busy: Boolean(status.busy || activeRequests.size), requests: [...activeRequests] }
+      return { ok: true, pid: process.pid, ...status, ...getVersion(), stopping, busy: Boolean(status.busy || activeRequests.size), requests: [...activeRequests] }
     }
     if (request.command === 'cli:show') { if (runtime.show) runtime.show(); return { ok: true } }
     if (request.command === 'cli:stop') {
@@ -380,4 +391,4 @@ function createBridge ({ ipcMain, dialog, userData, runtime = {} }) {
   }
   return { dispatch, listen, close, publish, notifyStopping, configure: values => Object.assign(runtime, values), rendererBusy: () => Boolean(rendererRequest), outputPending: () => Boolean(context.getStore()?.finalOutput) }
 }
-module.exports = { endpoint, createBridge, getSchema }
+module.exports = { endpoint, createBridge, getSchema, getVersion }

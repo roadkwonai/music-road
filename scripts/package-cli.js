@@ -4,14 +4,22 @@
 const fs = require('node:fs/promises')
 const path = require('node:path')
 const { execFileSync } = require('node:child_process')
-const { version } = require('../package.json')
 const root = path.resolve(__dirname, '..')
 
-async function packageCli (outputDir = path.join(root, 'dist')) {
+async function cliVersion (projectRoot) {
+  const manifest = JSON.parse(await fs.readFile(path.join(projectRoot, 'cli', 'package.json'), 'utf8'))
+  if (manifest.name !== 'road-music-cli' || manifest.private !== true || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(manifest.version)) {
+    throw new Error('cli/package.json에는 road-music-cli의 안정 버전과 private: true가 필요합니다.')
+  }
+  return manifest.version
+}
+
+async function packageCli (outputDir = path.join(root, 'dist'), projectRoot = root) {
   if (process.platform !== 'darwin') throw new Error('CLI ZIP packaging requires macOS ditto')
+  const version = await cliVersion(projectRoot)
   await fs.mkdir(outputDir, { recursive: true })
   const stage = await fs.mkdtemp(path.join(outputDir, '.cli-package-'))
-  const name = `RoadMusic-${version}-cli`
+  const name = `RoadMusic-CLI-${version}`
   const kit = path.join(stage, name)
   try {
     await fs.mkdir(kit)
@@ -22,7 +30,7 @@ async function packageCli (outputDir = path.join(root, 'dist')) {
     for (const entry of entries) {
       const destination = path.join(kit, entry)
       await fs.mkdir(path.dirname(destination), { recursive: true })
-      await fs.cp(path.join(root, entry), destination, { recursive: true,
+      await fs.cp(path.join(projectRoot, entry), destination, { recursive: true,
         filter: source => !['__pycache__', '.DS_Store'].includes(path.basename(source)) })
     }
     const archive = path.join(stage, `${name}.zip`)
@@ -37,4 +45,4 @@ if (require.main === module) packageCli().then(result => console.log(JSON.string
   console.error(error.message)
   process.exitCode = 1
 })
-module.exports = { packageCli }
+module.exports = { packageCli, cliVersion }

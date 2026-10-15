@@ -4,7 +4,8 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 const root = path.resolve(__dirname, '..')
-const version = require('../package.json').version
+const appVersion = require('../package.json').version
+const cliVersion = require('../cli/package.json').version
 const policy = Object.freeze({ preserveUserInput: true, autoApply: false, suggestionsRequireApproval: true })
 const documents = Object.freeze({
   genres: { title: '장르 프롬프트', source: 'docs/genre-prompts.md' },
@@ -28,7 +29,7 @@ function available (topic) {
 
 function metadata (topic) {
   const document = documents[topic]
-  return { topic, title: document.title, source: document.source, version }
+  return { topic, title: document.title, source: document.source, version: appVersion, appVersion, cliVersion }
 }
 
 function validate (params = {}) {

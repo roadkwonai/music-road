@@ -1,4 +1,4 @@
-name: Release
+name: Road Music App Release
 
 on:
   push:
@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.event_name != 'push' || github.event.deleted != true
     runs-on: macos-14
     timeout-minutes: 30
     permissions:
@@ -54,20 +55,20 @@ jobs:
       - name: Verify real Git source update and startup-failure rollback
         run: node scripts/verify-source-update.js
       - run: npm run dist:mac
-      - run: npm run dist:cli
+      - run: npm run dist:source
       - name: Verify bundles and prepare checksums
         run: |
           codesign --verify --deep --strict 'dist/mac-arm64/Road Music.app'
           hdiutil verify "dist/RoadMusic-${RELEASE_TAG#v}-mac-arm64.dmg"
-          node scripts/release-assets.js
+          node scripts/release-assets.js --product app
           cd dist
           shasum -a 256 -c SHA256SUMS.txt
-      - name: Publish complete release as latest
+      - name: Publish complete app release as latest
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TITLE: ${{ steps.release_notes.outputs.release_title }}
           RELEASE_NOTE_PATH: ${{ steps.release_notes.outputs.release_note_path }}
         run: |
-          gh release create "$RELEASE_TAG" --verify-tag --draft --title "$RELEASE_TITLE" --notes-file "$RELEASE_NOTE_PATH" "dist/RoadMusic-${RELEASE_TAG#v}-mac-arm64.dmg" "dist/RoadMusic-${RELEASE_TAG#v}-cli.zip" dist/SHA256SUMS.txt
+          gh release create "$RELEASE_TAG" --verify-tag --draft --title "$RELEASE_TITLE" --notes-file "$RELEASE_NOTE_PATH" "dist/RoadMusic-${RELEASE_TAG#v}-mac-arm64.dmg" "dist/RoadMusic-${RELEASE_TAG#v}-source.zip" dist/SHA256SUMS.txt
           gh release edit "$RELEASE_TAG" --draft=false --latest

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict'
 
-// Exercises the detached source updater only with disposable clones of official releases.
+// Exercises immutable official commits through an isolated local annotated-tag fixture.
+// It never creates, changes, or relies on a public release tag.
 const assert = require('node:assert/strict')
 const fs = require('node:fs/promises')
 const os = require('node:os')
@@ -11,9 +12,10 @@ const { spawn } = require('node:child_process')
 const helper = path.resolve(__dirname, '../electron/update-installer.js')
 const origin = 'https://github.com/roadkwonai/music-road.git'
 const oldVersion = '1.4.0'
-// v1.4.0 is republished, so this historical updater fixture must not follow its mutable tag.
 const oldReleaseCommit = '99a4908d74f5259124b442f777cb9af866f488bf'
 const newVersion = '1.4.1'
+const newReleaseCommit = '253456b5c57dc62e9fc3803451f214b31418e107'
+const updateRef = `refs/roadmusic-update/v${newVersion}`
 const commandTimeout = 120_000
 const installerTimeout = 16 * 60_000
 
@@ -109,6 +111,48 @@ server.listen(endpoint)
   return launcher
 }
 
+async function writeFixtureHelper (base) {
+  const fixture = path.join(base, 'update-installer-fixture.js')
+  const source = await fs.readFile(helper, 'utf8')
+  const patched = source.replace("return run('/usr/bin/git', ['-C', root, ...args])", "return run('git', ['-C', root, ...args])")
+  assert.notEqual(patched, source, '검증용 helper에서 Git 실행 경로를 바꾸지 못했습니다.')
+  await fs.writeFile(fixture, patched, { mode: 0o700 })
+  return fixture
+}
+
+async function writeGitFixture (base) {
+  const bin = path.join(base, 'git-fixture-bin')
+  const wrapper = path.join(bin, 'git')
+  await fs.mkdir(bin)
+  await fs.writeFile(wrapper, `#!/usr/bin/env node
+'use strict'
+const { spawnSync } = require('node:child_process')
+const commit = ${JSON.stringify(newReleaseCommit)}
+const ref = ${JSON.stringify(updateRef)}
+const requested = ${JSON.stringify(`refs/tags/v${newVersion}:${updateRef}`)}
+const tag = ${JSON.stringify(`roadmusic-source-fixture-v${newVersion}`)}
+const args = process.argv.slice(2)
+function invoke (value, capture = false) {
+  const result = spawnSync('/usr/bin/git', value, capture ? { encoding: 'utf8' } : { stdio: 'inherit' })
+  if (result.error) throw result.error
+  if (result.status !== 0) process.exit(result.status || 1)
+  if (capture) return result.stdout.trim()
+}
+const intercepted = args[0] === '-C' && args[3] === 'fetch' && args[4] === '--no-tags' && args[5] === 'origin' && args[6] === requested && args.length === 7
+if (!intercepted) {
+  invoke(args)
+} else {
+  const root = args[1]
+  invoke(['-C', root, 'fetch', '--no-tags', 'origin', commit])
+  invoke(['-C', root, '-c', 'user.name=Road Music fixture', '-c', 'user.email=fixture@invalid', 'tag', '-a', '-f', tag, commit, '-m', 'isolated immutable source update fixture'])
+  const object = invoke(['-C', root, 'rev-parse', 'refs/tags/' + tag], true)
+  invoke(['-C', root, 'update-ref', ref, object])
+}
+`)
+  await fs.chmod(wrapper, 0o700)
+  return bin
+}
+
 async function cloneRelease (base, name) {
   const root = path.join(base, name)
   await run('/usr/bin/git', ['clone', '--no-checkout', '--single-branch', origin, root])
@@ -146,30 +190,32 @@ async function assertNoResidue (base, root) {
   assert.equal(entries.some(name => name.startsWith(prefix) && (name.includes('.update-') || name.includes('.node_modules.before-update-'))), false, 'staging 또는 의존성 백업이 남았습니다.')
 }
 
-async function installer (root, dataDir, launcher, marker, extraEnv = {}) {
+async function installer (fixtureHelper, gitFixture, root, dataDir, launcher, marker, extraEnv = {}) {
   const waiting = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore' })
   await new Promise((resolve, reject) => { waiting.once('spawn', resolve); waiting.once('error', reject) })
   waiting.kill('SIGTERM')
   await new Promise(resolve => waiting.once('close', resolve))
   const payload = { mode: 'source', pid: waiting.pid, version: newVersion, root, userData: dataDir, execPath: launcher }
-  const result = await command(process.execPath, [helper, JSON.stringify(payload)], {
-    env: { ...process.env, ...extraEnv, ROADMUSIC_DATA_DIR: dataDir, SOURCE_UPDATE_MARKER: marker }, timeoutMs: installerTimeout
+  const result = await command(process.execPath, [fixtureHelper, JSON.stringify(payload)], {
+    env: { ...process.env, ...extraEnv, PATH: `${gitFixture}${path.delimiter}${process.env.PATH}`, ROADMUSIC_DATA_DIR: dataDir, SOURCE_UPDATE_MARKER: marker }, timeoutMs: installerTimeout
   })
   const durable = JSON.parse(await fs.readFile(path.join(dataDir, 'updates', 'installer-result.json'), 'utf8'))
   return { ...result, durable }
 }
 
-async function successCase (base, launcher) {
+async function successCase (base, fixtureHelper, gitFixture, launcher) {
   const root = await cloneRelease(base, 'success-source')
   const dataDir = await prepareData(base, 'success')
   const marker = path.join(base, 'success-launches.jsonl')
   try {
-    const result = await installer(root, dataDir, launcher, marker)
+    const result = await installer(fixtureHelper, gitFixture, root, dataDir, launcher, marker)
     assert.equal(result.code, 0, `${result.stderr}\n${JSON.stringify(result.durable)}`)
     assert.equal(result.durable.ok, true)
     assert.equal(result.durable.version, newVersion)
     assert.equal(JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8')).version, newVersion)
-    assert.equal(await git(root, ['rev-parse', 'HEAD']), await git(root, ['rev-parse', `refs/roadmusic-update/v${newVersion}^{commit}`]))
+    assert.equal(await git(root, ['rev-parse', 'HEAD']), newReleaseCommit)
+    assert.equal(await git(root, ['cat-file', '-t', updateRef]), 'tag')
+    assert.equal(await git(root, ['rev-parse', `${updateRef}^{commit}`]), newReleaseCommit)
     await fs.access(path.join(root, 'node_modules', 'electron', 'package.json'))
     await assert.rejects(fs.access(path.join(root, 'node_modules', 'old-dependency-sentinel')))
     assert.equal(await git(root, ['status', '--porcelain', '--untracked-files=all']), '')
@@ -182,14 +228,14 @@ async function successCase (base, launcher) {
   return '공식 Git fast-forward·실제 npm ci·의존성 교체·재시작·데이터 보존'
 }
 
-async function rejectedCase (base, launcher, name, prepare, expected) {
+async function rejectedCase (base, fixtureHelper, gitFixture, launcher, name, prepare, expected) {
   const root = await cloneRelease(base, `${name}-source`)
   const dataDir = await prepareData(base, name)
   const marker = path.join(base, `${name}-launches.jsonl`)
   await prepare(root)
   const oldHead = await git(root, ['rev-parse', 'HEAD'])
   try {
-    const result = await installer(root, dataDir, launcher, marker)
+    const result = await installer(fixtureHelper, gitFixture, root, dataDir, launcher, marker)
     assert.notEqual(result.code, 0)
     assert.equal(result.durable.ok, false)
     assert.match(result.durable.error, expected)
@@ -200,13 +246,13 @@ async function rejectedCase (base, launcher, name, prepare, expected) {
   } finally { await stopLaunched(marker) }
 }
 
-async function rollbackCase (base, launcher) {
+async function rollbackCase (base, fixtureHelper, gitFixture, launcher) {
   const root = await cloneRelease(base, 'rollback-source')
   const dataDir = await prepareData(base, 'rollback')
   const marker = path.join(base, 'rollback-launches.jsonl')
   const oldHead = await git(root, ['rev-parse', 'HEAD'])
   try {
-    const result = await installer(root, dataDir, launcher, marker, { SOURCE_UPDATE_FAIL_VERSION: newVersion })
+    const result = await installer(fixtureHelper, gitFixture, root, dataDir, launcher, marker, { SOURCE_UPDATE_FAIL_VERSION: newVersion })
     assert.notEqual(result.code, 0)
     assert.equal(result.durable.ok, false)
     assert.match(result.durable.error, /바로 종료/)
@@ -224,21 +270,21 @@ async function rollbackCase (base, launcher) {
 }
 
 async function main () {
-  const tag = await command('/usr/bin/git', ['ls-remote', '--exit-code', '--tags', origin, `refs/tags/v${newVersion}`])
-  assert.equal(tag.code, 0, `공식 v${newVersion} 태그가 아직 공개되지 않았습니다.`)
   const base = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'roadmusic-source-update-')))
   try {
     const launcher = await writeLauncher(base)
-    const checks = [await successCase(base, launcher)]
-    await rejectedCase(base, launcher, 'dirty', async root => { await fs.appendFile(path.join(root, 'README.md'), '\nsource update dirty sentinel\n') }, /변경되거나 추적되지 않은 파일/)
+    const fixtureHelper = await writeFixtureHelper(base)
+    const gitFixture = await writeGitFixture(base)
+    const checks = [await successCase(base, fixtureHelper, gitFixture, launcher)]
+    await rejectedCase(base, fixtureHelper, gitFixture, launcher, 'dirty', async root => { await fs.appendFile(path.join(root, 'README.md'), '\nsource update dirty sentinel\n') }, /변경되거나 추적되지 않은 파일/)
     checks.push('dirty 작업 트리 거부')
-    await rejectedCase(base, launcher, 'diverged', async root => {
+    await rejectedCase(base, fixtureHelper, gitFixture, launcher, 'diverged', async root => {
       await git(root, ['config', 'user.email', 'verify@example.test']); await git(root, ['config', 'user.name', 'source update verifier'])
       await fs.writeFile(path.join(root, 'local-divergence.txt'), 'local divergence\n')
       await git(root, ['add', 'local-divergence.txt']); await git(root, ['commit', '-m', 'local divergence'])
     }, /exited 1/)
     checks.push('diverged HEAD 거부')
-    checks.push(await rollbackCase(base, launcher))
+    checks.push(await rollbackCase(base, fixtureHelper, gitFixture, launcher))
     process.stdout.write(`${JSON.stringify({ ok: true, checks })}\n`)
   } finally {
     await fs.rm(base, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 })

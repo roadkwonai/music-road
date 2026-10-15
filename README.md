@@ -108,7 +108,7 @@ node cli/road-music.js engines:list
 | `engines:list` | 설치 여부와 엔진별 준비 상태 확인 |
 | 결과 출력 | stdout JSON 한 줄, `--events` 진행 상황은 stderr JSONL |
 
-첫 서비스 요청은 숨겨진 앱 창을 시작할 수 있습니다. 같은 데이터 폴더의 GUI가 실행 중이면 공유합니다. 전역 `road-music` 명령은 선택적으로 `npm link`로 만듭니다. [설치 상세](docs/cli-install.md) · [첫 곡 만들기](docs/quickstart.md)
+첫 서비스 요청은 숨겨진 앱 창을 시작할 수 있습니다. 같은 데이터 폴더의 GUI가 실행 중이면 공유합니다. 전역 `road-music` 명령은 선택적으로 [CLI 폴더에서 연결](docs/cli-install.md#toc-4)합니다. [설치 상세](docs/cli-install.md) · [첫 곡 만들기](docs/quickstart.md)
 
 <a id="toc-3"></a>
 
@@ -225,16 +225,21 @@ DMG의 앱을 `Applications`로 복사하면 GUI를 사용할 수 있으며 Node
 > [!NOTE]
 > 현재 앱은 애드혹 서명이며 Apple 공증을 받지 않았습니다. 실제 검증 환경과 OS별 제한은 [검수 결과](docs/cli-qa-report.md)에 있습니다.
 
-1.4.4는 기존 1.4.0~1.4.3보다 높아 업데이트 확인 대상이 됩니다. 같은 버전·낮은 버전은 감지하지 않습니다. 과거 1.4.0 통합본으로 수동 이전하던 절차는 [이전 안내](docs/updates.md#consolidated-140)에 보관했습니다.
+현재 앱 정식 버전은 1.4.0이며 앱 Release의 Latest가 앱 업데이트 대상입니다. CLI는 독립 0.1.0부터 `cli-vX.Y.Z` Release와 `RoadMusic-CLI-X.Y.Z.zip`을 사용합니다.
 
-앱과 CLI 서비스는 시작 시와 15분마다 GitHub 최신 정식 Release를 확인합니다. AI에게 “로드뮤직 업데이트해줘”라고 요청하거나 아래 명령을 사용할 수 있습니다.
+앱과 CLI의 업데이트 방식은 다릅니다. 앱 서비스는 시작 시와 15분마다 앱 Release를 확인합니다. CLI는 AI 세션의 첫 연결에서 한 번 확인하며 상시 감시하지 않습니다.
 
 ```bash
+# 앱 업데이트
 node cli/road-music.js update:check --json '{"manual":true}'
 node cli/road-music.js update:install --events --timeout 1800000
+
+# CLI 업데이트 확인과 설치
+node cli/road-music.js cli:update:check
+node cli/road-music.js cli:update:install --timeout 1800000
 ```
 
-진행·대기 작업 보호와 실패 복구는 [업데이트 가이드](docs/updates.md), 날짜별 변경 내용과 배포 노트 작성은 [릴리스 노트](releases/README.md)를 참고하세요.
+사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 맡긴 경우에만 설치합니다. 앱 설치는 앱을 교체·재시작할 수 있고, CLI 설치는 새 경로에만 설치합니다. 자세한 확인·복구·배포 기준은 [업데이트 가이드](docs/updates.md)를 참고하세요.
 
 <a id="toc-5"></a>
 

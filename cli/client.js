@@ -10,12 +10,13 @@ const { spawn } = require('node:child_process')
 const MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 const DEFAULT_TIMEOUT = 30_000
 const LONG_TIMEOUT = 3_600_000
+const CLI_UPDATE_INSTALL_TIMEOUT = 1_800_000
 const VIDEO_RENDER_TIMEOUT = 86_400_000
 const MAX_TIMER_TIMEOUT = 2_147_483_647
 const LONG_COMMANDS = new Set([
   'job:wait', 'setup:run', 'engines:install', 'song:generate', 'song:render', 'song:resume',
   'album:export', 'video:preview', 'video:prepare', 'video:render', 'video:finish',
-  'settings:move-models', 'settings:move-songs', 'update:download', 'update:install', 'update:watch'
+  'settings:move-models', 'settings:move-songs', 'update:download', 'update:install', 'update:watch', 'cli:update:install'
 ])
 const WAIT_COMMANDS = new Set(['song:generate', 'song:resume', 'song:render'])
 const UNCERTAIN_MUTATIONS = new Set([...WAIT_COMMANDS, 'video:render', 'update:install'])
@@ -66,8 +67,8 @@ function absolutePath (value, flag) {
 
 function timeoutFor (command, value) {
   const longCommand = LONG_COMMANDS.has(command)
-  const maximum = command === 'video:render' ? MAX_TIMER_TIMEOUT : (longCommand ? LONG_TIMEOUT : DEFAULT_TIMEOUT)
-  const timeout = value === undefined ? (command === 'video:render' ? VIDEO_RENDER_TIMEOUT : (longCommand ? LONG_TIMEOUT : DEFAULT_TIMEOUT)) : Number(value)
+  const maximum = command === 'video:render' ? MAX_TIMER_TIMEOUT : (command === 'cli:update:install' ? CLI_UPDATE_INSTALL_TIMEOUT : (longCommand ? LONG_TIMEOUT : DEFAULT_TIMEOUT))
+  const timeout = value === undefined ? (command === 'video:render' ? VIDEO_RENDER_TIMEOUT : (command === 'cli:update:install' ? CLI_UPDATE_INSTALL_TIMEOUT : (longCommand ? LONG_TIMEOUT : DEFAULT_TIMEOUT))) : Number(value)
   if (!Number.isInteger(timeout) || timeout < 1 || timeout > maximum) {
     throw new CliError('invalid_arguments', `--timeout must be between 1 and ${maximum} ms`)
   }
@@ -75,6 +76,7 @@ function timeoutFor (command, value) {
 }
 
 function normalizeCommand (parts) {
+  if (parts.length === 1 && parts[0] === 'version') return 'cli:version'
   if (parts.length === 1 && parts[0].includes(':')) return parts[0]
   if (parts.length === 2 && !parts[0].includes(':') && !parts[1].includes(':')) return `${parts[0]}:${parts[1]}`
   throw new CliError('invalid_arguments', 'command must be group action or group:action')
@@ -97,6 +99,7 @@ function parseArgs (argv) {
     const value = argv[index]
     if (!value.startsWith('--')) { values.push(value); continue }
     if (value === '--help') { options.help = true; continue }
+    if (value === '--version') { options.version = true; continue }
     if (['--stdin', '--events', '--confirm', '--overwrite', '--no-start', '--wait'].includes(value)) {
       options[value.slice(2).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = true
       continue
@@ -110,6 +113,12 @@ function parseArgs (argv) {
     else if (value === '--output') options.output = absolutePath(argument, value)
     else if (value === '--timeout') options.timeoutValue = argument
     else throw new CliError('invalid_arguments', `unknown option: ${value}`)
+  }
+  if (options.version) {
+    if (values.length || options.input.length || Object.keys(options).some(key => !['input', 'version'].includes(key))) {
+      throw new CliError('invalid_arguments', '--version cannot be combined with another command or option')
+    }
+    return { command: 'cli:version', params: {}, input: [], timeout: DEFAULT_TIMEOUT }
   }
   if (options.help && values.length === 0) return { help: true }
   if (values.length === 1 && values[0] === 'batch') return { batch: true, ...options }
@@ -411,6 +420,24 @@ function localKnowledge (params = {}) {
   return require('../electron/prompt-knowledge').read(params)
 }
 
+function localVersion (params = {}) {
+  if (!isObject(params) || Object.keys(params).length) throw new CliError('invalid_arguments', 'version does not accept parameters')
+  const transport = require('../electron/cli-transport')
+  if (typeof transport.getVersion === 'function') return transport.getVersion()
+  return {
+    cliVersion: require('./package.json').version,
+    appVersion: require('../package.json').version,
+    protocolVersion: require('../electron/cli-catalog').schema().version
+  }
+}
+
+async function localCliUpdate (command, params = {}) {
+  const update = require('./update')
+  if (command === 'cli:update:check') return update.check(params)
+  if (command === 'cli:update:install') return update.install(params)
+  throw new CliError('invalid_arguments', `unknown CLI update command: ${command}`)
+}
+
 async function waitForJobs (result, options, timeout) {
   const jobs = Array.isArray(result.jobs) ? result.jobs : (typeof result.jobId === 'string' ? [{ jobId: result.jobId }] : null)
   if (!jobs || !jobs.length || jobs.some(job => !job || typeof job.jobId !== 'string' || !job.jobId)) {
@@ -469,6 +496,10 @@ async function runBatch (parsed, options) {
       const payload = { id: item.id, command, params: item.params === undefined ? {} : item.params, input: item.input, output: item.output, confirm: item.confirm === true, overwrite: item.overwrite === true, timeout }
       const result = command === 'cli:schema'
         ? localSchema(item.params === undefined ? {} : item.params)
+        : command === 'cli:version'
+          ? localVersion(item.params === undefined ? {} : item.params)
+          : command.startsWith('cli:update:')
+            ? await localCliUpdate(command, item.params === undefined ? {} : item.params)
         : command === 'prompt:knowledge'
           ? localKnowledge(item.params === undefined ? {} : item.params)
         : (normalized.start ? await requestServiceStart(payload, requestOptions) : await requestWithStartup(payload, requestOptions))
@@ -498,17 +529,26 @@ async function run (argv = process.argv.slice(2), supplied = {}) {
       throw new CliError('invalid_arguments', 'batch accepts only --events and --no-start')
     }
     const normalized = parsed.command ? normalizeClientCommand(parsed.command) : null
-    if (normalized && (normalized.command === 'cli:schema' || parsed.help)) {
+    if (normalized && (normalized.command === 'cli:schema' || normalized.command === 'cli:version' || parsed.help)) {
       const params = parsed.help ? { command: normalized.command } : await paramsFor(parsed, options)
-      writeJson(options.stdout, { ok: true, result: localSchema(params) })
+      writeJson(options.stdout, { ok: true, result: normalized.command === 'cli:version' && !parsed.help ? localVersion(params) : localSchema(params) })
       return 0
     }
     if (parsed.wait && !WAIT_COMMANDS.has(parsed.command)) throw new CliError('invalid_arguments', '--wait is only available for song generate, resume, or render')
+    if (parsed.batch) {
+      options.endpoint = options.endpoint || socketEndpoint(options.userData)
+      options.noStart = parsed.noStart
+      options.onEvent = parsed.events ? (event) => writeJson(options.stderr, event) : undefined
+      return runBatch(parsed, options)
+    }
+    const params = await paramsFor(parsed, options)
+    if (normalized.command.startsWith('cli:update:')) {
+      writeJson(options.stdout, { ok: true, result: await localCliUpdate(normalized.command, params) })
+      return 0
+    }
     options.endpoint = options.endpoint || socketEndpoint(options.userData)
     options.noStart = parsed.noStart
     options.onEvent = parsed.events ? (event) => writeJson(options.stderr, event) : undefined
-    if (parsed.batch) return runBatch(parsed, options)
-    const params = await paramsFor(parsed, options)
     if (normalized.command === 'prompt:knowledge') {
       writeJson(options.stdout, { ok: true, result: localKnowledge(params) })
       return 0

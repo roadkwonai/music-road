@@ -6,7 +6,7 @@ const path = require('node:path')
 const os = require('node:os')
 const { execFileSync } = require('node:child_process')
 const { packageCli } = require('../scripts/package-cli')
-const { version } = require('../package.json')
+const { version } = require('../cli/package.json')
 
 test('CLI ZIP includes install instructions, locked dependencies, and a working schema', { skip: process.platform !== 'darwin' }, async t => {
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'roadmusic-cli-kit-'))
@@ -14,7 +14,7 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
   const result = await packageCli(temp)
   assert.ok(result.bytes > 1000)
   const entries = execFileSync('/usr/bin/unzip', ['-Z1', result.path], { encoding: 'utf8' }).trim().split('\n')
-  const name = `RoadMusic-${version}-cli`
+  const name = `RoadMusic-CLI-${version}`
   for (const file of ['docs/README.md', 'docs/assets/brand/banner.svg', 'releases/README.md']) {
     assert.ok(entries.includes(`${name}/${file}`), file)
   }

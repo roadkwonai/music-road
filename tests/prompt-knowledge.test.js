@@ -12,6 +12,11 @@ test('lists only the bundled prompt-knowledge topics with an explicit non-applic
   const result = knowledge.read()
   assert.deepEqual(result.topics.map(item => item.topic), Object.keys(knowledge.documents).filter(topic => fs.existsSync(path.join(__dirname, '..', knowledge.documents[topic].source))))
   assert.deepEqual(result.policy, { preserveUserInput: true, autoApply: false, suggestionsRequireApproval: true })
+  for (const topic of result.topics) {
+    assert.equal(topic.version, require('../package.json').version)
+    assert.equal(topic.appVersion, require('../package.json').version)
+    assert.equal(topic.cliVersion, require('../cli/package.json').version)
+  }
   assert.equal(result.content, undefined)
 })
 
@@ -22,6 +27,9 @@ test('returns the exact UTF-8 document for a fixed topic', () => {
   assert.equal(result.content, fs.readFileSync(source, 'utf8'))
   assert.deepEqual(Buffer.from(result.content, 'utf8'), fs.readFileSync(source))
   assert.equal(result.policy.preserveUserInput, true)
+  assert.equal(result.version, require('../package.json').version)
+  assert.equal(result.appVersion, require('../package.json').version)
+  assert.equal(result.cliVersion, require('../cli/package.json').version)
 })
 
 test('rejects unknown topics and any unneeded input fields in every entry point', async () => {

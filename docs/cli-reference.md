@@ -73,6 +73,9 @@
 | `app:language` | — | — | 현재 언어 |
 | `app:set-language` | `lang:ko/en/ja` | — | 표시 언어 저장 |
 | `cli:schema` | — | `command:str` | 공개 스키마 또는 지정 명령의 스키마 |
+| `cli:version`, `version`, `--version` | — | — | 로컬 `cliVersion`, `appVersion`, `protocolVersion` 반환. 앱·서비스를 시작하지 않음 |
+| `cli:update:check` | — | — | `cli-v*` 정식 Release만 읽기 전용으로 조회. 앱 Release·서비스는 조회·시작하지 않음 |
+| `cli:update:install` | — | `targetDir:abs-path` | 새 빈 폴더에 CLI ZIP 설치. 생략 시 사용자 CLI 저장소의 버전 폴더를 사용하며 새 `cliPath` 반환 |
 | `cli:status` | — | — | 서비스 PID·화면·대기열 |
 | `cli:show` | — | — | GUI 표시 |
 | `cli:stop` | — | — | 활성 작업 중이면 `--confirm` 필요 |
@@ -157,7 +160,7 @@
 | 명령 | 필수 | 선택 | 입력/출력·효과 |
 | --- | --- | --- | --- |
 | `renderer:catalog`, `prompt:catalog` | — | — | 화면/프롬프트의 현재 허용값 |
-| `prompt:knowledge` | — | `topic:genres\|ccm\|hymn-remake\|ace\|lyrics\|review` | 생략 시 번들 지식 목록, 지정 시 UTF-8 원문·출처·버전·보존 정책. 로컬 CLI는 앱을 시작하지 않음 |
+| `prompt:knowledge` | — | `topic:genres\|ccm\|hymn-remake\|ace\|lyrics\|review` | 생략 시 번들 지식 목록, 지정 시 UTF-8 원문·출처·호환 `version`(앱 버전)·`appVersion`·`cliVersion`·보존 정책. 로컬 CLI는 앱을 시작하지 않음 |
 | `lyrics:clean`, `lyrics:sections`, `lyrics:numbers` | — | `text:str≤20000` | 가사 변환 |
 | `lyrics:check` | — | `text:str≤20000`, `targetSeconds:num 1..3600|null` | 가사 검사 |
 | `prompt:compose` | — | `parts`의 모든 필드, `lyrics:str≤20000`, `soundEffect:bool` | 스타일 문장 생성 |

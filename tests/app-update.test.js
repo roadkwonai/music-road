@@ -77,3 +77,24 @@ test('설치 실패 기록이 있어도 다음 확인은 새 릴리스 상태로
   assert.notEqual(state.status, 'error')
   assert.equal(state.installerResult.ok, false)
 })
+
+test('CLI가 GitHub Latest로 지정돼도 앱 릴리스만 조회하고 CLI 버전을 알리지 않는다', async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'road-product-channel-'))
+  const originalFetch = global.fetch
+  t.after(() => { global.fetch = originalFetch; fs.rmSync(dir, { recursive: true, force: true }) })
+  const cliRelease = { tag_name: 'cli-v9.0.0', draft: false, prerelease: false,
+    html_url: 'https://github.com/roadkwonai/music-road/releases/tag/cli-v9.0.0', assets: [] }
+  const appRelease = { tag_name: 'v1.4.0', draft: false, prerelease: false,
+    html_url: 'https://github.com/roadkwonai/music-road/releases/tag/v1.4.0', assets: [] }
+  const calls = []
+  global.fetch = async url => {
+    calls.push(url)
+    return new Response(JSON.stringify(url.endsWith('/latest') ? cliRelease : [cliRelease, appRelease]))
+  }
+  update.init({ app: app(dir, '1.4.0'), publish: () => {}, isBusy: () => false })
+  const state = await update.check()
+  assert.equal(state.available, false)
+  assert.equal(state.version, '1.4.0')
+  assert.equal(state.status, 'idle')
+  assert.equal(calls.length, 2)
+})

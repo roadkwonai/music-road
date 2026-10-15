@@ -19,7 +19,7 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 
 ### 복사할 프롬프트
 
-사용자는 설치 경로를 입력하지 않고 아래 프롬프트를 그대로 사용한다. AI가 기존 CLI를 탐색하고 `cli/road-music.js`, `AGENTS.md`, 이 문서가 함께 있는 키트 루트를 확인한다. 저장소·앱·CLI는 이미 설치된 상태이므로 새로 clone하거나 설치하지 않는다.
+사용자는 설치 경로를 입력하지 않고 아래 프롬프트를 그대로 사용한다. AI가 활성 CLI 기록과 기존 CLI를 탐색하고 `cli/road-music.js`, `AGENTS.md`, 이 문서가 함께 있는 키트 루트를 확인한다. 저장소·앱·CLI는 이미 설치된 상태이므로 새로 clone하거나 설치하지 않는다.
 
 ```text
 로드뮤직 앱과 CLI는 이미 설치돼 있어. 이 컴퓨터에서 기존 CLI 설치 폴더를 자동으로 찾아줘.
@@ -31,9 +31,9 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 
 | 순서 | 수행할 일 | 완료 기준 |
 | --- | --- | --- |
-| 1. 기존 CLI 찾기 | 아래 [자동 탐색 순서](#find-cli)에 따라 전역 명령·현재 작업 폴더·기존 설치 파일 탐색 | 사용자의 경로 입력 없이 실제 키트 루트와 실행 명령 확보 |
+| 1. 기존 CLI 찾기 | 아래 [자동 탐색 순서](#find-cli)에 따라 활성 CLI 기록·전역 명령·현재 작업 폴더·기존 설치 파일 탐색 | 사용자의 경로 입력 없이 실제 키트 루트와 실행 명령 확보 |
 | 2. 지침 연결 | 그 루트의 `AGENTS.md`, 이 문서와 동봉 스킬을 읽고 가사·태그·검토·공식 원문의 위치를 확인 | 다른 프로젝트의 지침을 덮어쓰지 않고 참고 경로 연결 |
-| 3. 실행 계약 확인 | `schema`와 `service:status --no-start`로 공개 명령·현재 서비스 설치본·데이터 폴더 확인 | 실행 파일과 연결 대상이 의도한 설치본인지 확인 |
+| 3. 실행 계약 확인 | `cli:version`, `cli:update:check`, `schema`, `service:status --no-start`로 공개 명령·CLI 버전·현재 서비스 설치본·데이터 폴더 확인 | 실행 파일과 연결 대상이 의도한 설치본인지 확인 |
 | 4. 현재 상태 조회 | `app:state`, `engines:list`, `projects:list`, `songs:list`, `setup:check` 순으로 조회 | 엔진 준비 여부·현재 프로젝트·대기 작업과 플랫폼 제외 항목 파악 |
 | 5. 준비 결과 보고 | 설치 루트·절대 경로 호출 명령·실제 앱/서비스 버전·엔진 상태·기본 검토 정책 요약 | 새 세션에서 곧바로 음악 요청을 받을 수 있음 |
 
@@ -42,10 +42,11 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 <details>
 <summary><strong>설치 폴더 자동 탐색 순서 — AI용</strong></summary>
 
-1. **전역 명령:** `road-music`의 실행 위치를 확인한다. macOS·Linux는 `command -v road-music`, Windows는 `Get-Command road-music`을 사용한다. 심볼릭 링크의 실제 경로를 따라가며 npm 실행 래퍼인 경우 `npm root -g` 아래의 `road-music` 패키지도 확인한다.
-2. **현재 작업 폴더:** 작업 폴더와 상위 프로젝트에서 `cli/road-music.js`를 찾는다. `music-road` 저장소나 `RoadMusic-버전-cli` 키트가 후보이며, 폴더 이름만으로 확정하지 않는다.
-3. **기존 설치 파일:** macOS는 `mdfind 'kMDItemFSName == "road-music.js"'`로 먼저 찾는다. 검색 결과가 없거나 다른 OS라면 사용자 홈의 프로젝트·다운로드 폴더부터 파일명 `road-music.js`를 검색한다. 필요하면 홈 범위로 넓히되 `.git`, `node_modules`, 가상환경, 캐시·모델·음원 라이브러리는 제외한다. 전역 npm 패키지는 1단계에서 별도로 확인한다.
-4. **후보 검증:** 실제 경로 기준으로 중복을 제거하고 `package.json`의 이름 `road-music`, `cli/road-music.js`, `AGENTS.md`, `docs/ai-cli.md`가 함께 있는지 확인한다. 전역 명령이 가리키는 설치본을 우선하고, 지침을 읽은 뒤 `schema`와 `service:status --no-start`로 실행 버전·연결 대상도 점검한다. GUI의 `.app`이나 곡·모델 데이터 폴더를 CLI 키트로 선택하지 않는다.
+1. **활성 CLI 기록:** `ROADMUSIC_CLI_HOME`이 있으면 그 경로의 `current.json`, 없으면 `~/.local/share/road-music/cli/current.json`을 먼저 읽는다. 기록의 `cliPath`가 존재하고 키트 검증을 통과하면 이 경로를 사용한다.
+2. **전역 명령:** `road-music`의 실행 위치를 확인한다. macOS·Linux는 `command -v road-music`, Windows는 `Get-Command road-music`을 사용한다. 심볼릭 링크의 실제 경로를 따라가며 npm 실행 래퍼인 경우 `npm root -g` 아래의 `road-music-cli`와 과거 `road-music` 패키지도 확인한다.
+3. **현재 작업 폴더:** 작업 폴더와 상위 프로젝트에서 `cli/road-music.js`를 찾는다. `music-road` 저장소나 `RoadMusic-CLI-X.Y.Z` 키트가 후보이며, 폴더 이름만으로 확정하지 않는다.
+4. **기존 설치 파일:** macOS는 `mdfind 'kMDItemFSName == "road-music.js"'`로 먼저 찾는다. 검색 결과가 없거나 다른 OS라면 사용자 홈의 프로젝트·다운로드 폴더부터 파일명 `road-music.js`를 검색한다. 필요하면 홈 범위로 넓히되 `.git`, `node_modules`, 가상환경, 캐시·모델·음원 라이브러리는 제외한다. 전역 npm 패키지는 2단계에서 별도로 확인한다.
+5. **후보 검증:** 실제 경로 기준으로 중복을 제거하고 `package.json`의 이름 `road-music`, `cli/road-music.js`, `AGENTS.md`, `docs/ai-cli.md`가 함께 있는지 확인한다. 활성 기록이 가리키는 설치본을 우선하고, 지침을 읽은 뒤 `cli:version`, `schema`, `service:status --no-start`로 실행 버전·연결 대상도 점검한다. GUI의 `.app`이나 곡·모델 데이터 폴더를 CLI 키트로 선택하지 않는다.
 
 찾은 절대 경로는 AI가 현재 대화에서 기억하고 후속 명령에 사용한다. 여러 설치본 중 안전하게 선택할 수 없거나 끝내 찾지 못한 경우에만 검색 범위·후보·부족한 파일을 보고한다. 검색 실패를 이유로 설치·업데이트·전역 스킬 등록을 시작하지 않는다.
 
@@ -97,7 +98,7 @@ node cli/road-music.js app:state
 - `uncertain:true` 오류는 요청이 실제로 접수됐는지 알 수 없다는 뜻이다. 자동 재제출하지 말고 `service:status`, `queue:list`, `songs:list` 또는 `job:wait`을 조회한다.
 - `--confirm`, `--overwrite`, `--input`, `--output`은 JSON 안이 아닌 CLI 최상위 플래그다. 경로는 사용자가 고른 절대 경로를 쓴다.
 - `about:feedback`, `shell:open`, `about:open`, `update:open-page`, `notices:open`, `song:reveal`, `log:open`은 외부 전송·앱·브라우저 동작을 할 수 있으므로 명시적 요청이 있을 때만 쓴다.
-- 새 버전은 `update:check`, 상태는 `update:status`로 확인한다. 사용자가 업데이트를 요청한 경우 작업·대기열이 없을 때 `update:install`을 실행한다. 설치 인계 뒤 재시작을 기다리고 실제 버전을 다시 확인한다. [업데이트 가이드](updates.md)를 따른다.
+- 세션 첫 연결에서 `cli:version`, `cli:update:check`을 읽기 전용으로 실행한다. 새 CLI가 있으면 현재·최신 버전과 노트·설치 대상만 알린다. 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 위임할 때만 `cli:update:install`을 실행하고, 반환된 `cliPath`에서 버전·스키마·지식 조회를 확인한다. 앱 `update:*`는 앱 업데이트 요청에만 사용한다. [업데이트 가이드](updates.md)를 따른다.
 
 CLI 설치와 환경 점검은 [CLI 설치](cli-install.md), 명령별 상세 계약은 [CLI 레퍼런스](cli-reference.md), 검증된 범위는 [CLI 검수 결과](cli-qa-report.md)를 참고한다.
 

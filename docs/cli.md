@@ -22,7 +22,7 @@ Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 
 
 ## 시작하기
 
-CLI는 소스 체크아웃 또는 배포된 `RoadMusic-버전-cli` 소스 키트에서 Node.js로 실행한다. `버전`은 설치한 Release의 값으로 바꾼다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
+CLI는 소스 체크아웃 또는 배포된 `RoadMusic-CLI-X.Y.Z` 키트에서 Node.js로 실행한다. CLI 버전은 앱 버전과 별개이며 `cli-vX.Y.Z` Release를 따른다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
 
 ```bash
 npm ci --include=dev
@@ -42,7 +42,14 @@ node cli/road-music.js service:show
 
 `service:status`와 `service:stop`은 자동 시작하지 않는다. `service:start`는 상태 요청으로 서비스를 시작한다. 활성 요청·생성·설치·렌더·대기열이 있을 때 `service:stop`은 `--confirm` 없이는 실패하며, `--confirm`은 진행 중인 작업을 중단할 수 있다.
 
-앱·서비스가 실행 중이면 GitHub 최신 정식 버전을 주기적으로 확인한다. `update:check`로 수동 확인, `update:status`로 상태 조회, `update:watch`로 알림 대기, `update:install`로 다운로드·설치·재시작을 요청한다. 지원되는 설치 방식·진행 작업 보호·재시작 후 확인은 [업데이트 가이드](updates.md)를 따른다.
+앱·서비스가 실행 중이면 GitHub 최신 앱 Release를 주기적으로 확인한다. `update:check`로 수동 확인, `update:status`로 상태 조회, `update:watch`로 알림 대기, `update:install`로 앱 다운로드·설치·재시작을 요청한다. CLI 릴리스는 자동 감시하지 않으며 `cli:update:check`으로만 확인한다. 두 흐름의 대상과 제한은 [업데이트 가이드](updates.md)를 따른다.
+
+```bash
+node cli/road-music.js cli:version
+node cli/road-music.js cli:update:check
+```
+
+사용자가 CLI 업데이트를 요청했거나 자동 업데이트를 명시적으로 위임한 경우에만 `cli:update:install`을 실행한다. 설치 결과의 `cliPath`에서 `--version`, `schema`, `prompt:knowledge`를 확인하고, 이후 명령은 그 경로의 CLI로 실행한다. CLI 설치는 앱·GUI 서비스·모델·곡·기존 Git 작업 폴더를 바꾸지 않는다.
 
 기본 데이터 폴더는 macOS에서 `~/Library/Application Support/Road Music`이다. 개발·자동화는 실제 라이브러리와 분리한 절대 경로를 지정한다.
 
@@ -65,7 +72,7 @@ node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
 node cli/road-music.js prompt:knowledge --json '{"topic":"review"}'
 ```
 
-topic은 `genres`, `ccm`, `hymn-remake`, `ace`, `lyrics`, `review` 중 하나다. 생략하면 `topics` 목록, 지정하면 `topic`, `title`, 상대 `source`, 키트 `version`, 원문 `content`를 반환한다. `policy`의 `preserveUserInput:true`, `autoApply:false`, `suggestionsRequireApproval:true`는 지식을 읽어도 제공 가사·프롬프트를 임의 변경하지 않는 사용 계약이다.
+topic은 `genres`, `ccm`, `hymn-remake`, `ace`, `lyrics`, `review` 중 하나다. 생략하면 `topics` 목록, 지정하면 `topic`, `title`, 상대 `source`, 기존 호환 필드 `version`(앱 버전), `appVersion`, `cliVersion`, 원문 `content`를 반환한다. `policy`의 `preserveUserInput:true`, `autoApply:false`, `suggestionsRequireApproval:true`는 지식을 읽어도 제공 가사·프롬프트를 임의 변경하지 않는 사용 계약이다.
 
 이 명령은 가사·style 입력을 받거나 생성에 자동 반영하지 않는다. 더 나은 안은 [근거 기반 제안](music-review.md#preserve-input)으로 제시한다. 앱에서는 스타일 패널의 **가이드 보기**에서 같은 문서를 읽으며 입력창은 그대로 유지된다. 오래된 CLI의 `schema`에 이 명령이 없으면 동봉 문서를 직접 읽고 미지원 상태를 알린다. 조회를 이유로 자동 재설치하지 않는다.
 

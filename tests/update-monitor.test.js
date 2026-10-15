@@ -20,8 +20,8 @@ test('service start checks immediately and its 15-minute timer publishes a newly
   global.clearInterval = id => { assert.equal(id, token); cleared = true }
   global.fetch = async () => new Response(JSON.stringify({ tag_name: `v${version}`, draft: false, prerelease: false,
     html_url: `https://github.com/roadkwonai/music-road/releases/tag/v${version}`,
-    assets: [{ name: `RoadMusic-${version}-cli.zip`, size: 10,
-      browser_download_url: `https://github.com/roadkwonai/music-road/releases/download/v${version}/RoadMusic-${version}-cli.zip` },
+    assets: [{ name: `RoadMusic-${version}-source.zip`, size: 10,
+      browser_download_url: `https://github.com/roadkwonai/music-road/releases/download/v${version}/RoadMusic-${version}-source.zip` },
     { name: 'SHA256SUMS.txt', size: 90, browser_download_url: `https://github.com/roadkwonai/music-road/releases/download/v${version}/SHA256SUMS.txt` }]
   }))
   delete require.cache[require.resolve('../electron/app-update')]

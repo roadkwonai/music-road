@@ -5,7 +5,51 @@ const fs = require('node:fs/promises')
 const os = require('node:os')
 const path = require('node:path')
 const net = require('node:net')
-const { endpoint, createBridge } = require('../electron/cli-transport')
+const { endpoint, createBridge, getSchema, getVersion } = require('../electron/cli-transport')
+
+test('keeps protocol schema version separate from app and CLI releases', async t => {
+  const schema = getSchema()
+  assert.equal(schema.version, 2)
+  assert.deepEqual(getVersion(), {
+    cliVersion: require('../cli/package.json').version,
+    appVersion: require('../package.json').version,
+    protocolVersion: 2
+  })
+  assert.equal(schema.appVersion, require('../package.json').version)
+  assert.equal(schema.cliVersion, require('../cli/package.json').version)
+  assert.ok(schema.commands.some(entry => entry.command === 'cli:version'))
+  assert.deepEqual(schema.commands.find(entry => entry.command === 'cli:update:check').params, {
+    type: 'object', properties: {}, additionalProperties: false
+  })
+  assert.deepEqual(schema.commands.find(entry => entry.command === 'cli:update:install').params, {
+    type: 'object', properties: { targetDir: { type: 'string', format: 'absolute-path' } }, additionalProperties: false
+  })
+
+  const { bridge } = await fixture(t)
+  assert.deepEqual(await bridge.dispatch({ command: 'cli:version', params: {} }), getVersion())
+  assert.deepEqual(await bridge.dispatch({ command: 'cli:status', params: {} }), {
+    ok: true,
+    pid: process.pid,
+    appVersion: require('../package.json').version,
+    cliVersion: require('../cli/package.json').version,
+    protocolVersion: 2,
+    stopping: false,
+    busy: false,
+    requests: []
+  })
+  bridge.configure({ status: () => ({ version: 'running-app-version' }) })
+  const status = await bridge.dispatch({ command: 'cli:status', params: {} })
+  assert.equal(status.version, 'running-app-version')
+  assert.equal(status.appVersion, require('../package.json').version)
+
+  const update = require('../cli/update')
+  const original = { check: update.check, install: update.install }
+  t.after(() => Object.assign(update, original))
+  update.check = async params => ({ local: 'check', params })
+  update.install = async params => ({ local: 'install', params })
+  assert.deepEqual(await bridge.dispatch({ command: 'cli:update:check', params: {} }), { local: 'check', params: {} })
+  assert.deepEqual(await bridge.dispatch({ command: 'cli:update:install', params: { targetDir: '/tmp/road-music-cli' } }), { local: 'install', params: { targetDir: '/tmp/road-music-cli' } })
+})
 
 async function fixture (t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'road-cli-test-'))

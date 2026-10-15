@@ -9,6 +9,73 @@ const test = require('node:test')
 const { PassThrough } = require('node:stream')
 const { defaultUserData, parseArgs, request, run, socketEndpoint, startService } = require('../cli/client')
 
+test('reports the local CLI and application versions without starting Electron', async () => {
+  let spawns = 0
+  let stdout = ''
+  const versions = {
+    cliVersion: require('../cli/package.json').version,
+    appVersion: require('../package.json').version,
+    protocolVersion: 2
+  }
+  for (const argv of [['--version'], ['version'], ['cli:version']]) {
+    stdout = ''
+    const code = await run(argv, {
+      endpoint: path.join(os.tmpdir(), 'road-music-version-missing.sock'),
+      spawnProcess: () => { spawns += 1; return { on: () => {}, unref: () => {} } },
+      stdout: { write: text => { stdout += text } }
+    })
+    assert.equal(code, 0)
+    assert.deepEqual(JSON.parse(stdout), { ok: true, result: versions })
+  }
+  assert.equal(spawns, 0)
+})
+
+test('keeps the local version response in batch mode without starting Electron', async () => {
+  let stdout = ''
+  const code = await run(['batch'], {
+    stdinText: '{"id":"local","command":"version"}',
+    endpoint: path.join(os.tmpdir(), 'road-music-version-batch-missing.sock'),
+    spawnProcess: () => { throw new Error('must not start Electron') },
+    stdout: { write: text => { stdout += text } }
+  })
+  assert.equal(code, 0)
+  assert.deepEqual(JSON.parse(stdout), {
+    id: 'local', ok: true, result: {
+      cliVersion: require('../cli/package.json').version,
+      appVersion: require('../package.json').version,
+      protocolVersion: 2
+    }
+  })
+})
+
+test('runs CLI update commands locally in single and batch mode without starting Electron', async t => {
+  const update = require('../cli/update')
+  const original = { check: update.check, install: update.install }
+  const calls = []
+  update.check = async params => { calls.push(['check', params]); return { available: false, current: '0.1.0' } }
+  update.install = async params => { calls.push(['install', params]); return { cliVersion: '0.1.1', appVersion: '1.4.0', cliPath: '/tmp/road-music-cli/cli/road-music.js' } }
+  t.after(() => Object.assign(update, original))
+  let stdout = ''
+  const supplied = {
+    endpoint: path.join(os.tmpdir(), 'road-music-cli-update-missing.sock'),
+    spawnProcess: () => { throw new Error('must not start Electron') },
+    stdout: { write: text => { stdout += text } }
+  }
+  assert.equal(await run(['cli:update:check'], supplied), 0)
+  assert.deepEqual(JSON.parse(stdout), { ok: true, result: { available: false, current: '0.1.0' } })
+  stdout = ''
+  assert.equal(await run(['batch'], {
+    ...supplied,
+    stdout: { write: text => { stdout += text } },
+    stdinText: '{"id":"install","command":"cli:update:install","params":{"targetDir":"/tmp/road-music-cli"}}'
+  }), 0)
+  assert.deepEqual(JSON.parse(stdout), {
+    id: 'install', ok: true,
+    result: { cliVersion: '0.1.1', appVersion: '1.4.0', cliPath: '/tmp/road-music-cli/cli/road-music.js' }
+  })
+  assert.deepEqual(calls, [['check', {}], ['install', { targetDir: '/tmp/road-music-cli' }]])
+})
+
 function tempSocket () {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'road-music-cli-'))
   return { dir, socket: path.join(dir, 'service.sock') }
@@ -48,6 +115,9 @@ test('parses command flags and absolute file paths', () => {
   assert.equal(parseArgs(['video:render']).timeout, 86_400_000)
   assert.equal(parseArgs(['video:render', '--timeout', '43200000']).timeout, 43_200_000)
   assert.throws(() => parseArgs(['video:render', '--timeout', '2147483648']), (error) => error.code === 'invalid_arguments')
+  assert.equal(parseArgs(['cli:update:check']).timeout, 30_000)
+  assert.equal(parseArgs(['cli:update:install']).timeout, 1_800_000)
+  assert.throws(() => parseArgs(['cli:update:install', '--timeout', '1800001']), (error) => error.code === 'invalid_arguments')
 })
 
 test('writes standardized JSON result and forwards events to stderr', async () => {

@@ -13,7 +13,7 @@ async function fixture (t, fetchAsset) {
   await fs.mkdir(path.join(root, 'app', '.git'), { recursive: true })
   const originalFetch = global.fetch
   t.after(async () => { update.stop(); global.fetch = originalFetch; await new Promise(resolve => setTimeout(resolve, 20)); await fs.rm(root, { recursive: true, force: true }) })
-  const name = process.platform === 'darwin' ? `RoadMusic-1.4.0-mac-${process.arch}.dmg` : 'RoadMusic-1.4.0-cli.zip'
+  const name = process.platform === 'darwin' ? `RoadMusic-1.4.0-mac-${process.arch}.dmg` : 'RoadMusic-1.4.0-source.zip'
   const base = 'https://github.com/roadkwonai/music-road/releases/download/v1.4.0/'
   const bytes = Buffer.from('verified release bytes')
   const digest = crypto.createHash('sha256').update(bytes).digest('hex')

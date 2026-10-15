@@ -49,6 +49,8 @@ node cli/road-music.js cli:update:install \
 
 `cli:update:install`이 반환한 새 경로로 이후 명령을 실행한다. 전역 `road-music` 링크가 예전 키트를 가리키면 자동으로 바꾸지 않는다.
 
+공개 파일의 실제 감지·다운로드·설치 결과는 [CLI 독립 업데이트 검증](cli-update-qa-report.md)에 기록했다.
+
 <a id="ai"></a>
 
 ## AI의 확인과 설치 순서
@@ -82,3 +84,5 @@ node cli/road-music.js cli:update:check
 앱 자동 업데이트는 macOS에서 검증했다. Windows 앱 업데이트와 Linux 소스 설치는 별도 검증 대상이다. 앱은 현재 애드혹 서명이며 Apple 공증을 받지 않았다.
 
 CLI 설치가 실패하면 기존 CLI·앱·데이터는 그대로 둔다. 새 폴더에 설치했으므로 해당 폴더와 오류를 확인한 뒤 다시 시도한다. 실제 앱 업데이트의 설치 실패와 복구 규칙은 앱 상태 응답과 [CLI 검수 결과](cli-qa-report.md)를 따른다.
+
+이전 공유 번호의 CLI에는 독립 업데이트 명령이 없을 수 있다. 이 경우 [CLI 설치](cli-install.md)에 따라 `cli-v0.1.0` 키트를 새 폴더에 한 번 설치한 뒤 새 지침을 사용한다.

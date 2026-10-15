@@ -2,6 +2,8 @@
 
 특정 버전과 환경에서 수행한 CLI 검수의 기록이다. 현재 설치본의 동작 보증이 아니므로, 실제 명령과 입력값은 `schema`와 [CLI 레퍼런스](cli-reference.md)로 다시 확인한다.
 
+CLI 0.1.0의 별도 버전·배포·실제 업데이트 설치 검증은 [CLI 독립 업데이트 검증](cli-update-qa-report.md)을 참고한다.
+
 [Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
 
 > [!NOTE]

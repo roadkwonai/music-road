@@ -87,6 +87,7 @@
 | 자료 | 확인 범위 |
 | --- | --- |
 | [CLI 검수 결과](cli-qa-report.md) | 테스트·실제 ACE·음원/영상 검증과 미검증 항목 |
+| [CLI 독립 업데이트 검증](cli-update-qa-report.md) | CLI 0.1.0 공개 파일 감지·다운로드·설치와 앱 보존 확인 |
 | [업데이트 전 과정 검증](update-e2e-report.md) | 실제 GUI·CLI·소스 업데이트·재시작·복구 결과 |
 | [업데이트 검증 원시 결과](update-e2e-results.json) | 위 보고서가 참조하는 구조화된 실행 결과 |
 

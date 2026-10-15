@@ -13,6 +13,7 @@ const appUpdate = require('./app-update')
 const { generationError } = require('../renderer/generation-options')
 const midiTools = require('./midi')
 const videoTools = require('./video')
+const promptKnowledge = require('./prompt-knowledge')
 
 const WIN = process.platform === 'win32'
 const MAC = process.platform === 'darwin'
@@ -1625,6 +1626,7 @@ ipcMain.handle('app:state', async () => {
   return { ready, engines, gpu: settings.gpu || await detectGpu(), songsDir: dir, version: app.getVersion(),
     store: Boolean(process.windowsStore), repair }
 })
+ipcMain.handle('prompt:knowledge', (_event, params) => promptKnowledge.read(params))
 
 ipcMain.handle('setup:check', () => setupCheck())
 

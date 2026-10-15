@@ -407,6 +407,10 @@ function localSchema (params = {}) {
   return command
 }
 
+function localKnowledge (params = {}) {
+  return require('../electron/prompt-knowledge').read(params)
+}
+
 async function waitForJobs (result, options, timeout) {
   const jobs = Array.isArray(result.jobs) ? result.jobs : (typeof result.jobId === 'string' ? [{ jobId: result.jobId }] : null)
   if (!jobs || !jobs.length || jobs.some(job => !job || typeof job.jobId !== 'string' || !job.jobId)) {
@@ -465,6 +469,8 @@ async function runBatch (parsed, options) {
       const payload = { id: item.id, command, params: item.params === undefined ? {} : item.params, input: item.input, output: item.output, confirm: item.confirm === true, overwrite: item.overwrite === true, timeout }
       const result = command === 'cli:schema'
         ? localSchema(item.params === undefined ? {} : item.params)
+        : command === 'prompt:knowledge'
+          ? localKnowledge(item.params === undefined ? {} : item.params)
         : (normalized.start ? await requestServiceStart(payload, requestOptions) : await requestWithStartup(payload, requestOptions))
       const responseId = item.id === undefined ? {} : { id: item.id }
       if (result && result.ok === false) { failed = true; writeJson(options.stdout, { ...responseId, ok: false, error: failedResult(result) }) } else writeJson(options.stdout, { ...responseId, ok: true, result })
@@ -503,6 +509,10 @@ async function run (argv = process.argv.slice(2), supplied = {}) {
     options.onEvent = parsed.events ? (event) => writeJson(options.stderr, event) : undefined
     if (parsed.batch) return runBatch(parsed, options)
     const params = await paramsFor(parsed, options)
+    if (normalized.command === 'prompt:knowledge') {
+      writeJson(options.stdout, { ok: true, result: localKnowledge(params) })
+      return 0
+    }
     options.noStart = options.noStart || normalized.noStart
     const payload = { command: normalized.command, params, input: parsed.input, output: parsed.output, confirm: parsed.confirm, overwrite: parsed.overwrite, timeout: parsed.timeout }
     let result = normalized.start ? await requestServiceStart(payload, options) : await requestWithStartup(payload, options)

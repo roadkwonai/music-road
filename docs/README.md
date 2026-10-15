@@ -38,6 +38,7 @@
 | 보컬·악기·템포·길이를 세밀하게 지정 | [음악 생성 옵션](music-options.md) | 지원 값·우선순위·완전한 JSON 예시 |
 | K-POP·트로트·락발라드·BGM | [장르별 프롬프트](genre-prompts.md) | 간단 요청·상세 레시피·여러 곡 비교 |
 | CCM·워십을 주로 제작 | [CCM 상세 가이드](ccm-prompts.md) | 과거·최근 근거, 48개 스타일, 세부 옵션, 요청문·가사·JSON 예시 |
+| 옛 찬송을 현대 CCM으로 리메이크 | [원전·권리·리메이크 가이드](hymn-remake-guide.md) | 원전 후보 20곡·편곡 16가지, 번역·녹음 구분, 입력 원문 보존 |
 | 최근 인기 스타일을 조사해서 제작 | [리서치 기반 음악 만들기](music-research.md) | 날짜·출처·지표 → 창작 가사·설정 → 생성 |
 | 검토 후 생성하거나 전부 자동 위임 | [검토와 자동 생성](music-review.md) | 승인 범위·부분 위임·수정·결과 자료 |
 | 반복 작업을 AI에게 맡김 | [작업 프롬프트](../prompts/cli-workflows.md) | 생성·앨범·자막·영상·오류 진단 |
@@ -75,6 +76,7 @@
 | 날짜 기반 릴리스 노트 작성·GitHub Release 연결 | [릴리스 노트](../releases/README.md) |
 | DMG·CLI 키트 빌드·서명·배포 준비 | [패키징](packaging.md) |
 | 통합 배포와 이전 기록 | [1.4.0 통합 노트](../releases/2026-10-15-road-music-1-4-0.md) · [전체 GitHub Releases](https://github.com/roadkwonai/music-road/releases) |
+| 최신 지식 조회·찬송가 리메이크 | [1.4.4 노트](../releases/2026-10-15-hymn-remake-knowledge.md) |
 
 이미 공개된 태그·파일을 교체하지 않고 다음 버전에 수정 내용을 기록합니다. 날짜 노트와 실제 GitHub Release 발행은 별개의 단계입니다.
 

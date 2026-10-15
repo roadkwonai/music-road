@@ -6,10 +6,17 @@
 
 ## 목차
 
+- [최신 릴리스](#최신-릴리스)
 - [통합 릴리스](#통합-릴리스)
 - [작성 규칙](#작성-규칙)
 - [배포 연동](#배포-연동)
 - [이전 릴리스](#이전-릴리스)
+
+## 최신 릴리스
+
+| 날짜 | 노트 | 버전 |
+| --- | --- | --- |
+| 2026-10-15 | [찬송가 리메이크 지식과 원문 보존](2026-10-15-hymn-remake-knowledge.md) | 1.4.4 |
 
 ## 통합 릴리스
 
@@ -41,4 +48,4 @@ npm run release:note -- create --slug cli-guides --title "CLI 가이드 개선"
 
 ## 이전 릴리스
 
-통합 전 1.4.x 변경 기록은 [기존 릴리스 아카이브](../docs/releases/)에서 보관합니다. 현재 배포 내용은 위의 1.4.0 통합 노트를 기준으로 하며, 원격 발행 여부는 [GitHub Releases](https://github.com/roadkwonai/music-road/releases)에서 확인합니다.
+통합 전 1.4.x 변경 기록은 [기존 릴리스 아카이브](../docs/releases/)에서 보관합니다. 1.4.0 통합 이후의 변경은 최신 릴리스 노트에서 확인하며, 원격 발행 여부는 [GitHub Releases](https://github.com/roadkwonai/music-road/releases)에서 확인합니다.

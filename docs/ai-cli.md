@@ -105,6 +105,13 @@ CLI 설치와 환경 점검은 [CLI 설치](cli-install.md), 명령별 상세 �
 
 ## 음악 요청 예시 찾기
 
+CLI가 `prompt:knowledge`를 지원하면 앱을 시작하지 않고 장르 지식을 읽을 수 있다. 우선 목록을 읽고 CCM은 `ccm`, 옛 찬송 리메이크는 `hymn-remake`, 원문 보존·추천은 `review`를 조회한다. [명령 사용법](cli.md#knowledge)을 따른다. 사용자 가사·프롬프트가 이미 있으면 문서 예시로 바꾸지 않고 미지정 부분만 제안한다. 전처리가 원문과 충돌하면 차이와 근거를 보여주고 승인 없이 수정하지 않는다.
+
+```bash
+node cli/road-music.js prompt:knowledge --json '{"topic":"genres"}'
+node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
+```
+
 | 필요한 내용 | 문서 |
 | --- | --- |
 | ACE 생성 전 필수 참고, 공식 원문·프롬프트 최적화 | [ACE 최적화 가이드](ace-prompt-guide.md) · [공식 보관본](vendor/ace-step-1.5/README.md) |

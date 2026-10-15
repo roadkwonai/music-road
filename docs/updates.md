@@ -17,7 +17,9 @@
 
 ## 1.4.0 통합 배포본으로 이전
 
-이번 1.4.0 통합 배포본은 이전 1.4.0~1.4.3의 수정과 AI 제작 자료를 묶은 버전이다. 배포 상태는 [GitHub Releases](https://github.com/roadkwonai/music-road/releases), 변경 내용은 [통합 노트](../releases/2026-10-15-road-music-1-4-0.md)에서 확인한다.
+이 절은 과거 1.4.0 통합본으로 이전하던 기록이다. **1.4.4는 이전 1.4.0~1.4.3보다 높으므로 업데이트 확인 대상**이며, 최신 변경은 [1.4.4 노트](../releases/2026-10-15-hymn-remake-knowledge.md)에서 확인한다.
+
+당시 1.4.0 통합 배포본은 이전 1.4.0~1.4.3의 수정과 AI 제작 자료를 묶은 버전이었다. 배포 상태는 [GitHub Releases](https://github.com/roadkwonai/music-road/releases), 통합 내용은 [당시 노트](../releases/2026-10-15-road-music-1-4-0.md)에서 확인한다.
 
 > [!IMPORTANT]
 > **이전 1.4.0~1.4.3 설치본은 수동으로 교체한다.** 자동 업데이트는 현재보다 높은 버전만 설치하므로 같은 1.4.0이나 더 낮은 1.4.0을 감지하지 않는다.

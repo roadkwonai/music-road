@@ -1961,6 +1961,10 @@ function wireUi () {
     updatePreview()
   }
   $('tagPreview').onclick = () => $('tagPreview').classList.toggle('expanded')
+  $('knowledgeOpen').onclick = () => openKnowledge($('knowledgeOpen'))
+  $('knowledgeClose').onclick = closeKnowledge
+  $('knowledgeTopic').onchange = () => loadKnowledge($('knowledgeTopic').value)
+  $('knowledge').onkeydown = trapKnowledgeFocus
   updatePreview()
 
   for (const id of [...Object.keys(ADVANCED), 'advMaxSeconds', 'advCot']) {
@@ -2597,6 +2601,81 @@ function wireUi () {
     selected = null
     $('player').classList.add('hidden')
     await refresh()
+  }
+}
+
+let knowledgeRequest = 0
+let knowledgeTrigger = null
+
+function closeKnowledge () {
+  knowledgeRequest += 1
+  $('knowledge').classList.add('hidden')
+  const trigger = knowledgeTrigger
+  knowledgeTrigger = null
+  if (trigger && trigger.isConnected) trigger.focus()
+}
+
+function trapKnowledgeFocus (event) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    closeKnowledge()
+    return
+  }
+  if (event.key !== 'Tab') return
+  const controls = [...$('knowledge').querySelectorAll('button, select, [tabindex]')]
+    .filter(element => !element.disabled && element.tabIndex >= 0)
+  const first = controls[0]
+  const last = controls.at(-1)
+  if (!first || !last) return
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
+async function loadKnowledge (topic) {
+  const request = ++knowledgeRequest
+  $('knowledgeSource').textContent = ''
+  $('knowledgeContent').textContent = '가이드를 읽는 중…'
+  try {
+    const result = await window.yue.knowledge({ topic })
+    if (request !== knowledgeRequest || $('knowledgeTopic').value !== topic || $('knowledge').classList.contains('hidden')) return
+    $('knowledgeSource').textContent = `${result.title} · ${result.source} · v${result.version}`
+    $('knowledgeContent').textContent = result.content
+  } catch (error) {
+    if (request !== knowledgeRequest || $('knowledgeTopic').value !== topic || $('knowledge').classList.contains('hidden')) return
+    $('knowledgeSource').textContent = ''
+    $('knowledgeContent').textContent = error.message || '가이드를 읽지 못했습니다.'
+  }
+}
+
+async function openKnowledge (trigger) {
+  const request = ++knowledgeRequest
+  knowledgeTrigger = trigger || document.activeElement
+  $('knowledgeSource').textContent = ''
+  $('knowledgeContent').textContent = '가이드 목록을 읽는 중…'
+  $('knowledge').classList.remove('hidden')
+  try {
+    const result = await window.yue.knowledge()
+    if (request !== knowledgeRequest || $('knowledge').classList.contains('hidden')) return
+    const select = $('knowledgeTopic')
+    select.replaceChildren(...result.topics.map(({ topic, title }) => {
+      const option = document.createElement('option')
+      option.value = topic
+      option.textContent = title
+      return option
+    }))
+    if (select.value) {
+      select.focus()
+      await loadKnowledge(select.value)
+    } else $('knowledgeClose').focus()
+  } catch (error) {
+    if (request !== knowledgeRequest || $('knowledge').classList.contains('hidden')) return
+    $('knowledgeContent').textContent = error.message || '가이드 목록을 읽지 못했습니다.'
+    $('knowledgeClose').focus()
   }
 }
 

@@ -10,6 +10,7 @@ const on = (channel) => (handler) => {
 
 contextBridge.exposeInMainWorld('yue', {
   state: () => ipcRenderer.invoke('app:state'),
+  knowledge: (params) => ipcRenderer.invoke('prompt:knowledge', params),
   checkSetup: () => ipcRenderer.invoke('setup:check'),
   location: () => ipcRenderer.invoke('setup:location'),
   pickLocation: () => ipcRenderer.invoke('setup:pick-location'),

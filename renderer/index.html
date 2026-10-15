@@ -94,6 +94,7 @@
           <label class="seed-label">시드
             <input id="seed" placeholder="랜덤" inputmode="numeric">
           </label>
+          <button id="knowledgeOpen" class="ghost small" title="장르와 가사 작성 가이드를 읽기 전용으로 봅니다">가이드 보기</button>
           <button id="clearStyle" class="ghost small" title="프롬프트 지우기">✕ 지우기</button>
         </div>
       </div>
@@ -517,6 +518,22 @@
       </div>
     </div>
     <p class="muted tiny">업데이트하면 프로그램이 잠시 닫혔다가 다시 열립니다. 만든 곡과 설치된 AI 모델은 그대로 유지됩니다.</p>
+  </div>
+</div>
+
+<!-- 프롬프트 지식: 입력을 바꾸지 않는 읽기 전용 문서 보기 -->
+<div id="knowledge" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="knowledgeTitle">
+  <div class="setup-card knowledge-card">
+    <div class="about-head">
+      <div class="grow">
+        <h1 id="knowledgeTitle">음악 제작 가이드</h1>
+        <p class="muted tiny">가사와 스타일 입력은 바꾸지 않습니다. 참고·제안은 검토한 뒤 직접 적용하세요.</p>
+      </div>
+      <button id="knowledgeClose" class="ghost small">닫기</button>
+    </div>
+    <label class="knowledge-select">문서 <select id="knowledgeTopic"></select></label>
+    <p id="knowledgeSource" class="muted tiny"></p>
+    <pre id="knowledgeContent" class="knowledge-content" tabindex="0"></pre>
   </div>
 </div>
 

@@ -8,6 +8,8 @@ ACE로 음악을 만들거나 가사·생성 옵션을 설계할 때 **작업 �
 
 작업 스킬은 [road-music-ace](../skills/road-music-ace/SKILL.md), 태그 선택은 [구간 태그 가이드](lyrics-tags.md)를 따른다. **기본은 가사·프롬프트 검토 후 생성**이며, 두 항목부터 생성까지 전부 자동 위임한 경우의 예외와 결과 자료는 [검토 규칙](music-review.md)에 정리했다.
 
+사용자가 준 가사·프롬프트는 아래 최적화 예시보다 우선한다. 전처리·편곡 개선이 필요해도 원문을 덮어쓰지 말고 [원문·전달본과 추천](music-review.md#preserve-input)을 구분한다. 찬송가 원형을 유지하는 작업은 [참조 기반 리메이크](hymn-remake-guide.md#modes)도 확인한다.
+
 > [!IMPORTANT]
 > 이 문서는 현재 공개 CLI와 ACE Turbo·0.6B에 맞춘 적용 가이드다. 실제 입력 필드와 범위는 실행 버전의 `schema`가 우선한다.
 

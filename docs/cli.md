@@ -7,6 +7,7 @@ Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 
 ## 목차
 
 - [시작하기](#toc-1)
+- [내장 가이드 조회](#knowledge)
 - [입출력 계약](#toc-2)
 - [공통 플래그](#toc-3)
 - [권장 작업 순서](#toc-4)
@@ -50,6 +51,23 @@ ROADMUSIC_DATA_DIR="/tmp/road-music-cli" node cli/road-music.js service:start
 ```
 
 CLI 제어 요청은 macOS/Linux의 사용자 전용 Unix 소켓 또는 Windows named pipe를 쓴다. 원격 제어 TCP 포트는 열지 않는다. 다만 영상 렌더링 중 프레임 전달을 빠르게 하기 위해서만 임시 HTTP 서버를 `127.0.0.1`에 열며, 렌더마다 만든 토큰이 맞는 요청만 받는다. 사용할 수 없으면 IPC 전송으로 돌아간다.
+
+<a id="knowledge"></a>
+
+## 내장 가이드 조회
+
+`prompt:knowledge`는 번들된 장르 지식을 읽기 전용으로 조회한다. 로컬 CLI에서 처리하므로 앱·엔진을 시작하지 않는다. 목록을 읽고 해당 장르를 만들 때 필요한 topic을 고른다.
+
+```bash
+node cli/road-music.js prompt:knowledge
+node cli/road-music.js prompt:knowledge --json '{"topic":"ccm"}'
+node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
+node cli/road-music.js prompt:knowledge --json '{"topic":"review"}'
+```
+
+topic은 `genres`, `ccm`, `hymn-remake`, `ace`, `lyrics`, `review` 중 하나다. 생략하면 `topics` 목록, 지정하면 `topic`, `title`, 상대 `source`, 키트 `version`, 원문 `content`를 반환한다. `policy`의 `preserveUserInput:true`, `autoApply:false`, `suggestionsRequireApproval:true`는 지식을 읽어도 제공 가사·프롬프트를 임의 변경하지 않는 사용 계약이다.
+
+이 명령은 가사·style 입력을 받거나 생성에 자동 반영하지 않는다. 더 나은 안은 [근거 기반 제안](music-review.md#preserve-input)으로 제시한다. 앱에서는 스타일 패널의 **가이드 보기**에서 같은 문서를 읽으며 입력창은 그대로 유지된다. 오래된 CLI의 `schema`에 이 명령이 없으면 동봉 문서를 직접 읽고 미지원 상태를 알린다. 조회를 이유로 자동 재설치하지 않는다.
 
 <a id="toc-2"></a>
 

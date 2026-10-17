@@ -14,6 +14,7 @@ Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 
 - [생성 입력의 핵심 제약](#toc-5)
 - [곡 저장과 관리](#toc-6)
 - [영상](#toc-7)
+- [HTML 모션그래픽 스킬](#motion-graphics)
 - [연결 끊김과 재시작](#toc-8)
 - [JSONL 배치](#toc-9)
 - [사용 경계](#toc-10)
@@ -25,7 +26,7 @@ Road Music CLI는 실행 중인 Road Music 앱의 기능과 생성 대기열을 
 CLI는 소스 체크아웃 또는 배포된 `RoadMusic-CLI-X.Y.Z` 키트에서 Node.js로 실행한다. CLI 버전은 앱 버전과 별개이며 `cli-vX.Y.Z` Release를 따른다. 패키지된 dmg가 전역 `road-music` 명령을 설치하지는 않는다. GUI만 쓸 때는 Node.js가 필요 없지만, CLI에는 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. dmg·소스 키트·전역 링크의 설치 차이는 [CLI 설치](cli-install.md)를 따른다.
 
 ```bash
-npm ci --include=dev
+npm run setup:cli
 node cli/road-music.js schema
 node cli/road-music.js app:state
 ```
@@ -72,7 +73,7 @@ node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
 node cli/road-music.js prompt:knowledge --json '{"topic":"review"}'
 ```
 
-topic은 `genres`, `ccm`, `hymn-remake`, `ace`, `lyrics`, `review` 중 하나다. 생략하면 `topics` 목록, 지정하면 `topic`, `title`, 상대 `source`, 기존 호환 필드 `version`(앱 버전), `appVersion`, `cliVersion`, 원문 `content`를 반환한다. `policy`의 `preserveUserInput:true`, `autoApply:false`, `suggestionsRequireApproval:true`는 지식을 읽어도 제공 가사·프롬프트를 임의 변경하지 않는 사용 계약이다.
+topic은 `genres`, `ccm`, `hymn-remake`, `ace`, `models`, `lyrics`, `review` 중 하나다. `models`는 ACE·YuE2 제작 경로와 비교 한계를 설명한다. 생략하면 `topics` 목록, 지정하면 `topic`, `title`, 상대 `source`, 기존 호환 필드 `version`(앱 버전), `appVersion`, `cliVersion`, 원문 `content`를 반환한다. `policy`의 `preserveUserInput:true`, `autoApply:false`, `suggestionsRequireApproval:true`는 지식을 읽어도 제공 가사·프롬프트를 임의 변경하지 않는 사용 계약이다.
 
 이 명령은 가사·style 입력을 받거나 생성에 자동 반영하지 않는다. 더 나은 안은 [근거 기반 제안](music-review.md#preserve-input)으로 제시한다. 앱에서는 스타일 패널의 **가이드 보기**에서 같은 문서를 읽으며 입력창은 그대로 유지된다. 오래된 CLI의 `schema`에 이 명령이 없으면 동봉 문서를 직접 읽고 미지원 상태를 알린다. 조회를 이유로 자동 재설치하지 않는다.
 
@@ -215,6 +216,22 @@ node cli/road-music.js video:render --events --json '{"tracks":["/absolute/path/
 ```
 
 `video:preview`는 미리보기를 준비하고, `video:state`, `video:seek`, `video:play`, `video:pause`, `video:chapters`로 제어한다. `video:configure`는 현재 화면 설정을 부분 병합하며 `save:true`일 때 저장한다. `video:cancel`은 준비 단계 또는 렌더 단계에서 보류 상태를 반환할 수 있다. 배경·오버레이는 로컬 `path` 또는 호스트가 없거나 `localhost`인 `file:` URL만 받으며 원격 URL과 Windows UNC 경로는 거부한다. 위치와 크기는 화면 비율 좌표이고 허용 범위는 [레퍼런스](cli-reference.md#video)에 있다. GPU 인코더(`renderer:"gpu"`)의 가용성과 결과는 드라이버·하드웨어에 달려 있다.
+
+<a id="motion-graphics"></a>
+
+## HTML 모션그래픽 스킬
+
+`skills:*`와 `motion:*`은 Electron 서비스·음악 엔진을 시작하지 않고 동봉 스킬 번들과 고정된 HTML 스튜디오만 호출합니다. 먼저 `npm run setup:cli`로 스킬을 설치하고, 새 곡의 실제 절대 음원 경로를 `motion:handoff`로 넘기거나 음악 없이 프로젝트부터 만듭니다.
+
+```bash
+node cli/road-music.js skills:check
+node cli/road-music.js skills:update --events
+node cli/road-music.js motion:handoff --json '{"music":"/absolute/song.mp3","out":"/absolute/project","mode":"showreel-cd"}'
+node cli/road-music.js motion:handoff --json '{"out":"/absolute/project-with-upload","mode":"showreel-motion"}'
+node cli/road-music.js motion:studio --events --json '{"project":"/absolute/project","open":true,"review":true,"timeout":900}'
+```
+
+`motion:handoff` 성공 응답의 `nextCommand`는 다음 `motion:studio` 호출을 제공합니다. `motion:studio`는 스타일 카드·음원·영상·자막을 확인할 loopback HTML 화면을 유한 시간만 제공합니다. `review:true`는 재생·피드백을 유지하고 UI의 **검수 마치기**에서 완료되는 최종 검수 화면을 엽니다. CD/Showreel 모드의 선택 결과 `showreel-request.json`은 기존 Showreel `plan/create --selection`으로 넘길 수 있습니다. 4개 실제 샘플과 설치 대상, 호스트별 경로, 모드별 흐름은 [CLI 모션그래픽 연결](cli-motion-graphics.md)을 따릅니다.
 
 <a id="toc-8"></a>
 

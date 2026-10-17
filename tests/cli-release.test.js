@@ -25,6 +25,15 @@ test('CLI release notes use the independent CLI manifest and v-prefixed CLI note
   await assert.rejects(resolveCliReleaseNote(fixture, '0.1.1'), /cli\/package\.json/)
 })
 
+test('CLI 0.1.1 release note and dated change record match the packaged CLI version', async () => {
+  const { resolveCliReleaseNote } = require('../scripts/release-notes')
+  assert.equal(require('../cli/package.json').version, '0.1.1')
+  const release = await resolveCliReleaseNote(root, '0.1.1')
+  assert.equal(path.relative(root, release.path), 'releases/cli/v0.1.1.md')
+  assert.equal(release.title, 'Road Music CLI v0.1.1')
+  await fs.access(path.join(root, 'release', '2026-10-18-cli-0-1-1-skills-studio.md'))
+})
+
 test('app and CLI workflows publish different tags and assets', async () => {
   const app = await fs.readFile(path.join(root, '.github', 'workflows', 'release.yml'), 'utf8')
   const cli = await fs.readFile(path.join(root, '.github', 'workflows', 'release-cli.yml'), 'utf8')

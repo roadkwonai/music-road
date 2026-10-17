@@ -1,0 +1,3 @@
+[submodule "skills/music-road-skills"]
+	path = skills/music-road-skills
+	url = https://github.com/roadkwonai/music-road-skills.git

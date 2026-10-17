@@ -79,11 +79,11 @@ test('check selects only the highest stable cli-v release with its matching asse
   global.fetch = async url => String(url) === api ? new Response(JSON.stringify([old, skipped, f.stable])) : saved(url)
   const result = await update.check()
   assert.deepEqual(result, {
-    current: '0.1.0', available: true, version: '0.1.1',
+    current: '0.1.1', available: false, version: '0.1.1',
     releaseUrl: 'https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.1',
     notes: '',
     asset: { name: 'RoadMusic-CLI-0.1.1.zip', size: f.asset.length, url: `${releaseBase}RoadMusic-CLI-0.1.1.zip`, sumsUrl: `${releaseBase}SHA256SUMS.txt` },
-    installable: true
+    installable: false
   })
   void old; void skipped
 })
@@ -95,7 +95,7 @@ test('check rejects extra parameters and does not use app v tags as CLI updates'
   const saved = global.fetch
   global.fetch = async url => String(url) === api ? new Response(JSON.stringify([appRelease, f.stable])) : saved(url)
   const result = await update.check()
-  assert.equal(result.available, true)
+  assert.equal(result.available, false)
   assert.equal(result.version, '0.1.1')
   void appRelease
 })

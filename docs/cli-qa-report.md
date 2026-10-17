@@ -11,12 +11,24 @@
 
 ## 목차
 
+- [HTML 모션그래픽 스킬 연결 검증 (2026-10-18)](#motion-skills-2026-10-18)
 - [1.4.0 GitHub 업데이트 검증 (2026-10-15)](#toc-1)
 - [판정과 적용 범위](#toc-2)
 - [실행 증거](#toc-3)
 - [발견한 문제와 수정](#toc-4)
 - [문서와 재현](#toc-5)
 - [미검증과 남은 한계](#toc-6)
+
+<a id="motion-skills-2026-10-18"></a>
+
+## HTML 모션그래픽 스킬 연결 검증 (2026-10-18)
+
+- 격리 fixture에서 `skills:install`이 동봉 번들을 `source`로 전달하고, stdout 최종 JSON 한 줄과 stderr 이벤트 JSONL을 분리하는지 확인했다.
+- `motion:handoff`은 선택 음원과 새 출력 경로를 고정된 `studio.py init` 인수로 전달하고, 음악 없이 시작하는 경우도 확인했다. `motion:studio`는 정해진 `serve` 인수만 받는다.
+- 공개 스키마에 `skills:status/check/install/update/watch`, `motion:handoff/studio`가 포함되고, 허용되지 않은 모드·상대 경로를 거부하는지 확인했다.
+- CLI ZIP/npm 파일 목록에는 스킬 번들을 포함하고 데스크톱 DMG build 목록에는 포함하지 않는 계약을 검사했다.
+
+실제 GitHub Release 다운로드·사용자 전역 스킬 경로 변경·Antigravity 실행·이미지 생성·영상 렌더는 이 검증에서 실행하지 않았다. 각 작업은 사용자가 요청한 설치·제작 범위에서 별도로 실행한다.
 
 <a id="toc-1"></a>
 

@@ -9,6 +9,7 @@
 - [표기](#toc-1)
 - [공통 입력 모양](#toc-2)
 - [서비스·설치·프로젝트](#toc-3)
+- [스킬 설치·HTML 모션그래픽](#skills-motion)
 - [곡·생성·악보·내보내기](#toc-4)
 - [대기열·프리셋·자산·설정](#toc-5)
 - [가사·프롬프트·재생·영상](#toc-6)
@@ -90,6 +91,24 @@
 | `projects:select`, `projects:create` | `name:path` | — | 프로젝트 선택/생성 |
 | `projects:rename` | `from:path`, `to:path` | — | 이름에는 경로 구분자 불가 |
 
+<a id="skills-motion"></a>
+
+## 스킬 설치·HTML 모션그래픽
+
+이 명령은 로컬 CLI가 직접 처리하며 Electron 서비스·음악 엔진을 시작하지 않습니다. `target`은 절대 경로이고 명시하면 `host` 기본 경로보다 우선합니다. `source`도 절대 로컬 번들 경로이며 `install`·`update`에서만 생략 시 동봉 번들을 사용합니다.
+
+| 명령 | 필수 | 선택 | 효과 |
+| --- | --- | --- | --- |
+| `skills:status` | — | `host:codex/antigravity/antigravity-cli`, `target:abs-path` | 설치 버전·수정 파일·대상 조회 |
+| `skills:check` | — | `host`, `target` | GitHub Release 확인만 수행 |
+| `skills:install` | — | `host`, `target`, `source:abs-path` | 동봉 또는 지정 번들 설치 |
+| `skills:update` | — | `host`, `target`, `source:abs-path` | 새 Release 또는 지정 번들로 업데이트 |
+| `skills:watch` | — | `host`, `target`, `timeoutMs:int 1..3600000` | 새 Release 알림만 대기; 자동 설치 없음 |
+| `motion:handoff` | `out:abs-path` | `music:abs-path`, `mode:showreel-cd/showreel-mv/jizura/showreel-motion`, `host:codex/antigravity/antigravity-cli` | 새 HTML 프로젝트 생성. `music`은 생략하면 HTML 업로드로 나중에 지정, `out`은 아직 존재하면 안 됨. 성공 시 다음 `motion:studio`용 `nextCommand` 반환 |
+| `motion:studio` | `project:abs-path` | `music:abs-path`, `host:codex/antigravity/antigravity-cli`, `open:bool`, `review:bool`, `timeout:int 1..3600000` | 유한 시간의 HTML 선택·청취·검수 화면 실행. `review:true`는 재생·피드백을 유지한 결과 검수 |
+
+CLI 플래그 `--host codex|antigravity|antigravity-cli`, `--skills-target ABS`는 `skills:*`에서 JSON의 `host`, `target`과 같은 의미이며 값이 충돌하면 실패합니다. `motion:*`는 임의 실행 코드를 받지 않고 고정 `studio.py` 인수만 실행합니다. 자세한 흐름은 [CLI 모션그래픽 연결](cli-motion-graphics.md)을 참고하세요.
+
 <a id="toc-4"></a>
 
 ## 곡·생성·악보·내보내기
@@ -160,7 +179,7 @@
 | 명령 | 필수 | 선택 | 입력/출력·효과 |
 | --- | --- | --- | --- |
 | `renderer:catalog`, `prompt:catalog` | — | — | 화면/프롬프트의 현재 허용값 |
-| `prompt:knowledge` | — | `topic:genres\|ccm\|hymn-remake\|ace\|lyrics\|review` | 생략 시 번들 지식 목록, 지정 시 UTF-8 원문·출처·호환 `version`(앱 버전)·`appVersion`·`cliVersion`·보존 정책. 로컬 CLI는 앱을 시작하지 않음 |
+| `prompt:knowledge` | — | `topic:genres\|ccm\|hymn-remake\|ace\|models\|lyrics\|review` | 생략 시 번들 지식 목록, 지정 시 UTF-8 원문·출처·호환 `version`(앱 버전)·`appVersion`·`cliVersion`·보존 정책. 로컬 CLI는 앱을 시작하지 않음 |
 | `lyrics:clean`, `lyrics:sections`, `lyrics:numbers` | — | `text:str≤20000` | 가사 변환 |
 | `lyrics:check` | — | `text:str≤20000`, `targetSeconds:num 1..3600|null` | 가사 검사 |
 | `prompt:compose` | — | `parts`의 모든 필드, `lyrics:str≤20000`, `soundEffect:bool` | 스타일 문장 생성 |

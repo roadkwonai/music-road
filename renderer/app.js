@@ -117,8 +117,19 @@ const esc = (text) => String(text == null ? '' : text)
 // install button. A PC that cannot run an engine gets told why, and which cards can,
 // instead of a download that fails later.
 let engineList = []
-let enginesInstalled = { yue: false, ace: false }
-let enginesRepair = { yue: false } // installed once, model files gone
+const ENGINE_NAMES = Object.freeze({ ace: 'ACE-Step 1.5', yue: 'YuE2 (Windows · NVIDIA)', 'yue-mlx': 'YuE2 (Apple Silicon)' })
+const SCORE_ENGINES = Object.freeze(['yue-mlx', 'yue'])
+const isScoreEngine = (id) => SCORE_ENGINES.includes(id)
+const engineName = (id) => ENGINE_NAMES[id] || id
+const engineIdFromSong = (song = {}) => {
+  if (ENGINE_NAMES[song.engineId]) return song.engineId
+  if (ENGINE_NAMES[song.engine]) return song.engine
+  if (/mlx/i.test(String(song.engine || ''))) return 'yue-mlx'
+  if (/ace/i.test(String(song.engine || ''))) return 'ace'
+  return /yue/i.test(String(song.engine || '')) ? 'yue' : null
+}
+let enginesInstalled = { yue: false, 'yue-mlx': false, ace: false }
+let enginesRepair = { yue: false, 'yue-mlx': false } // installed once, model files gone
 let installingEngine = null
 let engineFirstRun = false
 
@@ -161,7 +172,7 @@ function wireSetup () {
     $('setup').classList.add('hidden')
     if (engineFirstRun) {
       engineFirstRun = false
-      if (!enginesInstalled.yue && !enginesInstalled.ace) await window.yue.skipEngines()
+      if (!Object.values(enginesInstalled).some(Boolean)) await window.yue.skipEngines()
       await startApp()
     }
     showEngineChoice()
@@ -189,7 +200,7 @@ async function renderEngines () {
   box.innerHTML = ''
   for (const engine of engineList) box.appendChild(buildEngineCard(engine))
   if (engineFirstRun) {
-    $('engineClose').textContent = enginesInstalled.yue || enginesInstalled.ace ? '시작하기' : '엔진 없이 시작'
+    $('engineClose').textContent = Object.values(enginesInstalled).some(Boolean) ? '시작하기' : '엔진 없이 시작'
   }
 }
 
@@ -302,7 +313,8 @@ function localStorageSet (key, value) {
 // The engine picked for the next song: the one used last if it is installed,
 // otherwise whichever is.
 function currentEngine () {
-  return $('engine').value === 'ace' ? 'ace' : 'yue'
+  const id = $('engine').value
+  return ENGINE_NAMES[id] ? id : 'yue'
 }
 
 function showEngineChoice () {
@@ -310,24 +322,30 @@ function showEngineChoice () {
   let saved = null
   try { saved = localStorage.getItem('engine') } catch {}
   for (const option of select.options) {
-    const name = option.value === 'ace' ? 'ACE-Step 1.5' : 'YuE2'
+    const name = engineName(option.value)
     option.textContent = enginesInstalled[option.value] ? name : `${name} (설치 필요)`
   }
   const pick = enginesInstalled[saved] ? saved
-    : enginesInstalled.yue ? 'yue' : enginesInstalled.ace ? 'ace' : (saved || 'yue')
+    : SCORE_ENGINES.find((id) => enginesInstalled[id]) || (enginesInstalled.ace ? 'ace' : (saved || 'yue-mlx'))
   select.value = pick
   applyEngineUi()
 }
 
-// A cover or an imported score is sung by YuE2: switch to it when it is installed.
+function scoreEngine () {
+  return SCORE_ENGINES.find((id) => enginesInstalled[id]) || null
+}
+
+// A cover or an imported score is sung by either YuE2 runtime: switch to one when installed.
 function useScoreEngine () {
-  if (currentEngine() !== 'ace') return
-  if (enginesInstalled.yue) {
-    $('engine').value = 'yue'
+  const current = currentEngine()
+  if (isScoreEngine(current) && enginesInstalled[current]) return
+  const id = scoreEngine()
+  if (id) {
+    $('engine').value = id
     applyEngineUi()
-    toast('악보로 만드는 곡이라 엔진을 YuE2로 바꿨습니다.', 5000)
+    toast(`악보로 만드는 곡이라 엔진을 ${engineName(id)}로 바꿨습니다.`, 5000)
   } else {
-    toast('악보로 만드는 곡은 YuE2 엔진이 필요합니다. "AI 엔진"에서 YuE2를 설치해 주세요.', 7000)
+    toast('악보로 만드는 곡은 YuE2 엔진이 필요합니다. "AI 엔진"에서 사용할 YuE2를 설치해 주세요.', 7000)
   }
 }
 
@@ -770,22 +788,33 @@ function select (song) {
 }
 
 async function resume (song) {
+  const mlx = engineIdFromSong(song) === 'yue-mlx'
   const names = { plan: '악보', semantic: '노래 생성', synth: '음향 합성' }
   const done = (song.stages || []).map((stage) => names[stage]).filter(Boolean)
-  const detail = done.length
-    ? `${done.join(', ')}까지 끝나 있어 그다음부터 이어집니다.`
-    : '처음부터 만듭니다.'
+  const detail = mlx
+    ? '이전 시도는 보존하고 새로 다시 생성합니다.'
+    : done.length
+      ? `${done.join(', ')}까지 끝나 있어 그다음부터 이어집니다.`
+      : '처음부터 만듭니다.'
   const question = running
-    ? `"${song.title || '무제'}"를 대기열에 넣어 이어서 완성할까요?\n${detail}`
-    : `"${song.title || '무제'}"를 이어서 완성할까요?\n${detail}`
+    ? mlx
+      ? `"${song.title || '무제'}"의 이전 시도를 보존하고 대기열에서 새로 다시 생성할까요?\n${detail}`
+      : `"${song.title || '무제'}"를 대기열에 넣어 이어서 완성할까요?\n${detail}`
+    : mlx
+      ? `"${song.title || '무제'}"의 이전 시도를 보존하고 새로 다시 생성할까요?\n${detail}`
+      : `"${song.title || '무제'}"를 이어서 완성할까요?\n${detail}`
   if (!confirm(question)) return
   const estimated = estimate(song.lyrics || '', { firstRun: !warmed })
   const result = await window.yue.resume(song.dir)
   if (!result.ok) return toast(result.message)
   plans.set(result.jobId, estimated)
-  toast(result.position > 0
-    ? `대기열 ${result.position}번째로 넣었습니다`
-    : '이어서 만드는 중입니다', 5000)
+  toast(mlx
+    ? result.position > 0
+      ? `대기열 ${result.position}번째로 넣었습니다. 이전 시도는 보존하고 새로 다시 생성합니다.`
+      : '이전 시도를 보존하고 새로 다시 생성하는 중입니다.'
+    : result.position > 0
+      ? `대기열 ${result.position}번째로 넣었습니다`
+      : '이어서 만드는 중입니다', 5000)
 }
 
 // Long paths are cut in the middle: the drive and the last folders are what tell two
@@ -829,7 +858,7 @@ function renderSongMeta (song) {
         : null],
     ['만든 때', (song.createdAt || '').replace('T', ' ')],
     ['걸린 시간', song.wallSeconds ? `${Math.round(song.wallSeconds / 60)}분` : null],
-    ['엔진', song.engine],
+    ['엔진', engineIdFromSong(song) ? engineName(engineIdFromSong(song)) : song.engine],
     ['프로그램', song.appVersion ? `Road Music ${song.appVersion}` : null],
     ['폴더', song.dir]
   ]
@@ -1334,7 +1363,7 @@ function showCover () {
 // a score, or brought in from elsewhere) is remade from its sound by ACE-Step.
 async function startCover (song) {
   const result = song.score ? await window.yue.score(song.dir) : { ok: false }
-  if (!result.ok || (!enginesInstalled.yue && enginesInstalled.ace)) return startSoundCover(song)
+  if (!result.ok || (!scoreEngine() && enginesInstalled.ace)) return startSoundCover(song)
   coverFrom = { source: 'cover', dir: song.dir, abc: result.abc, title: song.title || '무제',
     hasChords: hasChordSymbols(result.abc) }
   useScoreEngine()
@@ -1603,13 +1632,13 @@ function userRequest (song) {
   // the expert panel they would pin the length and override whatever target is picked
   // next, so only knobs the user set by hand come back.
   const advanced = { ...(song.advanced || {}) }
-  if (song.targetSeconds) {
+  if (song.targetSeconds && engineIdFromSong(song) !== 'yue-mlx') {
     delete advanced.maxTokens
     delete advanced.minTokens
   }
   // Likewise the guidance "프롬프트 강하게" added: it comes back as the checkbox.
   if (parts.strong && advanced.cfgScale === STRONG_CFG) delete advanced.cfgScale
-  return { style, lyrics, onlyListed, parts, advanced }
+  return { style, lyrics, onlyListed, parts, advanced, engine: engineIdFromSong(song) }
 }
 
 function readTarget () {
@@ -1623,12 +1652,20 @@ function updateTarget () {
   $('targetCustomRow').classList.toggle('hidden', $('target').value !== 'custom')
   $('targetCustom').min = currentEngine() === 'ace' ? 1 : 20
   $('targetCustom').max = $('soundEffect')?.checked ? 30 : currentEngine() === 'ace' ? 600 : 360
+  const mlx = currentEngine() === 'yue-mlx'
+  const hint = $('targetHint')
+  if (hint) {
+    hint.classList.toggle('hidden', !mlx)
+    hint.textContent = mlx
+      ? 'Apple Silicon YuE2의 목표 길이는 기록·비교용이며 생성 길이를 직접 제어하지 않습니다. 실제 길이는 자연 종료에 따라 달라집니다.'
+      : ''
+  }
   for (const option of $('target').options) {
     option.disabled = option.value !== '' && option.value !== 'custom' &&
       (Number(option.value) < Number($('targetCustom').min) || Number(option.value) > Number($('targetCustom').max))
   }
   if ([...$('target').options].some(option => option.value === $('target').value && option.disabled)) $('target').value = ''
-  showLyricsCheckHint()
+  if (typeof showLyricsCheckHint === 'function') showLyricsCheckHint()
 }
 
 function setTarget (seconds) {
@@ -1650,6 +1687,16 @@ function lengthPlan (seconds, lyrics) {
     longForm: seconds >= 240,
     // Four minutes of song needs more than a verse and a chorus to sing.
     needsFiller: seconds >= 240 && words < seconds * 2.2
+  }
+}
+
+function generationLengthPlan (engine, targetSeconds, { imported = false, soundCover = false, lyrics = '' } = {}) {
+  const naturalEos = engine === 'yue-mlx'
+  const requestedTarget = imported || soundCover ? null : targetSeconds
+  return {
+    naturalEos,
+    requestedTarget,
+    length: imported || soundCover || naturalEos ? null : lengthPlan(targetSeconds, lyrics)
   }
 }
 
@@ -1886,7 +1933,7 @@ function wireUi () {
     if (!enginesInstalled[id]) {
       showEngineChoice() // back to the one that works
       openEngines()
-      return toast(`${id === 'ace' ? 'ACE-Step 1.5' : 'YuE2'}는 아직 설치되지 않았습니다. 사양을 확인하고 설치할 수 있습니다.`, 6000)
+      return toast(`${engineName(id)}는 아직 설치되지 않았습니다. 사양을 확인하고 설치할 수 있습니다.`, 6000)
     }
     localStorageSet('engine', id)
     if (id !== 'ace' && $('soundEffect').checked) setSoundEffect(false)
@@ -2138,7 +2185,7 @@ function wireUi () {
     const imported = Boolean(coverFrom && coverFrom.source === 'import')
     const fromRecording = Boolean(coverFrom && coverFrom.source === 'recording')
     const soundCover = Boolean(coverFrom && (coverFrom.source === 'audio' || fromRecording))
-    const length = imported || soundCover ? null : lengthPlan(targetSeconds, lyrics)
+    const { naturalEos, requestedTarget, length } = generationLengthPlan(currentEngine(), targetSeconds, { imported, soundCover, lyrics })
     if (imported && $('target').value) notes.push('불러온 악보가 곡 길이를 정하므로 "길이" 설정은 쓰지 않았습니다')
     if (soundCover && $('target').value) {
       notes.push(fromRecording ? '곡 길이는 녹음 창에서 고른 길이를 따르므로 "길이" 설정은 쓰지 않았습니다'
@@ -2150,6 +2197,9 @@ function wireUi () {
         lyrics += FILLER_SECTIONS
         notes.push('긴 곡을 위해 간주·솔로·아웃트로 구간을 덧붙였습니다')
       }
+    }
+    if (naturalEos && requestedTarget) {
+      notes.push('Apple Silicon YuE2의 목표 길이는 기록·비교용이며 생성 길이를 직접 제어하지 않습니다. 실제 길이는 자연 종료에 따라 달라집니다.')
     }
     const heading = raw.split('\n').find((line) => /^\s*#/.test(line)) || ''
     const payload = {
@@ -2174,7 +2224,7 @@ function wireUi () {
       },
       // The builder's fields, so 설정 복제 and 커버 can put them back as they were.
       parts: { ...parts, instrumental },
-      targetSeconds: length ? length.seconds : null,
+      targetSeconds: requestedTarget,
       // A supplied score leaves the plan stage nothing to invent. Its instruction must
       // describe it truthfully — "chord-annotated" only when it has chords — and
       // "악보 없이 바로" would throw it away, so the mode follows the score.
@@ -2194,15 +2244,15 @@ function wireUi () {
     }
     if (!enginesInstalled[payload.engine]) {
       openEngines()
-      if (enginesRepair[payload.engine]) return toast('YuE2 모델 파일을 찾지 못했습니다. 위쪽 "설정 · 도구 → AI 엔진"에서 YuE2의 "다시 받기"를 누르면 빠진 파일만 다시 받습니다.', 9000)
-      return toast(`${payload.engine === 'ace' ? 'ACE-Step 1.5' : 'YuE2'} 엔진을 먼저 설치해 주세요.`, 6000)
+      if (enginesRepair[payload.engine]) return toast(`${engineName(payload.engine)} 모델 파일을 찾지 못했습니다. 위쪽 "설정 · 도구 → AI 엔진"에서 "다시 받기"를 누르면 빠진 파일만 다시 받습니다.`, 9000)
+      return toast(`${engineName(payload.engine)} 엔진을 먼저 설치해 주세요.`, 6000)
     }
     if (soundCover && (payload.engine !== 'ace' || mode === 'plan')) {
       return toast(fromRecording
         ? '녹음으로 만드는 곡은 ACE-Step 1.5 엔진의 "곡 만들기"로만 됩니다. 엔진을 ACE-Step 1.5로 바꿔 주세요.'
         : '원곡 소리로 만드는 커버는 ACE-Step 1.5 엔진의 "곡 만들기"로만 됩니다. 엔진을 ACE-Step 1.5로 바꿔 주세요.', 8000)
     }
-    if (payload.engine === 'ace' && (mode === 'plan' || (coverFrom && !soundCover))) {
+    if (!isScoreEngine(payload.engine) && (mode === 'plan' || (coverFrom && !soundCover))) {
       return toast(mode === 'plan'
         ? '악보만 만들기는 YuE2 엔진에서만 됩니다. 엔진을 YuE2로 바꿔 주세요.'
         : '악보로 만드는 곡(커버·악보 불러오기)은 YuE2 엔진에서만 됩니다. 엔진을 YuE2로 바꿔 주세요.', 8000)
@@ -2473,6 +2523,11 @@ function wireUi () {
     $('instrumental').checked = instrumental
     $('instrumental').onchange()
     const request = userRequest(selected)
+    if (request.engine && enginesInstalled[request.engine]) {
+      $('engine').value = request.engine
+      localStorageSet('engine', request.engine)
+      applyEngineUi()
+    }
     if (!instrumental) $('lyrics').value = request.lyrics
     writeParts(request.parts)
     $('seed').value = selected.seed == null ? '' : selected.seed

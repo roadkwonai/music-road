@@ -2,7 +2,7 @@
 
 [Road Music](../README.md) · [릴리스 노트](../releases/README.md) · [최신 다운로드](https://github.com/roadkwonai/music-road/releases/latest)
 
-원하는 작업부터 고르세요. **처음 설치 → AI 세션 연결 → 음악 설계 → 생성·내보내기** 순서로 읽을 수 있습니다.
+원하는 작업부터 고르세요. **처음 설치 → AI 세션 연결 → 음악 설계 → 생성·내보내기 → HTML 모션그래픽 검수** 순서로 읽을 수 있습니다.
 
 ## 목차
 
@@ -37,11 +37,14 @@
 | Verse·Chorus·간주를 갖춘 가사 | [구간 태그](lyrics-tags.md) | 역할·배치 시점·실제 변환/삭제 결과 |
 | 보컬·악기·템포·길이를 세밀하게 지정 | [음악 생성 옵션](music-options.md) | 지원 값·우선순위·완전한 JSON 예시 |
 | K-POP·트로트·락발라드·BGM | [장르별 프롬프트](genre-prompts.md) | 간단 요청·상세 레시피·여러 곡 비교 |
+| Apple Silicon에서 YuE2로 제작 | [YuE2 Apple Silicon](yue-mlx.md) | 별도 설치·지원 환경·자연 길이 생성·복구 경계 |
+| 모델별 결과와 비용을 비교 | [모델별 제작·비교](model-production-guide.md) | ACE·YuE2 경로·실험 기록·입력 보존 |
 | CCM·워십을 주로 제작 | [CCM 상세 가이드](ccm-prompts.md) | 과거·최근 근거, 48개 스타일, 세부 옵션, 요청문·가사·JSON 예시 |
 | 옛 찬송을 현대 CCM으로 리메이크 | [원전·권리·리메이크 가이드](hymn-remake-guide.md) | 원전 후보 20곡·편곡 16가지, 번역·녹음 구분, 입력 원문 보존 |
 | 최근 인기 스타일을 조사해서 제작 | [리서치 기반 음악 만들기](music-research.md) | 날짜·출처·지표 → 창작 가사·설정 → 생성 |
 | 검토 후 생성하거나 전부 자동 위임 | [검토와 자동 생성](music-review.md) | 승인 범위·부분 위임·수정·결과 자료 |
 | 반복 작업을 AI에게 맡김 | [작업 프롬프트](../prompts/cli-workflows.md) | 생성·앨범·자막·영상·오류 진단 |
+| 만든 음원을 HTML 플레이리스트·모션그래픽으로 이어감 | [CLI 모션그래픽 연결](cli-motion-graphics.md) | 스킬 설치·스타일 선택·청취·자막/영상 검수 |
 
 | AI가 읽는 동봉 자료 | 역할 |
 | --- | --- |
@@ -61,6 +64,9 @@
 | [CLI 사용법](cli.md) | 실행 순서·JSON 출력·이벤트·대기·재시도 |
 | [CLI 레퍼런스](cli-reference.md) | 공개 명령과 중첩 입력 필드를 정확히 확인 |
 | [CLI 설계](cli-design.md) | 로컬 서비스·전송·renderer 경계 이해 |
+| [CLI 모션그래픽 연결](cli-motion-graphics.md) | `skills:*`, `motion:*`, HTML 스튜디오와 호스트별 스킬 설치 |
+| [YuE2 Apple Silicon](yue-mlx.md) | `yue-mlx` 설치·상태 확인·생성·복구 경계 |
+| [모델별 제작·비교](model-production-guide.md) | 모델별 입력·실험·비용·검증 한계 |
 | [프로젝트 안내](project-guide.md) | 기능·엔진·코드 구조·외부 통신 파악 |
 | [상세 가이드](guide.md) | GUI의 생성·관리·녹음·영상 설정 확인 |
 

@@ -26,6 +26,10 @@ const MODEL_BYTES = 8.4 * 1024 ** 3 // both checkpoints, used for the download b
 // ACE-Step 1.5, the second engine: pinned to the commit tried on an RTX 3050 8GB.
 const ACE_COMMIT = 'ca1e85fe9430179831e6bc6be790c332190a3866'
 const ACE_URL = `https://github.com/ace-step/ACE-Step-1.5/archive/${ACE_COMMIT}.zip`
+const MLX_YUE_COMMIT = 'c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8'
+const MLX_YUE_URL = `https://github.com/vanch007/mlx-Yue/archive/${MLX_YUE_COMMIT}.zip`
+const YUE2_MODEL_REVISION = '1a96eca688d6ae5d7f0feb88573fec89920fcd19'
+const YUE2_VAE_REVISION = '95535e72a97bc0f09b8ada125d26b4009428c0e8'
 
 let win = null
 let worker = null
@@ -124,7 +128,18 @@ const paths = () => {
     aceVenv: path.join(dataDir, 'engines', 'ace-step', 'venv'),
     acePython: venvPython(path.join(dataDir, 'engines', 'ace-step', 'venv')),
     aceWorker: unpacked(path.join(__dirname, '..', 'python', 'ace_worker.py')),
-    aceSetupModels: unpacked(path.join(__dirname, '..', 'python', 'ace_setup_models.py'))
+    aceSetupModels: unpacked(path.join(__dirname, '..', 'python', 'ace_setup_models.py')),
+    // Apple Silicon YuE2 is deliberately isolated from the CUDA YuE2 runtime and
+    // its Hugging Face cache. Installing one never moves or rewrites the other.
+    yueMlxRoot: path.join(dataDir, 'engines', 'yue-mlx'),
+    yueMlxVenv: path.join(dataDir, 'engines', 'yue-mlx', 'venv'),
+    yueMlxPython: venvPython(path.join(dataDir, 'engines', 'yue-mlx', 'venv')),
+    yueMlxModels: path.join(dataDir, 'engines', 'yue-mlx', 'models'),
+    yueMlxVae: path.join(dataDir, 'engines', 'yue-mlx', 'vae'),
+    yueMlxSrc: path.join(dataDir, 'engines', 'yue-mlx', 'src'),
+    yueMlxManifest: path.join(dataDir, 'engines', 'yue-mlx', 'paths.json'),
+    yueMlxWorker: unpacked(path.join(__dirname, '..', 'python', 'yue_mlx_worker.py')),
+    yueMlxSetup: unpacked(path.join(__dirname, '..', 'python', 'yue_mlx_setup.py'))
   }
 }
 
@@ -560,6 +575,17 @@ async function freeSpaceGb (target) {
   }
 }
 
+async function macOSProductVersion () {
+  try { return (await run('/usr/bin/sw_vers', ['-productVersion'])).trim() } catch { return null }
+}
+
+function versionAtLeast (actual, minimum) {
+  const parts = (value) => String(value || '').split('.').map(Number)
+  const [a0 = 0, a1 = 0] = parts(actual)
+  const [m0 = 0, m1 = 0] = parts(minimum)
+  return a0 > m0 || (a0 === m0 && a1 >= m1)
+}
+
 // ── engines ──
 // The app installs without any AI engine; each engine is added from the engine
 // screen, and only on a PC that can run it. What each one needs is stated up front
@@ -567,8 +593,8 @@ async function freeSpaceGb (target) {
 const ENGINES = {
   yue: {
     id: 'yue',
-    name: 'YuE2',
-    tagline: '악보(ABC)부터 짜서 부르는 엔진. 악보 보기·편집, 악보로 커버, MIDI·ABC 불러오기를 쓸 수 있습니다. 3분 곡에 약 8~20분.',
+    name: 'YuE2 (Windows NVIDIA)',
+    tagline: 'Windows NVIDIA 전용 YuE2입니다. 악보(ABC)부터 짜서 부르며 악보 보기·편집, 악보로 커버, MIDI·ABC 불러오기를 쓸 수 있습니다. 3분 곡에 약 8~20분.',
     downloadGb: 11,
     needGb: NEEDED_GB,
     minVramGb: NEEDED_VRAM_GB,
@@ -579,6 +605,20 @@ const ENGINES = {
     steps: [['gpu', '그래픽카드 확인'], ['uv', '설치 도구 준비'], ['venv', '파이썬 환경 구성'],
       ['torch', 'AI 엔진 설치 (약 3GB)'], ['yue', 'YuE2 설치'], ['models', '음악 모델 다운로드 (약 8GB)'],
       ['verify', '엔진 점검']]
+  },
+  'yue-mlx': {
+    id: 'yue-mlx',
+    name: 'YuE2 (Apple Silicon)',
+    tagline: 'Apple Silicon 맥 전용 MLX YuE2입니다. 악보(ABC)부터 짜서 부르며, 32GB에서도 설치할 수 있으나 64GB를 권장합니다. 모델은 CC-BY-NC 4.0입니다.',
+    downloadGb: 10,
+    needGb: 30,
+    minVramGb: 64,
+    floorVramGb: 32,
+    minCompute: null,
+    supported: 'Apple Silicon(M1 이상) 맥, 메모리 32GB 이상 (64GB 이상 권장)',
+    unsupported: '인텔 맥, 메모리 32GB 미만 맥, Windows·Linux',
+    steps: [['gpu', 'Apple Silicon 메모리 확인'], ['uv', '설치 도구 준비'], ['python', '파이썬 준비'],
+      ['source', 'MLX YuE2 받기'], ['deps', 'AI 실행 환경 설치'], ['models', '원본 모델 다운로드·MLX 변환 (약 8GB 다운로드)'], ['verify', '엔진 점검']]
   },
   ace: {
     id: 'ace',
@@ -596,6 +636,20 @@ const ENGINES = {
       ['source', 'ACE-Step 받기'], ['deps', 'AI 엔진 설치 (약 4GB)'], ['models', '음악 모델 다운로드 (약 7.7GB)'],
       ['verify', '엔진 점검']]
   }
+}
+
+function canonicalEngineId (value) {
+  if (typeof value !== 'string') return null
+  if (Object.prototype.hasOwnProperty.call(ENGINES, value)) return value
+  if (/^ace-step|^ace$/i.test(value)) return 'ace'
+  if (/yue2.*(mlx|apple)/i.test(value)) return 'yue-mlx'
+  if (/^yue2?$/i.test(value)) return 'yue'
+  return null
+}
+
+function completedEngineId (meta, placeholder = {}) {
+  return canonicalEngineId(meta && meta.engineId) || canonicalEngineId(currentJob && currentJob.job && currentJob.job.engine) ||
+    canonicalEngineId(placeholder.engineId) || canonicalEngineId(placeholder.engine) || 'yue'
 }
 
 // On a Mac ACE-Step runs on Metal (MLX for the planner, DiT and VAE) out of unified
@@ -645,11 +699,34 @@ async function engineInstalled (id) {
   const p = paths()
   const settings = await readSettings()
   if (id === 'yue') return Boolean(settings.setupDone) && await exists(p.python) && Boolean(findYueModels())
+  if (id === 'yue-mlx') return yueMlxInstalled(p)
   if (id === 'ace') {
     return Boolean(settings.aceInstalled) && await exists(p.acePython) &&
       await exists(path.join(p.aceSrc, 'checkpoints', 'acestep-v15-turbo', 'model.safetensors'))
   }
   return false
+}
+
+async function yueMlxInstalled (p = paths()) {
+  const manifest = yueMlxManifest(p)
+  if (!manifest || !await exists(p.yueMlxPython)) return false
+  if (!await exists(path.join(p.yueMlxSrc, 'pyproject.toml')) || !await exists(path.join(p.yueMlxSrc, 'uv.lock')) ||
+      !await exists(path.join(p.yueMlxSrc, 'src', 'lyra', 'cli.py'))) return false
+  const modelFiles = ['conversion.json', 'config.json', 'ar-8bit.safetensors', 'ar-bf16.safetensors', 'nar-bf16.safetensors', 'qwen.tiktoken']
+  const vaeFiles = ['config.json', 'model.safetensors']
+  return (await Promise.all(modelFiles.map((name) => exists(path.join(manifest.model, name))))).every(Boolean) &&
+    (await Promise.all(vaeFiles.map((name) => exists(path.join(manifest.vae, name))))).every(Boolean)
+}
+
+function yueMlxManifest (p = paths()) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(p.yueMlxManifest, 'utf8'))
+    const inside = (file) => typeof file === 'string' && path.resolve(file).startsWith(`${path.resolve(p.yueMlxRoot)}${path.sep}`)
+    const source = manifest && manifest.source
+    return manifest && manifest.schema === 1 && manifest.precision === '8bit' && source &&
+      source.runtimeCommit === MLX_YUE_COMMIT && source.modelRevision === YUE2_MODEL_REVISION && source.vaeRevision === YUE2_VAE_REVISION &&
+      inside(manifest.model) && inside(manifest.vae) ? manifest : null
+  } catch { return null }
 }
 
 // Checked before the first byte is downloaded: finding out about a full disk or an
@@ -666,7 +743,15 @@ async function engineCheck (id) {
   const freeGb = worst === -1 ? null : spaces[worst]
   const problems = []
   const warnings = []
-  if (!gpu.ok && MAC) {
+  if (id === 'yue-mlx' && (!MAC || process.arch !== 'arm64')) {
+    problems.push('YuE2 (Apple Silicon)는 Apple Silicon 맥에서만 사용할 수 있습니다.')
+  } else if (id === 'yue-mlx') {
+    const minimum = /\bM5\b/i.test(gpu.name || '') ? '26.2' : '14.2'
+    const version = await macOSProductVersion()
+    if (!version || !versionAtLeast(version, minimum)) {
+      problems.push(`YuE2 (Apple Silicon)는 macOS ${minimum} 이상이 필요합니다.${version ? ` 현재 버전은 ${version}입니다.` : ''}`)
+    }
+  } else if (!gpu.ok && MAC) {
     problems.push('이 맥에서는 AI 엔진을 쓸 수 없습니다. Apple Silicon(M1 이상) 맥이 필요합니다.')
   } else if (!gpu.ok) {
     const others = (gpu.adapters || []).filter(Boolean)
@@ -675,7 +760,7 @@ async function engineCheck (id) {
       ' NVIDIA 카드가 있다면 NVIDIA 드라이버를 설치·업데이트한 뒤 PC를 다시 시작해 주세요.')
   } else if (MAC && id === 'yue') {
     problems.push('YuE2는 NVIDIA 그래픽카드 전용이라 맥에서는 쓸 수 없습니다. ACE-Step 1.5를 설치해 주세요.')
-  } else if (gpu.compute !== null && gpu.compute < engine.minCompute) {
+  } else if (engine.minCompute !== null && gpu.compute !== null && gpu.compute < engine.minCompute) {
     problems.push(id === 'yue'
       ? `${gpu.name}는 YuE2가 쓰는 BF16 연산을 지원하지 않습니다. RTX 30 시리즈 이상이 필요합니다.`
       : `${gpu.name}는 ${engine.name}를 지원하지 않는 세대입니다. RTX 20 시리즈 이상이 필요합니다.`)
@@ -713,6 +798,7 @@ async function engineCheck (id) {
 
 function setupSkipReason (id) {
   if (MAC && id === 'yue') return 'YuE2는 macOS에서 지원하지 않습니다.'
+  if (!MAC && id === 'yue-mlx') return 'YuE2 (Apple Silicon)는 Apple Silicon 맥에서만 지원합니다.'
   return null
 }
 
@@ -729,7 +815,7 @@ async function setupCheck () {
   return {
     ...primary,
     ok,
-    problems: ok ? [] : checks.flatMap((check) => check.problems),
+    problems: ok ? [] : [...new Set(checks.flatMap((check) => check.problems))],
     warnings: [...new Set(checks.flatMap((check) => check.warnings))],
     engines,
     skipped
@@ -948,6 +1034,82 @@ async function runAceSetup () {
   return { ok: true, gpu: check.gpu }
 }
 
+async function runYueMlxSetup () {
+  const p = paths()
+  const check = await engineCheck('yue-mlx')
+  if (!check.ok) throw new Error(check.problems.join('\n'))
+  send('setup:step', { step: 'gpu', status: 'done', detail: `${check.gpu.name} (${check.gpu.vramGb}GB)` })
+
+  send('setup:step', { step: 'uv', status: 'run' })
+  await ensureUv()
+  send('setup:step', { step: 'uv', status: 'done' })
+
+  send('setup:step', { step: 'python', status: 'run' })
+  const python = await ensurePython312()
+  await fsp.mkdir(p.yueMlxRoot, { recursive: true })
+  if (!await exists(p.yueMlxPython)) await run(p.uv, ['venv', '--python', python, p.yueMlxVenv], { stream: true, env: uvEnv() })
+  send('setup:step', { step: 'python', status: 'done' })
+
+  // Keep the MLX source and environment separate from both CUDA YuE2 and ACE.
+  send('setup:step', { step: 'source', status: 'run' })
+  const zip = path.join(os.tmpdir(), `mlx-yue-${MLX_YUE_COMMIT}.zip`)
+  const unpackDir = path.join(p.yueMlxRoot, 'unpack')
+  await download(MLX_YUE_URL, zip, (got, total) => send('setup:progress', { step: 'source', got, total }))
+  await fsp.rm(unpackDir, { recursive: true, force: true })
+  await unzip(zip, unpackDir)
+  await fsp.unlink(zip).catch(() => {})
+  const [top] = await fsp.readdir(unpackDir)
+  if (!top) throw new Error('MLX YuE2 소스 압축을 풀지 못했습니다.')
+  await fsp.rm(p.yueMlxSrc, { recursive: true, force: true })
+  await fsp.rename(path.join(unpackDir, top), p.yueMlxSrc)
+  await fsp.rm(unpackDir, { recursive: true, force: true })
+  send('setup:step', { step: 'source', status: 'done' })
+
+  send('setup:step', { step: 'deps', status: 'run' })
+  await run(p.uv, ['sync', '--project', p.yueMlxSrc, '--frozen', '--no-dev', '--python', python], {
+    cwd: p.yueMlxSrc, stream: true, env: { ...uvEnv(), UV_PROJECT_ENVIRONMENT: p.yueMlxVenv }
+  })
+  send('setup:step', { step: 'deps', status: 'done' })
+
+  // The script owns model download, conversion and doctor verification. It writes
+  // paths.json only after every check passes.
+  send('setup:step', { step: 'models', status: 'run' })
+  await new Promise((resolve, reject) => {
+    const child = spawn(p.yueMlxPython, ['-u', p.yueMlxSetup, p.yueMlxRoot], {
+      env: { ...process.env, ROADMUSIC_YUE_MLX_ROOT: p.yueMlxRoot, HF_HOME: path.join(p.yueMlxRoot, 'hf-cache'),
+        PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }, windowsHide: true
+    })
+    let err = ''
+    let buffer = ''
+    const onLine = (line) => {
+      try {
+        const event = JSON.parse(line)
+        if (event.type === 'progress') send('setup:progress', { step: event.step || 'models', got: event.bytes || event.got, total: event.total })
+        else if (event.type === 'step') send('setup:step', { step: event.step, status: event.status || 'run', detail: event.detail })
+        else if (event.type === 'error') err += event.message || ''
+        else if (event.message) setupLog(event.message)
+      } catch { setupLog(line) }
+    }
+    child.stdout.on('data', (d) => {
+      buffer += String(d)
+      const lines = buffer.split(/\r?\n/)
+      buffer = lines.pop()
+      lines.filter(Boolean).forEach(onLine)
+    })
+    child.stderr.on('data', (d) => { err += d })
+    child.on('error', reject)
+    child.on('close', (code) => {
+      if (buffer.trim()) onLine(buffer)
+      code === 0 ? resolve() : reject(new Error(err.slice(-2000) || `YuE2 (Apple Silicon) 설치 실패 (${code})`))
+    })
+  })
+  if (!await yueMlxInstalled(p)) throw new Error('YuE2 (Apple Silicon) 설치 확인 파일 또는 변환된 모델을 찾지 못했습니다.')
+  send('setup:step', { step: 'verify', status: 'done' })
+  await writeSettings({ yueMlxInstalled: true, yueMlxInstalledAt: new Date().toISOString() })
+  log('yue mlx installed', p.yueMlxRoot)
+  return { ok: true, gpu: check.gpu }
+}
+
 function uvEnv () {
   return { ...process.env, UV_PYTHON_INSTALL_DIR: path.join(paths().runtime, 'python'), UV_NO_PROGRESS: '1' }
 }
@@ -1041,6 +1203,10 @@ function startWorker (engine = 'yue') {
   const spec = engine === 'ace'
     ? { python: p.acePython, script: p.aceWorker, cwd: p.aceSrc,
         env: { ROADMUSIC_ACE_SRC: p.aceSrc, HF_HUB_OFFLINE: '1', ...(safe ? { ROADMUSIC_LOW_VRAM: '1' } : {}) } }
+    : engine === 'yue-mlx'
+      ? { python: p.yueMlxPython, script: p.yueMlxWorker, cwd: p.yueMlxSrc,
+          env: { ROADMUSIC_YUE_MLX_ROOT: p.yueMlxRoot, ROADMUSIC_YUE_MLX_MODELS: (yueMlxManifest(p) || {}).model || p.yueMlxModels,
+            ROADMUSIC_YUE_MLX_VAE: (yueMlxManifest(p) || {}).vae || p.yueMlxVae, HF_HOME: path.join(p.yueMlxRoot, 'hf-cache'), HF_HUB_OFFLINE: '1' } }
     : { python: p.python, script: p.worker, cwd: undefined, env: { HF_HOME: hfHome, ...(safe ? { ROADMUSIC_FAST: '0' } : {}) } }
   log('starting worker', engine, spec.python, spec.script, safe ? '(safe mode)' : '')
   const child = spawn(spec.python, ['-u', spec.script], {
@@ -1189,7 +1355,7 @@ async function handleWorkerEvent (event) {
     // The song went through in safe mode after a native crash: stay in safe mode on
     // this PC from now on.
     if (currentJob && currentJob.safeRetry) {
-      const engine = currentJob.job.engine === 'ace' ? 'ace' : 'yue'
+      const engine = currentJob.job.engine
       const safeMode = { ...((await readSettings()).safeMode || {}), [engine]: true }
       await writeSettings({ safeMode })
       log('safe mode kept', engine)
@@ -1358,7 +1524,7 @@ function jobPlaceholder (dir) {
     ? currentJob
     : queue.find((entry) => entry.outDir === dir)
   if (!item) return {}
-  return { title: item.title, instrumental: Boolean(item.job && item.job.instrumental),
+  return { title: item.title, engine: item.job && item.job.engine, instrumental: Boolean(item.job && item.job.instrumental),
     targetSeconds: (item.job && item.job.targetSeconds) || null,
     parts: (item.job && item.job.parts) || null }
 }
@@ -1378,7 +1544,8 @@ async function saveSong (event) {
       // The worker does not echo these back, but reuse and re-render need them.
       instrumental: Boolean(placeholder.instrumental),
       parts: placeholder.parts || null,
-      title: placeholder.title || event.meta.id }
+      title: placeholder.title || event.meta.id,
+      engineId: completedEngineId(event.meta, placeholder) }
     await writeMeta(dir, meta)
     return meta
   }
@@ -1393,7 +1560,7 @@ async function saveSong (event) {
   } catch {}
   const title = placeholder.title || event.meta.title || event.meta.id
   await autoConvert(dir)
-  // The worker always writes audio.wav; the file takes the song's title from here on.
+  // The worker writes its native audio format; the file takes the song's title here.
   const named = await nameAudio(dir, title)
   const audio = named.wav || named.mp3 || event.audio
   const meta = { ...event.meta, jobId: event.jobId || placeholder.jobId, dir, audio, mp3: named.mp3 || null, status: 'done',
@@ -1403,6 +1570,7 @@ async function saveSong (event) {
     soundEffect: Boolean(placeholder.soundEffect),
     targetSeconds: placeholder.targetSeconds || null,
     parts: placeholder.parts || null,
+    engineId: completedEngineId(event.meta, placeholder),
     // A cover from another song's sound: which one, and how closely it followed.
     cover: placeholder.cover ? { from: placeholder.cover.from, strength: placeholder.cover.strength } : null,
     appVersion: app.getVersion(),
@@ -1615,12 +1783,15 @@ async function listSongs ({ includeHidden = false } = {}) {
 // ── ipc ──────────────────────────────────────────────────────────────────────
 ipcMain.handle('app:state', async () => {
   const settings = await readSettings()
-  const engines = { yue: await engineInstalled('yue'), ace: await engineInstalled('ace') }
+  const engines = Object.fromEntries(await Promise.all(Object.keys(ENGINES).map(async (id) => [id, await engineInstalled(id)])))
   // The YuE2 install is there but its model files are not: the engine screen offers "다시 받기".
-  const repair = { yue: Boolean(settings.setupDone) && !engines.yue && fs.existsSync(paths().python) && !findYueModels() }
+  const repair = {
+    yue: Boolean(settings.setupDone) && !engines.yue && fs.existsSync(paths().python) && !findYueModels(),
+    'yue-mlx': Boolean(settings.yueMlxInstalled) && !engines['yue-mlx'] && fs.existsSync(paths().yueMlxPython)
+  }
   // The app opens once an engine is in — or once the person chose to go without one
   // (video studio, imports and playback need no engine).
-  const ready = engines.yue || engines.ace || Boolean(settings.engineSetupSkipped)
+  const ready = Object.values(engines).some(Boolean) || Boolean(settings.engineSetupSkipped)
   // The folder button opens the project being worked on, not the library root.
   const dir = ready ? await projectDir().catch(() => null) : null
   return { ready, engines, gpu: settings.gpu || await detectGpu(), songsDir: dir, version: app.getVersion(),
@@ -1643,7 +1814,9 @@ ipcMain.handle('engines:list', async () => Promise.all(Object.values(ENGINES).ma
   steps: engine.steps,
   installed: await engineInstalled(engine.id),
   // Installed once, but the model files are gone: offer to fetch them again.
-  repair: engine.id === 'yue' && Boolean(settingsSync().setupDone) && fs.existsSync(paths().python) && !findYueModels(),
+  repair: engine.id === 'yue' ? Boolean(settingsSync().setupDone) && fs.existsSync(paths().python) && !findYueModels()
+    : engine.id === 'yue-mlx' ? Boolean(settingsSync().yueMlxInstalled) && !await yueMlxInstalled()
+      : false,
   check: await engineCheck(engine.id)
 }))))
 
@@ -1656,14 +1829,16 @@ ipcMain.handle('engines:install', async (_e, id) => {
   if (installing) return { ok: false, message: '다른 엔진을 설치하는 중입니다.' }
   const check = await engineCheck(id)
   if (!check.ok) return { ok: false, blocked: true, problems: check.problems }
+  if (installing) return { ok: false, message: '다른 엔진을 설치하는 중입니다.' }
   // The engine being replaced must let go of its files first.
   if (workerEngine === id && !currentJob) stopWorker()
-  if (currentJob && currentJob.job.engine === id) {
-    return { ok: false, message: '이 엔진으로 곡을 만드는 중입니다. 끝난 뒤에 다시 설치해 주세요.' }
+  if (currentJob || queue.length || activeWork > 1) {
+    return { ok: false, message: '곡을 만드는 중입니다. 끝난 뒤에 AI 엔진을 설치해 주세요.' }
   }
   installing = id
+  setupRunning += 1
   try {
-    const result = id === 'ace' ? await runAceSetup() : await runSetup()
+    const result = id === 'ace' ? await runAceSetup() : id === 'yue-mlx' ? await runYueMlxSetup() : await runSetup()
     log('engine installed', id)
     return result
   } catch (error) {
@@ -1671,6 +1846,7 @@ ipcMain.handle('engines:install', async (_e, id) => {
     return { ok: false, message: error.message }
   } finally {
     installing = null
+    setupRunning -= 1
   }
   } finally {
     activeWork -= 1
@@ -1843,13 +2019,13 @@ function pump () {
   currentJob = queue.shift()
   // Without its model files YuE2 can only fail after a minute of loading; say why now,
   // and hold the rest of the queue until the models are back.
-  if (currentJob.job.engine !== 'ace' && !findYueModels()) {
+  if (currentJob.job.engine === 'yue' && !findYueModels()) {
     log('yue models missing', paths().hfHome)
     paused = true
     handleWorkerEvent({ type: 'error', jobId: currentJob.jobId, message: YUE_MODELS_MISSING })
     return
   }
-  startWorker(currentJob.job.engine === 'ace' ? 'ace' : 'yue')
+  startWorker(currentJob.job.engine)
   worker.stdin.write(JSON.stringify(currentJob.job) + '\n')
   log('job started', { jobId: currentJob.jobId, title: currentJob.title })
   send('job:started', { jobId: currentJob.jobId, title: currentJob.title })
@@ -1910,9 +2086,17 @@ async function savedCover (value) {
 
 async function startGeneration (payload) {
   if (typeof updateBlocksWork === 'function' && updateBlocksWork()) return { ok: false, message: '업데이트 설치를 준비하는 중에는 새 작업을 시작할 수 없습니다.' }
+  if ((typeof installing !== 'undefined' && installing) || (typeof setupRunning !== 'undefined' && setupRunning)) {
+    return { ok: false, message: 'AI 엔진 설치 중에는 곡 생성을 시작할 수 없습니다. 설치가 끝난 뒤에 다시 시도해 주세요.' }
+  }
   activeWork += 1
   try {
-  const engine = payload.engine === 'ace' ? 'ace' : 'yue'
+  const normalizeEngine = typeof canonicalEngineId === 'function'
+    ? canonicalEngineId
+    : (value) => value === 'ace' || value === 'yue' || value === 'yue-mlx' ? value : null
+  const engine = normalizeEngine(payload.engine) || normalizeEngine(payload.engineId) ||
+    (payload.engine == null && payload.engineId == null ? 'ace' : null)
+  if (!engine) return { ok: false, message: '알 수 없는 생성 엔진입니다.' }
   const error = generationError({ ...payload, engine })
   if (error) return { ok: false, message: error }
   log('generate request', { title: payload.title, seed: payload.seed, engine })
@@ -2036,10 +2220,11 @@ ipcMain.handle('song:score', async (_e, dir) => {
 // in a short-lived process of its own, so a busy generation worker never delays it.
 ipcMain.handle('score:check', async (_e, text) => {
   const p = paths()
-  if (!await exists(p.python)) return { ok: false, error: '실행 환경이 없어 악보를 검사할 수 없습니다.' }
+  const python = await exists(p.python) ? p.python : await exists(p.yueMlxPython) ? p.yueMlxPython : null
+  if (!python) return { ok: false, error: '실행 환경이 없어 악보를 검사할 수 없습니다.' }
   const script = unpacked(path.join(__dirname, '..', 'python', 'abc_check.py'))
   return new Promise((resolve) => {
-    const child = execFile(p.python, [script],
+    const child = execFile(python, [script],
       { timeout: 15000, windowsHide: true, maxBuffer: 1024 * 1024,
         env: { ...process.env, PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' } },
       (error, stdout, stderr) => {
@@ -3787,6 +3972,15 @@ async function createWindow () {
   win.autoHideMenuBar = true
   installContextMenu(win)
   win.on('close', (event) => {
+    if (installing || setupRunning) {
+      event.preventDefault()
+      dialog.showMessageBoxSync(win, {
+        type: 'warning', buttons: ['확인'], defaultId: 0,
+        title: 'AI 엔진 설치 중', message: 'AI 엔진을 설치하거나 모델을 변환하는 중입니다.',
+        detail: '설치가 끝난 뒤에 창을 닫아 주세요. 지금 닫으면 설치가 깨질 수 있습니다.'
+      })
+      return
+    }
     if (!renderJobs.size || quittingAfterRender) return
     const choice = dialog.showMessageBoxSync(win, {
       type: 'warning', buttons: ['계속 만들기', '취소하고 닫기'], defaultId: 0, cancelId: 0,
@@ -3942,7 +4136,17 @@ app.whenReady().then(async () => {
   if (!cliService) reportInstall()
 })
 app.on('will-quit', () => { appUpdate.stop(); cliBridge.close().catch(() => {}) })
-app.on('before-quit', () => cliBridge.notifyStopping())
+app.on('before-quit', (event) => {
+  if (installing || setupRunning) {
+    event.preventDefault()
+    if (win && !win.isDestroyed()) dialog.showMessageBoxSync(win, {
+      type: 'warning', buttons: ['확인'], defaultId: 0,
+      title: 'AI 엔진 설치 중', message: 'AI 엔진 설치가 끝난 뒤에 종료할 수 있습니다.'
+    })
+    return
+  }
+  cliBridge.notifyStopping()
+})
 app.on('window-all-closed', () => {
   if (worker) { try { worker.stdin.write(JSON.stringify({ cmd: 'quit' }) + '\n') } catch {} worker.kill() }
   // app.quit() waits for any render to be cleaned up (before-quit above). The Mac quits

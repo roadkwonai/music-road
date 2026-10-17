@@ -22,6 +22,7 @@ ACE를 사용할 때는 매 요청마다 [ACE 공식 가이드 적용 절차](ac
 - [한 줄 요청 모음](#one-line-requests)
 - [요청한 5곡 묶음](#requested-five-song-set)
 - [비교·수정 지시](#iterate)
+- [가사 전달·고음·모델별 조정](#model-adaptation)
 - [가사 작성 팁](#lyrics-tips)
 - [다음 문서](#related-docs)
 
@@ -363,6 +364,16 @@ AGENTS.md와 docs/cli.md를 따라 Road Music CLI로 아래 한국어 창작곡 
 | 재시도 안전 | `생성 요청이 uncertain 오류면 재제출하지 말고 service:status, queue:list, songs:list으로 먼저 생성 여부를 확인해줘.` |
 
 `count: 2`는 제목 뒤에 A/B를 붙이고 시드를 증가시킨다. 세밀한 생성 옵션은 [음악 생성 옵션](music-options.md), 대기·오류 처리 규칙은 [CLI 사용법](cli.md#연결-끊김과-재시작)을 따른다.
+
+<a id="model-adaptation"></a>
+
+## 가사 전달·고음·모델별 조정
+
+기존 가사를 유지한 채 모델별 프롬프트나 FLOW를 바꿔 비교하려면 [모델별 제작·비교 가이드](model-production-guide.md)를 읽거나 `prompt:knowledge`의 `models`를 조회한다. 기본 ACE·0.6B 제작과 별도 1.7B·네이티브 XL·YuE2 MLX 실험의 지원 범위를 구분한다.
+
+가사 중심 편곡은 명료한 여성 솔로 보컬·보컬 전면 배치·절제된 반주를 짧게 제안하고, 고음 요청은 마지막 후렴에 집중시키는 안을 검토할 수 있다. 제공 가사를 음절 단위로 다시 쓰거나 후렴을 임의 추가하지 않는다. 긴 발음 지시나 부정 태그, 더 큰 LM이 더 정확한 가창을 보장하지 않는다. 모델별 시험 caption과 실제 결과·한계는 위 가이드에 모았다.
+
+2026-10-16의 16곡 비교에서는 전곡 ASR과 30초 구간 ASR의 개선 방향이 다수 엇갈렸다. 관측된 전사 오류를 실제 발음 오류로 단정하지 않고, 목표 길이와 실제 길이·생성 시간·재시도 비용을 함께 비교한다. 실험값을 일괄 프리셋으로 적용하거나 청취하지 않은 음질을 평가하지 않는다.
 
 <a id="lyrics-tips"></a>
 

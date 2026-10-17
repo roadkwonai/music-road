@@ -108,16 +108,19 @@ CLI 설치와 환경 점검은 [CLI 설치](cli-install.md), 명령별 상세 �
 
 ## 음악 요청 예시 찾기
 
-CLI가 `prompt:knowledge`를 지원하면 앱을 시작하지 않고 장르 지식을 읽을 수 있다. 우선 목록을 읽고 CCM은 `ccm`, 옛 찬송 리메이크는 `hymn-remake`, 원문 보존·추천은 `review`를 조회한다. [명령 사용법](cli.md#knowledge)을 따른다. 사용자 가사·프롬프트가 이미 있으면 문서 예시로 바꾸지 않고 미지정 부분만 제안한다. 전처리가 원문과 충돌하면 차이와 근거를 보여주고 승인 없이 수정하지 않는다.
+CLI가 `prompt:knowledge`를 지원하면 앱을 시작하지 않고 장르 지식을 읽을 수 있다. 우선 목록을 읽고 CCM은 `ccm`, 옛 찬송 리메이크는 `hymn-remake`, 원문 보존·추천은 `review`, 모델별 제작·비교는 `models`를 조회한다. [명령 사용법](cli.md#knowledge)을 따른다. 사용자 가사·프롬프트가 이미 있으면 문서 예시로 바꾸지 않고 미지정 부분만 제안한다. 전처리가 원문과 충돌하면 차이와 근거를 보여주고 승인 없이 수정하지 않는다.
 
 ```bash
 node cli/road-music.js prompt:knowledge --json '{"topic":"genres"}'
 node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
+node cli/road-music.js prompt:knowledge --json '{"topic":"models"}'
 ```
 
 | 필요한 내용 | 문서 |
 | --- | --- |
 | ACE 생성 전 필수 참고, 공식 원문·프롬프트 최적화 | [ACE 최적화 가이드](ace-prompt-guide.md) · [공식 보관본](vendor/ace-step-1.5/README.md) |
+| 모델별 입력·FLOW 조정과 비교, 시험값·길이·ASR·복구 한계 | [모델별 제작·비교](model-production-guide.md) |
+| Apple Silicon YuE2 설치·선택·생성, 메모리·라이선스 | [YuE2 Apple Silicon](yue-mlx.md) |
 | Verse·Chorus 등 구간 태그, 기본 검토·전체 자동 위임 | [태그 가이드](lyrics-tags.md) · [검토 규칙](music-review.md) |
 | 자연어 요청을 지원 옵션으로 바꾸기, JSON 파일 실행 | [음악 생성 옵션](music-options.md) |
 | 장르별 상세 요청·한 줄 요청·여성 보컬·여러 곡 | [장르별 프롬프트](genre-prompts.md) |

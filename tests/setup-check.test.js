@@ -11,12 +11,12 @@ function loadSetupCheck ({ MAC, engineCheck }) {
   const start = source.indexOf('function setupSkipReason')
   const end = source.indexOf('const preflight', start)
   assert.notEqual(start, -1, 'setup:check must explicitly identify platform-skipped engines')
-  const context = { MAC, ENGINES: { ace: {}, yue: {} }, engineCheck }
+  const context = { MAC, ENGINES: { ace: {}, yue: {}, 'yue-mlx': {} }, engineCheck }
   vm.runInNewContext(source.slice(start, end), context)
   return context.setupCheck
 }
 
-test('setup:check skips YuE without checking it on macOS when ACE is ready', async () => {
+test('setup:check skips Windows YuE but checks Apple Silicon YuE on macOS', async () => {
   const checked = []
   const setupCheck = loadSetupCheck({
     MAC: true,
@@ -24,10 +24,10 @@ test('setup:check skips YuE without checking it on macOS when ACE is ready', asy
   })
 
   const result = await setupCheck()
-  assert.deepEqual(checked, ['ace'])
+  assert.deepEqual(checked.sort(), ['ace', 'yue-mlx'])
   assert.equal(result.ok, true)
   assert.equal(result.engines.ace.ok, true)
-  assert.deepEqual(JSON.parse(JSON.stringify(result.skipped)), [{ id: 'yue', reason: 'YuE2는 macOS에서 지원하지 않습니다.' }])
+  assert.deepEqual(JSON.parse(JSON.stringify(result.skipped)), [{ id: 'yue', reason: 'YuE2 (Windows NVIDIA)는 macOS에서 지원하지 않습니다. Apple Silicon에서는 YuE2 (Apple Silicon)를 선택해 주세요.' }])
 })
 
 test('setup:check retains an ACE failure on macOS while YuE is skipped', async () => {
@@ -39,6 +39,7 @@ test('setup:check retains an ACE failure on macOS while YuE is skipped', async (
   assert.deepEqual(JSON.parse(JSON.stringify(result.problems)), failure.problems)
   assert.equal(result.engines.ace, failure)
   assert.equal(result.skipped[0].id, 'yue')
+  assert.ok(result.engines['yue-mlx'])
 })
 
 test('setup:check evaluates YuE on platforms where it is supported', async () => {
@@ -57,12 +58,12 @@ test('setup:check evaluates YuE on platforms where it is supported', async () =>
   assert.equal(result.ok, true)
   assert.equal(result.needGb, 20)
   assert.equal(result.engines.yue, checks.yue)
-  assert.deepEqual(JSON.parse(JSON.stringify(result.skipped)), [])
+  assert.deepEqual(JSON.parse(JSON.stringify(result.skipped)), [{ id: 'yue-mlx', reason: 'YuE2 (Apple Silicon)는 Apple Silicon 맥에서만 지원합니다.' }])
 })
 
 test('setup:check IPC returns the aggregate setup check', async () => {
   let setupCheckHandler
-  const expected = { ok: true, skipped: [{ id: 'yue', reason: 'YuE2는 macOS에서 지원하지 않습니다.' }] }
+  const expected = { ok: true, skipped: [{ id: 'yue', reason: 'YuE2 (Windows NVIDIA)는 macOS에서 지원하지 않습니다. Apple Silicon에서는 YuE2 (Apple Silicon)를 선택해 주세요.' }] }
   const context = {
     ipcMain: { handle: (channel, handler) => { if (channel === 'setup:check') setupCheckHandler = handler } },
     setupCheck: async () => expected

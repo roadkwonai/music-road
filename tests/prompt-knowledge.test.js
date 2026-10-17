@@ -49,6 +49,26 @@ test('rejects unknown topics and any unneeded input fields in every entry point'
   assert.equal(JSON.parse(stdout).result.topic, 'ccm')
 })
 
+test('model-production knowledge is available through schema and CLI without starting a service', async () => {
+  validate('prompt:knowledge', { topic: 'models' })
+  assert.ok(knowledge.read().topics.some(topic => topic.topic === 'models'))
+  const expected = fs.readFileSync(path.join(__dirname, '..', 'docs', 'model-production-guide.md'), 'utf8')
+  let spawns = 0
+  let stdout = ''
+  const code = await run(['prompt:knowledge', '--json', '{"topic":"models"}'], {
+    endpoint: path.join(__dirname, 'missing-model-knowledge.sock'),
+    spawnProcess: () => { spawns += 1; return { on: () => {}, unref: () => {} } },
+    stdout: { write: text => { stdout += text } }
+  })
+  assert.equal(code, 0)
+  assert.equal(spawns, 0)
+  const result = JSON.parse(stdout).result
+  assert.equal(result.topic, 'models')
+  assert.equal(result.source, 'docs/model-production-guide.md')
+  assert.equal(result.content, expected)
+  assert.deepEqual(result.policy, { preserveUserInput: true, autoApply: false, suggestionsRequireApproval: true })
+})
+
 test('guide UI is read-only and never assigns a guide result to lyric or style inputs', () => {
   const source = fs.readFileSync(path.join(__dirname, '..', 'renderer', 'app.js'), 'utf8')
   const start = source.indexOf('let knowledgeRequest')

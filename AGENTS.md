@@ -17,6 +17,7 @@
 
 - ACE의 가사·프롬프트·옵션을 설계하거나 생성할 때는 **작업 요청마다 [동봉 스킬](skills/road-music-ace/SKILL.md)과 [ACE 최적화 가이드](docs/ace-prompt-guide.md)를 먼저 읽고**, 해당 작업의 공식 원문 절과 [가사 태그 가이드](docs/lyrics-tags.md)를 참고한다. 현재 Turbo·0.6B와 공개 CLI에 적용되는 내용만 사용한다. `prompt:compose`·가사 점검 결과로 최종 caption 512자·정리된 가사 4,096자 이내인지 확인하고 잘림을 방지한다. 모델·CLI가 바뀌면 한계를 다시 확인하며, 원문이 없거나 버전이 맞지 않으면 공식 근거를 확인해 복구하고 확인 불가 상태를 보고한다.
 - 상세 옵션은 [음악 생성 옵션](docs/music-options.md), 장르별 출발점은 [장르 프롬프트](docs/genre-prompts.md)를 필요한 부분만 참고한다. 자연어 요청은 AI가 가사와 지원 JSON으로 변환한다. 보컬·키·장르 태그를 확정적 결과나 미지원 전용 옵션으로 안내하지 않는다.
+- 모델별 제작·최적화·비교를 요청받으면 [모델별 제작·비교 가이드](docs/model-production-guide.md)와 `prompt:knowledge`의 `models`를 참고한다. Apple Silicon YuE2는 [YuE2 Apple Silicon](docs/yue-mlx.md)의 공개 `yue-mlx` 설치·생성 경로를 사용하고, 기존 `yue`는 Windows NVIDIA용으로 유지한다. 실험 설정을 기본값으로 승격하거나 ASR 지표로 청취 품질을 확정하지 않는다. 사용자 가사·목표 길이를 보존하고 실제 길이 편차와 실패·복구 비용을 함께 보고한다.
 - CCM·찬양·워십 요청은 [CCM 상세 가이드](docs/ccm-prompts.md)에서 회중 예배·특송·개인 기도·묵상 연주의 목적을 먼저 고른다. 과거·최근 근거와 제작용 설정을 구분하고, 가사에서 신앙의 대상·주제를 명확하게 한다. 일반 음악 요청을 임의로 CCM으로 바꾸지는 않는다.
 - 찬송가 리메이크는 [원전·권리·리메이크 가이드](docs/hymn-remake-guide.md)를 읽고 원어 가사·지정 선율과 한국어 번역·현대 편곡·녹음의 권리를 따로 확인한다. 원전 만료를 현행 한국어 가사·유튜브 음원 사용 허락으로 확대하지 않는다. 실제 원형을 유지하려면 허락된 참조 오디오가 필요하며 텍스트 장르 요청만으로 원래 멜로디가 보존된다고 안내하지 않는다.
 - 장르 지식은 `prompt:knowledge`로 조회해 참고한다. **사용자가 준 가사·프롬프트·명시한 옵션은 지식·프리셋 예시보다 우선하며 원문을 임의로 개사·번역·확장·축약·교체하지 않는다.** 더 나은 안은 [원문 보존·추천 규칙](docs/music-review.md#preserve-input)에 따라 근거와 변경점을 제안하고, 승인된 수정만 반영한다. 전체 자동 생성 위임도 별도로 제공한 원문을 고치라는 권한으로 확대하지 않는다.
@@ -43,7 +44,7 @@
 - GUI용 dmg는 `/Applications`로 복사해 실행한다. GUI만 사용할 때 Node.js는 필요 없다.
 - CLI는 이 소스 키트에서 Node.js 24 LTS와 `npm ci --include=dev`가 필요하다. `node cli/road-music.js …`로 실행한다. Electron이 개발 의존성으로 선언되어 있어 실행 시에도 설치해야 한다.
 - 키트의 `cli` 하위 폴더에서 `npm link`로 독립 `road-music-cli`의 전역 명령을 만들 수 있지만 선택 사항이다. 권한 오류가 나도 `sudo`를 쓰지 말고 위의 `node` 명령을 사용한다.
-- `ffmpeg`와 `ffprobe`, ACE 엔진은 CLI와 별도로 준비한다. 설치·생성 전 `setup:check`와 `engines:list`으로 확인한다.
+- `ffmpeg`와 `ffprobe`, 음악 엔진은 CLI와 별도로 준비한다. 설치·생성 전 `setup:check`와 `engines:list`으로 확인한다.
 - 엔진·모델 다운로드는 사용자가 설치를 요청한 경우에만 실행한다. 음악 생성만 요청했는데 모델이 없으면 미설치 상태를 보고한다.
 - 업데이트는 [업데이트 가이드](docs/updates.md)를 따른다. 앱은 `update:*`, CLI는 `cli:update:*`만 쓴다. 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 위임했을 때만 설치한다. `cli:update:install` 뒤에는 반환된 `cliPath`에서 버전·스키마·지식 조회를 검증하고 이후 명령도 그 경로로 실행한다. 기존 폴더·앱·모델·곡·Git 작업 폴더를 덮어쓰거나 재시작하지 않는다.
 - 새 정식 버전은 제품별로 배포한다. 앱은 `package.json`·`vX.Y.Z` 태그·`RoadMusic-X.Y.Z-*` asset을, CLI는 `cli/package.json`·`cli-vX.Y.Z` 태그·`RoadMusic-CLI-X.Y.Z.zip` asset을 사용한다. 앱 Release만 Latest이며 현재 앱은 `0.1.0`, CLI는 `0.1.1`이다. 이번 0.1.0 재초기화만 명시적 예외로 기존 공개 CLI 0.1.0을 백업·철회 후 새 자산으로 바꾼다. 이후 CI는 같은 제품의 최신 정식 Release 다음 버전만 허용하며, 다른 제품 태그·동일 버전·역행·번호 건너뛰기를 거부한다. 앱 1.4.x와 이전 CLI 0.1.0 키트는 수동 전환 후 해당 제품의 0.1.1 이상만 알린다.

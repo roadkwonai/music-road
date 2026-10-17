@@ -1,6 +1,6 @@
 ---
 name: road-music-ace
-description: Use when preparing lyrics, style prompts, or generation requests for ACE through Road Music CLI, including section tags, requester review, and explicitly delegated automatic creation.
+description: Prepare ACE lyrics and music prompts through Road Music CLI, or adapt those inputs for explicitly requested model comparisons, with input preservation and generation review.
 ---
 
 # Road Music ACE 작사·생성
@@ -11,6 +11,7 @@ CLI 키트에 동봉하는 작업 스킬이다. 기준 경로는 이 파일에�
 
 - 매 음악 요청: [ACE 적용 가이드](../../docs/ace-prompt-guide.md), [태그 사용법](../../docs/lyrics-tags.md), [검토·자동 생성 규칙](../../docs/music-review.md).
 - 필요한 부분만: [옵션](../../docs/music-options.md), [장르 레시피](../../docs/genre-prompts.md). 최신 인기·플레이리스트가 언급되면 [리서치 절차](../../docs/music-research.md).
+- 모델별 프롬프트·FLOW 조정, 1.7B LM·네이티브 XL·YuE2 MLX 비교를 요청받으면 [모델별 제작·비교](../../docs/model-production-guide.md)를 읽는다. Apple Silicon YuE2 생성은 [YuE2 Apple Silicon](../../docs/yue-mlx.md)의 `yue-mlx` 공개 설치·생성 경로를 쓰며 기존 `yue`는 Windows NVIDIA용이다. CLI에서는 `prompt:knowledge`의 `models` topic으로 조회한다. 기본 ACE 요청에 비교 실험의 설정을 자동 적용하지 않는다.
 - 공식 원문은 적용 가이드가 연결한 해당 절을 읽는다. 네이티브 ACE 기능을 로드뮤직 지원 옵션으로 오인하지 않는다.
 
 ## 작업 흐름
@@ -20,7 +21,7 @@ CLI 키트에 동봉하는 작업 스킬이다. 기준 경로는 이 파일에�
 3. 태그 가이드로 필요한 구간을 선택한다. 모든 태그를 억지로 넣지 않는다. 실제 부를 가사는 섹션 아래에, 보컬·편곡 지시는 style에 둔다. `parts.structure`로 보컬 가사를 자동 구성한다고 가정하지 않는다. 빠진 취향은 합리적인 안으로 제안해 가정을 표시하고, 곡 수 미지정은 1곡으로 한다. 필수 원문·파일·권한이 없으면 해당 작업만 확인한다.
 4. 생성 준비에는 상태·schema를 확인하고 `lyrics:clean` 전후의 태그·본문, `lyrics:check`, `prompt:compose`의 notes와 최종 caption을 점검한다. ACE 최종 caption 512자·가사 4,096자와 요청의 의미를 보존한다. 지원되지 않는 전용 필드를 추가하지 않는다. 단순 텍스트 초안만 요청한 경우는 태그·의미·분량을 정적으로 점검하고 도구 미실행을 밝힌다. 초안만을 위해 서비스를 시작하지 않는다.
 5. 생성까지 요청된 기본 검토는 **완성 가사·최종 caption·입력 JSON·검증 결과·출처**를 한 번에 보여주고 응답을 기다린다. 승인 전 생성 제출은 하지 않는다. 자동 위임은 질문으로 멈추지 않고 검증 후 요청 범위에서 생성한다.
-6. 승인/위임 범위의 JSON으로 제출하고 완료를 확인한다. 이후 음악·실제 가사·caption·설정·seed·참고 자료·선택 이유·검증 한계를 제공한다. 승인 후 의미가 달라지는 AI의 수정은 재검토받되, 사용자가 구체적 수정과 즉시 생성을 함께 요청했다면 그 지시를 따른다.
+6. 승인/위임 범위의 JSON으로 제출하고 완료를 확인한다. 이후 음악·실제 가사·caption·설정·seed·참고 자료·선택 이유·검증 한계를 제공한다. 비교에는 목표와 실제 길이, 생성 본체와 실패·복구 시간, 실제 로드한 모델을 구분한다. ASR 전사 일치도를 실제 가창·청취 점수로 바꾸지 않는다. 승인 후 의미가 달라지는 AI의 수정은 재검토받되, 사용자가 구체적 수정과 즉시 생성을 함께 요청했다면 그 지시를 따른다.
 
 ## 음악 생성 뒤 HTML 모션그래픽 연결
 

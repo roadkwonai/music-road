@@ -39,6 +39,9 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
   assert.ok(result.bytes > 1000)
   const entries = execFileSync('/usr/bin/unzip', ['-Z1', result.path], { encoding: 'utf8' }).trim().split('\n')
   const name = `RoadMusic-CLI-${version}`
+  for (const file of ['python/yue_mlx_setup.py', 'python/yue_mlx_worker.py', 'docs/yue-mlx.md']) {
+    assert.ok(entries.includes(`${name}/${file}`), file)
+  }
   for (const file of ['docs/README.md', 'docs/assets/brand/banner.svg', 'releases/README.md', 'release/2026-10-18-cli-0-1-1-skills-studio.md']) {
     assert.ok(entries.includes(`${name}/${file}`), file)
   }
@@ -51,7 +54,7 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
     assert.ok(entries.includes(`${name}/${file}`), file)
   }
   assert.deepEqual(entries.filter(file => /(^|\/)(node_modules|\.git|\.omx|\.omc|\.impeccable|__pycache__)(\/|$)|\.pyc$/.test(file)), [], 'noGitMetadata')
-  for (const file of ['docs/lyrics-tags.md', 'docs/music-review.md', 'skills/road-music-ace/SKILL.md', 'prompts/ace-review.md']) {
+  for (const file of ['docs/lyrics-tags.md', 'docs/music-review.md', 'docs/model-production-guide.md', 'skills/road-music-ace/SKILL.md', 'prompts/ace-review.md']) {
     assert.ok(entries.includes(`${name}/${file}`), `AI 음악 제작 자료 누락: ${file}`)
   }
   const extracted = path.join(temp, 'extracted')

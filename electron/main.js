@@ -797,7 +797,7 @@ async function engineCheck (id) {
 }
 
 function setupSkipReason (id) {
-  if (MAC && id === 'yue') return 'YuE2는 macOS에서 지원하지 않습니다.'
+  if (MAC && id === 'yue') return 'YuE2 (Windows NVIDIA)는 macOS에서 지원하지 않습니다. Apple Silicon에서는 YuE2 (Apple Silicon)를 선택해 주세요.'
   if (!MAC && id === 'yue-mlx') return 'YuE2 (Apple Silicon)는 Apple Silicon 맥에서만 지원합니다.'
   return null
 }

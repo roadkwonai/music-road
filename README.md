@@ -78,7 +78,7 @@ https://github.com/roadkwonai/music-road 의 AGENTS.md와 설치 지침을 따�
 
 ```text
 로드뮤직 앱과 CLI는 이미 설치돼 있어. 이 컴퓨터에서 기존 CLI 설치 폴더를 자동으로 찾아줘.
-찾은 폴더의 AGENTS.md와 docs/ai-cli.md에 따라 재설치 없이 연결·ACE 준비 상태를 확인해줘.
+찾은 폴더의 AGENTS.md와 docs/ai-cli.md에 따라 재설치 없이 연결·엔진 준비 상태를 확인해줘.
 이후 음악 요청은 동봉 스킬과 공식 가이드로 처리해줘.
 ```
 
@@ -212,6 +212,7 @@ flowchart LR
 | 더 세밀하게 만들려면 | 참고 문서 |
 | --- | --- |
 | 공식 ACE 가이드에 맞춘 입력 최적화 | [ACE 적용 가이드](docs/ace-prompt-guide.md) |
+| Apple Silicon YuE2 설치·선택·생성 | [YuE2 Apple Silicon](docs/yue-mlx.md) |
 | Verse·Chorus 등 구간의 의미와 배치 | [가사 태그](docs/lyrics-tags.md) |
 | 보컬·악기·BPM·길이·seed·실행 JSON | [음악 생성 옵션](docs/music-options.md) |
 | 장르별 간단 요청과 상세 레시피 | [장르별 프롬프트](docs/genre-prompts.md) |

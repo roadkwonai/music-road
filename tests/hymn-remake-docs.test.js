@@ -49,7 +49,7 @@ test('리메이크 JSON 예시와 공개 지식 조회는 실제 스키마를 �
     assert.equal(input.targetSeconds, undefined, '참조 입력을 일반 길이로 덮어쓰면 안 됩니다')
     assert.ok(Array.from(request.style).length <= 512)
   }
-  for (const topic of ['genres', 'ccm', 'hymn-remake', 'ace', 'lyrics', 'review']) {
+  for (const topic of ['genres', 'ccm', 'hymn-remake', 'ace', 'models', 'lyrics', 'review']) {
     const parsed = parseArgs(['prompt:knowledge', '--json', JSON.stringify({ topic })])
     validate(parsed.command, parsed.params)
   }

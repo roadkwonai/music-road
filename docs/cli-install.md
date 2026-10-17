@@ -23,7 +23,7 @@ Road Music의 dmg와 CLI는 용도가 다르다. dmg는 Finder에서 쓰는 GUI 
 먼저 [AGENTS.md](../AGENTS.md)를 읽고, 요청 범위에 따라 아래 절차를 적용한다.
 
 - 공통: OS·CPU·GPU·여유 공간, 기존 앱·CLI·진행 작업을 확인한다. 기존 설치를 우선 재사용하고 곡·모델·설정·대기 작업과 로컬 수정을 보존한다. 필요한 파일은 쓰기 가능한 사용자 폴더에 설치하고 `sudo`는 사용하지 않는다.
-- 전체 설치: 앱은 GitHub Releases의 Latest 정식 버전, CLI는 `cli-v*` 정식 Release 중 최고 버전을 각각 확인한다. Node.js 24 LTS, 소스 설치에 필요한 Git, `ffmpeg`·`ffprobe`, CLI 의존성과 지원되는 엔진·모델을 준비한다. Apple Silicon에서는 ACE를 사용하며, 지원하지 않는 환경이나 공간 부족은 보고한다. 상세 과정은 [빠른 시작](quickstart.md)을 따른다.
+- 전체 설치: 앱은 GitHub Releases의 Latest 정식 버전, CLI는 `cli-v*` 정식 Release 중 최고 버전을 각각 확인한다. Node.js 24 LTS, 소스 설치에 필요한 Git, `ffmpeg`·`ffprobe`, CLI 의존성과 지원되는 엔진·모델을 준비한다. Apple Silicon에서는 ACE와 별도 선택 설치인 `yue-mlx`를 지원한다. YuE2 MLX는 macOS 14.2 이상·32GB 이상 메모리가 필요하고 64GB 이상을 권장하며, M5는 macOS 26.2 이상과 전원 연결이 필요하다. 상세 과정은 [빠른 시작](quickstart.md)과 [YuE2 Apple Silicon](yue-mlx.md)을 따른다.
 - CLI만 추가: 기존 CLI 폴더가 없으면 `cli-v*` Release의 `RoadMusic-CLI-X.Y.Z.zip`을 설치한다. 앱의 `/releases/latest` asset을 CLI 키트로 사용하지 않는다. Node.js 24 LTS와 `npm ci --include=dev`로 CLI 실행에 필요한 의존성만 준비한다. 기존 GUI와 같은 데이터 폴더를 사용하고, 앱 재설치·업데이트, 엔진·모델 다운로드, 라이브러리 이동, 작업 중단은 하지 않는다. 부족한 엔진·변환 도구는 보고한다.
 
 설치 후 `cli:version`, `cli:update:check`, `schema`, `app:state`, `engines:list`, `projects:list`, `songs:list`, `setup:check`를 순서대로 조회한다. CLI만 추가하는 경우 여기까지로 연결을 검증하며, 새 곡 생성·내보내기는 하지 않는다. 전체 설치의 생성 검증은 새 테스트 프로젝트의 10초 피아노 연주곡으로 하되, **[프롬프트 검토 규칙](music-review.md)에 따라 안을 제시해 승인받거나 전체 자동 위임이 있을 때만 제출**한다. 완료를 기다린 뒤 MP3 파일과 길이를 검증한다. 생성 없이 설치만 요청했다면 상태 조회까지만 한다. 기존 라이브러리와 분리한 테스트는 `ROADMUSIC_DATA_DIR`로 임시 데이터 폴더를 지정하고 기존 모델을 재사용한다.
@@ -54,6 +54,7 @@ GUI만 쓸 때는 Node.js가 필요 없다. AI 엔진과 `ffmpeg`/`ffprobe`는 �
 | `skills/road-music-ace/SKILL.md` | 작사·프롬프트·검증·검토·생성·근거 보고 워크플로 |
 | `skills/music-road-skills/` | Showreel CD·Showreel MV·JIZURA·모션그래픽 HTML 스튜디오와 업데이트 스킬 번들 |
 | `docs/ace-prompt-guide.md`, `docs/vendor/ace-step-1.5/` | ACE 적용 가이드, 공식 원문·LICENSE·해시 |
+| `docs/yue-mlx.md` | Apple Silicon YuE2 설치·선택·생성, 메모리·라이선스·검증 한계 |
 | `docs/lyrics-tags.md`, `docs/music-options.md` | 태그 의미·변환·배치와 실제 CLI 옵션 |
 | `docs/genre-prompts.md`, `docs/music-research.md`, `docs/music-review.md` | 장르 예시, 최신 근거 조사, 요청자 검토·결과 자료 |
 | `prompts/ace-review.md`, `prompts/cli-workflows.md` | 선택적 검수 에이전트 역할과 실행·내보내기 예시 |
@@ -76,7 +77,7 @@ node cli/road-music.js engines:list
 - 첫 설치는 npm 패키지와 Electron 다운로드를 위해 인터넷이 필요하다. 이미 받은 캐시가 있으면 재사용할 수 있다.
 - `ffmpeg`와 `ffprobe`는 영상·변환에 필요하다. macOS에서는 `brew install ffmpeg` 후 `setup:check`으로 확인한다.
 - `npm run setup:cli`는 Node.js 24·잠금 의존성을 확인하고 동봉 `music-road-skills`를 Codex 기본 스킬 경로에 설치한다. Antigravity 또는 프로젝트별 위치는 [모션그래픽 설치 표](cli-motion-graphics.md#1-스킬-설치와-업데이트)를 따른다. 이 단계는 음악 엔진·영상 모델을 다운로드하지 않는다.
-- ACE 엔진 모델은 별도 설치다. `engines:list`에 준비 상태가 나오며, 설치를 요청하는 명령은 실제 다운로드와 디스크 사용이 발생하므로 사용자의 요청 범위에서만 쓴다.
+- ACE와 YuE2 엔진 모델은 별도 설치다. `engines:list`에 준비 상태가 나오며, 설치를 요청하는 명령은 실제 다운로드와 디스크 사용이 발생하므로 사용자의 요청 범위에서만 쓴다. Apple Silicon YuE2는 `engines:install`의 `id:"yue-mlx"`이며, 기존 `yue`는 Windows NVIDIA용이다.
 
 CLI의 첫 서비스 요청은 이 소스 키트의 Electron을 숨겨진 창으로 시작할 수 있다. 설치된 dmg GUI가 같은 기본 데이터 폴더로 이미 실행 중이면 프로젝트·곡 라이브러리·대기열을 공유한다. 실제 작업과 테스트를 섞지 않는다.
 

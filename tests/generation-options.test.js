@@ -39,7 +39,8 @@ test('custom length survives restoring saved settings and invalid input stays in
   const elements = {
     target: { value: '', options: ['', '30', '60', '120', '180', '240', '300', '360', 'custom'].map(value => ({ value })) },
     targetCustom: { value: '', max: '', classList: { toggle () {} } },
-    targetCustomRow: { classList: { toggle () {} } }
+    targetCustomRow: { classList: { toggle () {} } },
+    targetHint: { textContent: '', classList: { toggle () {} } }
   }
   let engine = 'ace'
   const context = { $: id => elements[id], currentEngine: () => engine, showLyricsCheckHint () {} }
@@ -60,6 +61,10 @@ test('custom length survives restoring saved settings and invalid input stays in
   engine = 'yue'
   context.updateTarget()
   assert.equal(context.readTarget(), null)
+  engine = 'yue-mlx'
+  elements.target.value = '180'
+  context.updateTarget()
+  assert.equal(elements.targetHint.textContent, 'Apple Silicon YuE2의 목표 길이는 기록·비교용이며 생성 길이를 직접 제어하지 않습니다. 실제 길이는 자연 종료에 따라 달라집니다.')
 })
 
 test('effect descriptions bypass music arrangement and strict instrument clauses', () => {

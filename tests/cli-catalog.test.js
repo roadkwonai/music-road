@@ -105,3 +105,16 @@ test('keeps internal pixel transport out of the public schema', () => {
   assert.ok(schema({ includeInternal: true }).commands.some(entry => entry.command === 'video:frame'))
   assert.notEqual(commands['song:generate'].description, commands['song:export'].description)
 })
+
+test('Apple Silicon YuE2 has a separate install and generation engine id', () => {
+  assert.deepEqual(validate('engines:install', { id: 'yue-mlx' }).args, ['yue-mlx'])
+  const input = { engine: 'yue-mlx', lyrics: '[Verse]\n너 없는 저녁에', targetSeconds: 180, mode: 'song', cot: 'full' }
+  assert.equal(validate('song:generate', input).paramsValue.engine, 'yue-mlx')
+  assert.equal(validate('song:generate', { ...input, mode: 'plan' }).paramsValue.mode, 'plan')
+  for (const targetSeconds of [5, 361]) {
+    assert.throws(() => validate('song:generate', { ...input, targetSeconds }), { code: 'INVALID_ARGUMENT' })
+  }
+  assert.throws(() => validate('song:generate', { ...input, soundEffect: true, targetSeconds: 20 }), { code: 'INVALID_ARGUMENT' })
+  assert.equal(validate('engines:install', { id: 'yue' }).args[0], 'yue')
+  assert.equal(validate('song:generate', {}).paramsValue.engine, 'ace')
+})

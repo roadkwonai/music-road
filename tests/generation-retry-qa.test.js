@@ -22,6 +22,7 @@ function generationContext ({ songs, recordings }) {
   const context = {
     fs, fsp, path, crypto, queue, currentJob: null, activeWork: 0, updateBlocksWork: () => false,
     generationError: () => null,
+    canonicalEngineId: value => value === 'ace' || value === 'yue' || value === 'yue-mlx' ? value : null,
     engineInstalled: async () => true,
     ensureSongsDir: async () => songs,
     recordingsDir: () => recordings,

@@ -19,9 +19,9 @@ AI나 터미널에서 설치부터 첫 곡 저장까지 진행하는 순서다. 
 Node.js 24를 준비하고 저장소를 받는다. 배포 CLI ZIP을 쓰는 경우에는 압축을 푼 폴더에서 `npm ci` 단계부터 진행한다.
 
 ```bash
-git clone https://github.com/roadkwonai/music-road.git
+git clone --recurse-submodules https://github.com/roadkwonai/music-road.git
 cd music-road
-npm ci --include=dev
+npm run setup:cli
 node cli/road-music.js schema
 ```
 

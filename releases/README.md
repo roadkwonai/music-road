@@ -2,15 +2,17 @@
 
 [Road Music README](../README.md) · [앱·CLI 업데이트](../docs/updates.md) · [패키징](../docs/packaging.md)
 
+CLI의 날짜 기반 변경 기록은 [release/2026-10-18-cli-0-1-1-skills-studio.md](../release/2026-10-18-cli-0-1-1-skills-studio.md)에 두고, GitHub Release 본문은 아래 CLI 전용 버전 노트를 사용합니다.
+
 앱과 CLI는 **서로 다른 제품 버전**을 사용합니다. 앱의 GUI·엔진·실행 기능을 배포할 때만 앱 버전을 올리고, CLI·AI 지침·키트를 배포할 때는 CLI 버전만 올립니다. 전체 Git 태그의 가장 큰 숫자로 다음 버전을 추측하지 않습니다.
 
 | 항목 | 로드뮤직 앱 | Road Music CLI |
 | --- | --- | --- |
-| 현재 정식 버전 | 0.1.0 | 0.1.0 |
+| 현재 정식 버전 | 0.1.0 | 0.1.1 |
 | 버전 원본 | 루트 `package.json`·`package-lock.json` | `cli/package.json` |
-| 태그 | `v0.1.0` | `cli-v0.1.0` |
-| 노트 | [앱 0.1.0](2026-10-15-road-music-0-1-0.md) | [CLI 0.1.0](cli/v0.1.0.md) |
-| 자산 | `RoadMusic-0.1.0-mac-arm64.dmg`, `RoadMusic-0.1.0-source.zip` | `RoadMusic-CLI-0.1.0.zip` |
+| 태그 | `v0.1.0` | `cli-v0.1.1` |
+| 노트 | [앱 0.1.0](2026-10-15-road-music-0-1-0.md) | [CLI 0.1.1](cli/v0.1.1.md) |
+| 자산 | `RoadMusic-0.1.0-mac-arm64.dmg`, `RoadMusic-0.1.0-source.zip` | `RoadMusic-CLI-0.1.1.zip` |
 | 체크섬 | 해당 앱 Release의 `SHA256SUMS.txt` | 해당 CLI Release의 `SHA256SUMS.txt` |
 | GitHub Latest | 앱 Release에만 지정 | 항상 `--latest=false` |
 | 업데이트 | `update:check`·`update:install` | `cli:update:check`·`cli:update:install` |
@@ -42,10 +44,10 @@ node scripts/release-assets.js --product app
 
 ## CLI 배포
 
-`cli/package.json`을 원하는 CLI 버전으로 바꾸고 `releases/cli/vX.Y.Z.md`를 작성합니다. [CLI 0.1.0 노트](cli/v0.1.0.md)를 형식의 출발점으로 삼되 실제 변경·검증 결과를 기록합니다.
+`cli/package.json`을 원하는 CLI 버전으로 바꾸고 `releases/cli/vX.Y.Z.md`를 작성합니다. [CLI 0.1.1 노트](cli/v0.1.1.md)를 형식의 출발점으로 삼되 실제 변경·검증 결과를 기록합니다.
 
 ```bash
-node scripts/release-notes.js resolve-cli --version 0.1.0 --output /absolute/path/cli-release-note.md
+node scripts/release-notes.js resolve-cli --version 0.1.1 --output /absolute/path/cli-release-note.md
 npm run dist:cli
 node scripts/release-assets.js --product cli
 ```

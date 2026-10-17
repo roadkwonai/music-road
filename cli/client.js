@@ -16,7 +16,8 @@ const MAX_TIMER_TIMEOUT = 2_147_483_647
 const LONG_COMMANDS = new Set([
   'job:wait', 'setup:run', 'engines:install', 'song:generate', 'song:render', 'song:resume',
   'album:export', 'video:preview', 'video:prepare', 'video:render', 'video:finish',
-  'settings:move-models', 'settings:move-songs', 'update:download', 'update:install', 'update:watch', 'cli:update:install'
+  'settings:move-models', 'settings:move-songs', 'update:download', 'update:install', 'update:watch', 'cli:update:install',
+  'skills:watch', 'motion:studio'
 ])
 const WAIT_COMMANDS = new Set(['song:generate', 'song:resume', 'song:render'])
 const UNCERTAIN_MUTATIONS = new Set([...WAIT_COMMANDS, 'video:render', 'update:install'])
@@ -112,6 +113,8 @@ function parseArgs (argv) {
     else if (value === '--input') options.input.push(absolutePath(argument, value))
     else if (value === '--output') options.output = absolutePath(argument, value)
     else if (value === '--timeout') options.timeoutValue = argument
+    else if (value === '--host') options.host = argument
+    else if (value === '--skills-target') options.skillsTarget = absolutePath(argument, value)
     else throw new CliError('invalid_arguments', `unknown option: ${value}`)
   }
   if (options.version) {
@@ -367,6 +370,15 @@ async function paramsFor (parsed, options) {
   return parseJsonObject(source, parsed.file ? '--file' : '--stdin')
 }
 
+function applyLocalFlags (parsed, params) {
+  if (parsed.host === undefined && parsed.skillsTarget === undefined) return params
+  if (!parsed.command || !parsed.command.startsWith('skills:')) throw new CliError('invalid_arguments', '--host와 --skills-target은 skills 명령에서만 사용할 수 있습니다.')
+  if (parsed.host !== undefined && !['codex', 'antigravity', 'antigravity-cli'].includes(parsed.host)) throw new CliError('invalid_arguments', '--host는 codex, antigravity 또는 antigravity-cli여야 합니다.')
+  if (parsed.host !== undefined && params.host !== undefined && params.host !== parsed.host) throw new CliError('invalid_arguments', '--host와 JSON host가 다릅니다.')
+  if (parsed.skillsTarget !== undefined && params.target !== undefined && params.target !== parsed.skillsTarget) throw new CliError('invalid_arguments', '--skills-target과 JSON target이 다릅니다.')
+  return { ...params, ...(parsed.host === undefined ? {} : { host: parsed.host }), ...(parsed.skillsTarget === undefined ? {} : { target: parsed.skillsTarget }) }
+}
+
 function readStream (stream) {
   return new Promise((resolve, reject) => {
     let text = ''
@@ -438,6 +450,17 @@ async function localCliUpdate (command, params = {}) {
   throw new CliError('invalid_arguments', `unknown CLI update command: ${command}`)
 }
 
+function isLocalCommand (command) {
+  return command === 'prompt:knowledge' || command.startsWith('cli:update:') || require('./skills').isLocalCommand(command)
+}
+
+async function localCommand (command, params, options) {
+  if (command === 'prompt:knowledge') return localKnowledge(params)
+  if (command.startsWith('cli:update:')) return localCliUpdate(command, params)
+  const validated = require('../electron/cli-catalog').validate(command, params).paramsValue
+  return require('./skills').execute(command, validated, options)
+}
+
 async function waitForJobs (result, options, timeout) {
   const jobs = Array.isArray(result.jobs) ? result.jobs : (typeof result.jobId === 'string' ? [{ jobId: result.jobId }] : null)
   if (!jobs || !jobs.length || jobs.some(job => !job || typeof job.jobId !== 'string' || !job.jobId)) {
@@ -498,11 +521,9 @@ async function runBatch (parsed, options) {
         ? localSchema(item.params === undefined ? {} : item.params)
         : command === 'cli:version'
           ? localVersion(item.params === undefined ? {} : item.params)
-          : command.startsWith('cli:update:')
-            ? await localCliUpdate(command, item.params === undefined ? {} : item.params)
-        : command === 'prompt:knowledge'
-          ? localKnowledge(item.params === undefined ? {} : item.params)
-        : (normalized.start ? await requestServiceStart(payload, requestOptions) : await requestWithStartup(payload, requestOptions))
+          : isLocalCommand(command)
+            ? await localCommand(command, item.params === undefined ? {} : item.params, { ...requestOptions, timeout })
+            : (normalized.start ? await requestServiceStart(payload, requestOptions) : await requestWithStartup(payload, requestOptions))
       const responseId = item.id === undefined ? {} : { id: item.id }
       if (result && result.ok === false) { failed = true; writeJson(options.stdout, { ...responseId, ok: false, error: failedResult(result) }) } else writeJson(options.stdout, { ...responseId, ok: true, result })
     } catch (error) {
@@ -524,11 +545,14 @@ async function run (argv = process.argv.slice(2), supplied = {}) {
   }
   try {
     const parsed = parseArgs(argv)
-    if (parsed.help && !parsed.command) { writeJson(options.stdout, { ok: true, result: { usage: 'road-music <group> <action> [--json JSON|--file FILE|--stdin] [--input FILE] [--output FILE] [--confirm] [--overwrite] [--wait] [--timeout MS] [--events] [--no-start]; video:render defaults to 86400000 ms and accepts up to 2147483647 ms' } }); return 0 }
-    if (parsed.batch && (parsed.params || parsed.file || parsed.stdin || parsed.input.length || parsed.output || parsed.confirm || parsed.overwrite || parsed.wait || parsed.timeoutValue !== undefined)) {
+    if (parsed.help && !parsed.command) { writeJson(options.stdout, { ok: true, result: { usage: 'road-music <group> <action> [--json JSON|--file FILE|--stdin] [--input FILE] [--output FILE] [--confirm] [--overwrite] [--wait] [--timeout MS] [--events] [--no-start]; skills:* also accepts --host and --skills-target; video:render defaults to 86400000 ms and accepts up to 2147483647 ms' } }); return 0 }
+    if (parsed.batch && (parsed.params || parsed.file || parsed.stdin || parsed.input.length || parsed.output || parsed.confirm || parsed.overwrite || parsed.wait || parsed.timeoutValue !== undefined || parsed.host || parsed.skillsTarget)) {
       throw new CliError('invalid_arguments', 'batch accepts only --events and --no-start')
     }
     const normalized = parsed.command ? normalizeClientCommand(parsed.command) : null
+    if ((parsed.host !== undefined || parsed.skillsTarget !== undefined) && (!parsed.command || !parsed.command.startsWith('skills:'))) {
+      throw new CliError('invalid_arguments', '--host와 --skills-target은 skills 명령에서만 사용할 수 있습니다.')
+    }
     if (normalized && (normalized.command === 'cli:schema' || normalized.command === 'cli:version' || parsed.help)) {
       const params = parsed.help ? { command: normalized.command } : await paramsFor(parsed, options)
       writeJson(options.stdout, { ok: true, result: normalized.command === 'cli:version' && !parsed.help ? localVersion(params) : localSchema(params) })
@@ -541,18 +565,15 @@ async function run (argv = process.argv.slice(2), supplied = {}) {
       options.onEvent = parsed.events ? (event) => writeJson(options.stderr, event) : undefined
       return runBatch(parsed, options)
     }
-    const params = await paramsFor(parsed, options)
-    if (normalized.command.startsWith('cli:update:')) {
-      writeJson(options.stdout, { ok: true, result: await localCliUpdate(normalized.command, params) })
+    const params = applyLocalFlags(parsed, await paramsFor(parsed, options))
+    options.onEvent = parsed.events ? (event) => writeJson(options.stderr, event) : undefined
+    if (isLocalCommand(normalized.command)) {
+      writeJson(options.stdout, { ok: true, result: await localCommand(normalized.command, params, { ...options, timeout: parsed.timeout }) })
       return 0
     }
     options.endpoint = options.endpoint || socketEndpoint(options.userData)
     options.noStart = parsed.noStart
     options.onEvent = parsed.events ? (event) => writeJson(options.stderr, event) : undefined
-    if (normalized.command === 'prompt:knowledge') {
-      writeJson(options.stdout, { ok: true, result: localKnowledge(params) })
-      return 0
-    }
     options.noStart = options.noStart || normalized.noStart
     const payload = { command: normalized.command, params, input: parsed.input, output: parsed.output, confirm: parsed.confirm, overwrite: parsed.overwrite, timeout: parsed.timeout }
     let result = normalized.start ? await requestServiceStart(payload, options) : await requestWithStartup(payload, options)

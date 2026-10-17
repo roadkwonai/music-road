@@ -24,7 +24,7 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 ```text
 로드뮤직 앱과 CLI는 이미 설치돼 있어. 이 컴퓨터에서 기존 CLI 설치 폴더를 자동으로 찾아줘.
 찾은 폴더의 AGENTS.md와 docs/ai-cli.md에 따라 재설치 없이 연결·ACE 준비 상태를 확인해줘.
-이후 음악 요청은 동봉 스킬과 공식 가이드로 처리해줘.
+이후 음악 요청은 동봉 스킬과 공식 가이드로 처리하고, 완성 음원은 docs/cli-motion-graphics.md에 따라 HTML 모션그래픽 작업으로 이어줘.
 ```
 
 ### AI가 준비할 내용
@@ -36,6 +36,7 @@ Road Music에는 MCP 서버가 없다. AI 에이전트는 로컬 셸에서 `node
 | 3. 실행 계약 확인 | `cli:version`, `cli:update:check`, `schema`, `service:status --no-start`로 공개 명령·CLI 버전·현재 서비스 설치본·데이터 폴더 확인 | 실행 파일과 연결 대상이 의도한 설치본인지 확인 |
 | 4. 현재 상태 조회 | `app:state`, `engines:list`, `projects:list`, `songs:list`, `setup:check` 순으로 조회 | 엔진 준비 여부·현재 프로젝트·대기 작업과 플랫폼 제외 항목 파악 |
 | 5. 준비 결과 보고 | 설치 루트·절대 경로 호출 명령·실제 앱/서비스 버전·엔진 상태·기본 검토 정책 요약 | 새 세션에서 곧바로 음악 요청을 받을 수 있음 |
+| 6. 모션그래픽 연결 확인 | `skills:status`로 스킬 설치 상태를 읽고, 음원 생성 뒤 `motion:handoff`로 넘길 경로를 확인 | 이미지·자막·영상 검수를 HTML 스튜디오에서 시작할 수 있음 |
 
 <a id="find-cli"></a>
 
@@ -97,6 +98,7 @@ node cli/road-music.js app:state
 - `song:generate`, `song:resume`, `song:render` 뒤에는 받은 `jobId`로 `job:wait`을 호출한다. `video:render`는 명령 자체가 렌더 완료를 반환한다.
 - `uncertain:true` 오류는 요청이 실제로 접수됐는지 알 수 없다는 뜻이다. 자동 재제출하지 말고 `service:status`, `queue:list`, `songs:list` 또는 `job:wait`을 조회한다.
 - `--confirm`, `--overwrite`, `--input`, `--output`은 JSON 안이 아닌 CLI 최상위 플래그다. 경로는 사용자가 고른 절대 경로를 쓴다.
+- 음악 생성 뒤 HTML 모션그래픽 작업은 [`skills:*`, `motion:*`](cli-motion-graphics.md)로 연결한다. 스튜디오는 선택·청취·검수 화면을 제공하며, AI 이미지·영상 도구 자체를 CLI가 설치하거나 호출하는 기능은 아니다.
 - `about:feedback`, `shell:open`, `about:open`, `update:open-page`, `notices:open`, `song:reveal`, `log:open`은 외부 전송·앱·브라우저 동작을 할 수 있으므로 명시적 요청이 있을 때만 쓴다.
 - 세션 첫 연결에서 `cli:version`, `cli:update:check`을 읽기 전용으로 실행한다. 새 CLI가 있으면 현재·최신 버전과 노트·설치 대상만 알린다. 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 위임할 때만 `cli:update:install`을 실행하고, 반환된 `cliPath`에서 버전·스키마·지식 조회를 확인한다. 앱 `update:*`는 앱 업데이트 요청에만 사용한다. [업데이트 가이드](updates.md)를 따른다.
 

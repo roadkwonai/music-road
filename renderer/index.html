@@ -199,7 +199,8 @@
         <label class="inst-toggle" title="ACE-Step으로 짧은 음향을 만듭니다. 스타일 칸에 원하는 소리를 설명해 주세요."><input type="checkbox" id="soundEffect"> 효과음 (실험)</label>
         <label class="count-label">엔진
           <select id="engine">
-            <option value="yue">YuE2</option>
+            <option value="yue">YuE2 (Windows · NVIDIA)</option>
+            <option value="yue-mlx">YuE2 (Apple Silicon)</option>
             <option value="ace">ACE-Step 1.5</option>
           </select>
         </label>
@@ -223,6 +224,7 @@
         <label id="targetCustomRow" class="count-label hidden">초
           <input id="targetCustom" type="number" min="1" max="600" step="0.1" placeholder="초 단위" aria-label="직접 입력할 길이 (초)">
         </label>
+        <span id="targetHint" class="muted hint hidden"></span>
         <label class="count-label">한 번에
           <select id="count">
             <option value="1">1곡</option>
@@ -422,6 +424,7 @@
           <option value="mirror">미러 막대</option>
           <option value="line">선형 파형</option>
           <option value="circle">원형</option>
+          <option value="cd">회전 CD</option>
         </select>
         <label class="v-check" title="낮은 음(베이스) 막대가 놓이는 곳">좌우 대칭
           <select id="sLayout">
@@ -450,8 +453,14 @@
           <option value="free" disabled>직접 배치 (편집 모드)</option>
         </select>
       </div>
-      <div class="v-row"><span class="v-label">높이</span><input type="range" id="sSize" min="0.08" max="0.6" step="0.01"></div>
-      <div class="v-row"><span class="v-label">너비</span><input type="range" id="sWidth" min="0.3" max="1" step="0.01"></div>
+      <div class="v-row hidden" id="sCoverRow">
+        <span class="v-label">CD 표지</span>
+        <button id="sCoverPick" class="ghost small" type="button" title="표지로 쓸 이미지 한 장을 고르세요">표지 불러오기</button>
+        <button id="sCoverClear" class="ghost small" type="button">표지 빼기</button>
+      </div>
+      <div class="v-row hidden" id="sCoverNameRow"><span class="v-label"></span><span id="sCoverName" class="v-file" data-i18n="off"></span></div>
+      <div class="v-row"><span class="v-label" id="sSizeLabel">높이</span><input type="range" id="sSize" min="0.08" max="0.6" step="0.01"></div>
+      <div class="v-row" id="sWidthRow"><span class="v-label">너비</span><input type="range" id="sWidth" min="0.3" max="1" step="0.01"></div>
       <div class="v-row">
         <span class="v-label">색상</span>
         <input type="color" id="sColor1" title="아래쪽 색">

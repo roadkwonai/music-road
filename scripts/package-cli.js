@@ -14,7 +14,28 @@ async function cliVersion (projectRoot) {
   return manifest.version
 }
 
-async function packageCli (outputDir = path.join(root, 'dist'), projectRoot = root) {
+function packageFilter (source) {
+  return !['__pycache__', '.DS_Store', '.git'].includes(path.basename(source))
+}
+
+const requiredSkillsFiles = ['manifest.json', 'skills/road-music-skills-update/scripts/manage.cjs', 'skills/road-music-video-studio/scripts/studio.py']
+
+async function assertSkillsBundle (projectRoot) {
+  const bundle = path.join(projectRoot, 'skills', 'music-road-skills')
+  try {
+    const info = await fs.stat(bundle)
+    if (!info.isDirectory()) throw new Error('not a directory')
+    for (const file of requiredSkillsFiles) {
+      const entry = await fs.stat(path.join(bundle, file))
+      if (!entry.isFile()) throw new Error('not a file')
+    }
+  } catch {
+    throw new Error(`CLI Release에는 완전한 skills/music-road-skills 번들이 필요합니다: ${requiredSkillsFiles.join(', ')}`)
+  }
+  return bundle
+}
+
+async function packageCli (outputDir = path.join(root, 'dist'), projectRoot = root, { requireSkillsBundle = false } = {}) {
   if (process.platform !== 'darwin') throw new Error('CLI ZIP packaging requires macOS ditto')
   const version = await cliVersion(projectRoot)
   await fs.mkdir(outputDir, { recursive: true })
@@ -23,15 +44,24 @@ async function packageCli (outputDir = path.join(root, 'dist'), projectRoot = ro
   const kit = path.join(stage, name)
   try {
     await fs.mkdir(kit)
-    const entries = ['cli', 'electron', 'renderer', 'python', 'docs', 'releases', 'tests', 'scripts',
+    const entries = ['cli', 'electron', 'renderer', 'python', 'docs', 'releases', 'release', 'tests', 'scripts',
       'package.json', 'package-lock.json', 'README.md', 'LICENSE', 'AGENTS.md', 'CLAUDE.md',
       'build/icon.png', 'build/icon.icns', 'prompts/cli-workflows.md', 'prompts/ace-review.md',
       'skills/road-music-ace']
+    if (requireSkillsBundle) {
+      await assertSkillsBundle(projectRoot)
+      entries.push('skills/music-road-skills')
+    } else {
+      try {
+        const info = await fs.stat(path.join(projectRoot, 'skills', 'music-road-skills'))
+        if (info.isDirectory()) entries.push('skills/music-road-skills')
+      } catch {}
+    }
     for (const entry of entries) {
       const destination = path.join(kit, entry)
       await fs.mkdir(path.dirname(destination), { recursive: true })
       await fs.cp(path.join(projectRoot, entry), destination, { recursive: true,
-        filter: source => !['__pycache__', '.DS_Store'].includes(path.basename(source)) })
+        filter: packageFilter })
     }
     const archive = path.join(stage, `${name}.zip`)
     execFileSync('/usr/bin/ditto', ['-c', '-k', '--keepParent', kit, archive])
@@ -41,8 +71,8 @@ async function packageCli (outputDir = path.join(root, 'dist'), projectRoot = ro
   } finally { await fs.rm(stage, { recursive: true, force: true }) }
 }
 
-if (require.main === module) packageCli().then(result => console.log(JSON.stringify(result))).catch(error => {
+if (require.main === module) packageCli(undefined, undefined, { requireSkillsBundle: true }).then(result => console.log(JSON.stringify(result))).catch(error => {
   console.error(error.message)
   process.exitCode = 1
 })
-module.exports = { packageCli, cliVersion }
+module.exports = { assertSkillsBundle, packageCli, cliVersion, packageFilter, requiredSkillsFiles }

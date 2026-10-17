@@ -52,19 +52,20 @@ GUI만 쓸 때는 Node.js가 필요 없다. AI 엔진과 `ffmpeg`/`ffprobe`는 �
 | --- | --- |
 | `AGENTS.md`, `CLAUDE.md` | 공통 작업 순서, 검토·자동 위임 규칙과 스킬 진입점 |
 | `skills/road-music-ace/SKILL.md` | 작사·프롬프트·검증·검토·생성·근거 보고 워크플로 |
+| `skills/music-road-skills/` | Showreel CD·Showreel MV·JIZURA·모션그래픽 HTML 스튜디오와 업데이트 스킬 번들 |
 | `docs/ace-prompt-guide.md`, `docs/vendor/ace-step-1.5/` | ACE 적용 가이드, 공식 원문·LICENSE·해시 |
 | `docs/lyrics-tags.md`, `docs/music-options.md` | 태그 의미·변환·배치와 실제 CLI 옵션 |
 | `docs/genre-prompts.md`, `docs/music-research.md`, `docs/music-review.md` | 장르 예시, 최신 근거 조사, 요청자 검토·결과 자료 |
 | `prompts/ace-review.md`, `prompts/cli-workflows.md` | 선택적 검수 에이전트 역할과 실행·내보내기 예시 |
 
-압축을 풀면 위 자료도 같은 키트 루트에 배치된다. `npm ci --include=dev`는 실행 의존성을 준비하는 단계이며 문서를 별도로 다운로드하지 않는다. 키트 내부 상대 경로를 유지해 폴더 전체를 설치한다. 일부 파일만 복사하면 스킬의 참고 링크가 끊어진다.
+`music-road-skills`의 정본은 별도 공개 저장소에서 관리하며 개발 소스는 고정 커밋 Git submodule로 참조한다. 압축을 풀면 동봉된 고정 버전의 실제 스킬 파일이 같은 키트 루트에 배치되므로, CLI ZIP을 설치하는 사용자는 Git·서브모듈을 추가로 준비하지 않는다. `npm ci --include=dev`는 실행 의존성을 준비하는 단계이며 문서를 별도로 다운로드하지 않는다. 키트 내부 상대 경로를 유지해 폴더 전체를 설치한다. 일부 파일만 복사하면 스킬의 참고 링크가 끊어진다.
 
 AI는 `AGENTS.md`가 연결한 **동봉 스킬을 파일로 읽어 사용**한다. 전역 스킬 자동 등록이나 특정 제품의 슬래시 명령 지원을 가정하지 않는다. 외부 프로젝트에서 요청할 때는 [AI 사용 가이드](ai-cli.md)의 절대 경로 읽기를 적용하며, 다른 프로젝트의 지침이나 사용자 전역 스킬을 덮어쓰지 않는다.
 
 ```bash
 cd "/사용자가 선택한 경로/RoadMusic-CLI-X.Y.Z"
 node --version
-npm ci --include=dev
+npm run setup:cli
 node cli/road-music.js schema
 node cli/road-music.js setup:check
 node cli/road-music.js engines:list
@@ -74,6 +75,7 @@ node cli/road-music.js engines:list
 - `npm ci --include=dev`는 키트의 잠금 파일대로 Electron을 포함한 의존성을 설치한다. Electron이 개발 의존성으로 선언되어 있으므로 `NODE_ENV=production` 환경에서도 `--include=dev`를 유지한다. 개발 중이 아니어도 CLI를 쓸 때 한 번 필요하다.
 - 첫 설치는 npm 패키지와 Electron 다운로드를 위해 인터넷이 필요하다. 이미 받은 캐시가 있으면 재사용할 수 있다.
 - `ffmpeg`와 `ffprobe`는 영상·변환에 필요하다. macOS에서는 `brew install ffmpeg` 후 `setup:check`으로 확인한다.
+- `npm run setup:cli`는 Node.js 24·잠금 의존성을 확인하고 동봉 `music-road-skills`를 Codex 기본 스킬 경로에 설치한다. Antigravity 또는 프로젝트별 위치는 [모션그래픽 설치 표](cli-motion-graphics.md#1-스킬-설치와-업데이트)를 따른다. 이 단계는 음악 엔진·영상 모델을 다운로드하지 않는다.
 - ACE 엔진 모델은 별도 설치다. `engines:list`에 준비 상태가 나오며, 설치를 요청하는 명령은 실제 다운로드와 디스크 사용이 발생하므로 사용자의 요청 범위에서만 쓴다.
 
 CLI의 첫 서비스 요청은 이 소스 키트의 Electron을 숨겨진 창으로 시작할 수 있다. 설치된 dmg GUI가 같은 기본 데이터 폴더로 이미 실행 중이면 프로젝트·곡 라이브러리·대기열을 공유한다. 실제 작업과 테스트를 섞지 않는다.
@@ -89,7 +91,7 @@ ROADMUSIC_DATA_DIR="/사용자가 선택한 임시 절대 경로/road-music-test
 
 ## 선택: 전역 명령 만들기
 
-소스 키트의 `cli` 하위 폴더에서 연결하면 독립 패키지 `road-music-cli@0.1.0`의 `road-music` 전역 명령을 만들 수 있다.
+소스 키트의 `cli` 하위 폴더에서 연결하면 독립 패키지 `road-music-cli@0.1.1`의 `road-music` 전역 명령을 만들 수 있다.
 
 ```bash
 cd "/사용자가 선택한 경로/RoadMusic-CLI-X.Y.Z"

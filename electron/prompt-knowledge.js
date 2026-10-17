@@ -12,6 +12,7 @@ const documents = Object.freeze({
   ccm: { title: 'CCM 상세 가이드', source: 'docs/ccm-prompts.md' },
   'hymn-remake': { title: '찬송가 리메이크 가이드', source: 'docs/hymn-remake-guide.md' },
   ace: { title: 'ACE 최적화 가이드', source: 'docs/ace-prompt-guide.md' },
+  models: { title: '모델별 제작·비교 가이드', source: 'docs/model-production-guide.md' },
   lyrics: { title: '가사 태그 가이드', source: 'docs/lyrics-tags.md' },
   review: { title: '음악 검토 규칙', source: 'docs/music-review.md' }
 })

@@ -11,6 +11,7 @@
     "AGENTS.md",
     "CLAUDE.md",
     "cli/*.js",
+    "scripts/setup-cli.js",
     "cli/package.json",
     "electron/*.js",
     "renderer/*.js",
@@ -24,9 +25,11 @@
     "LICENSE",
     "docs/**",
     "skills/road-music-ace/**",
+    "skills/music-road-skills/**",
     "prompts/ace-review.md",
     "prompts/cli-workflows.md",
     "releases/**",
+    "release/**",
     "scripts/release-notes.js"
   ],
   "author": "하이밸류연구소",
@@ -35,6 +38,7 @@
   "scripts": {
     "start": "electron .",
     "cli": "node cli/road-music.js",
+    "setup:cli": "node scripts/setup-cli.js",
     "test": "node --test tests/*.test.js",
     "dist:cli": "node scripts/package-cli.js",
     "release:assets": "node scripts/release-assets.js",

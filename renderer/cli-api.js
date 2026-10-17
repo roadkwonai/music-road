@@ -81,7 +81,7 @@ const imageOverlay = (overlay) => new Promise((resolve, reject) => {
 async function configureVideo (params = {}, { selectTracks = true, cliToken = null } = {}) {
   if (studio.frame) return cliError('render already in progress', 'busy')
   const v = params.video || {}
-  for (const image of [v.background, ...(v.overlays || [])]) {
+  for (const image of [v.background, v.spectrum && v.spectrum.cover, ...(v.overlays || [])]) {
     if (!image) continue
     let local = !image.path || !/^[\\/]{2}/.test(image.path)
     if (image.url) {
@@ -90,7 +90,7 @@ async function configureVideo (params = {}, { selectTracks = true, cliToken = nu
         local = local && url.protocol === 'file:' && (!url.hostname || url.hostname === 'localhost') && !/^[\\/]{2}/.test(decodeURIComponent(url.pathname))
       } catch { local = false }
     }
-    if (!local) throw new Error('배경과 오버레이에는 로컬 파일 경로만 사용할 수 있습니다.')
+    if (!local) throw new Error('배경·표지·오버레이에는 로컬 파일 경로만 사용할 수 있습니다.')
   }
   if (v.resolution != null) oneOf(v.resolution, 'resolution', ['720p', '1080p', '1440p', '2160p'])
   if (v.renderer != null) oneOf(v.renderer, 'renderer', ['gpu', 'cpu'])
@@ -114,7 +114,7 @@ async function configureVideo (params = {}, { selectTracks = true, cliToken = nu
   if (v.spectrum) {
     const s = v.spectrum
     if (s.visible != null && typeof s.visible !== 'boolean') throw new Error('spectrum visible must be boolean')
-    if (s.kind != null) oneOf(s.kind, 'spectrum kind', ['bars', 'mirror', 'line', 'circle'])
+    if (s.kind != null) oneOf(s.kind, 'spectrum kind', ['bars', 'mirror', 'line', 'circle', 'cd'])
     if (s.layout != null) oneOf(s.layout, 'spectrum layout', ['left', 'center', 'right'])
     if (s.position != null) oneOf(s.position, 'spectrum position', ['bottom', 'center', 'free'])
     if (s.barCount != null && !Number.isInteger(finite(s.barCount, 'spectrum barCount', 8, 256))) throw new Error('spectrum barCount must be an integer')
@@ -143,6 +143,17 @@ async function configureVideo (params = {}, { selectTracks = true, cliToken = nu
     if (typeof overlayImages !== 'undefined') overlayImages.set(overlay.url, image)
     return overlay
   })) : null
+  let cover
+  if (v.spectrum && Object.prototype.hasOwnProperty.call(v.spectrum, 'cover')) {
+    cover = v.spectrum.cover
+    if (cover !== null) {
+      if (!cover || typeof cover !== 'object' || Array.isArray(cover)) throw new Error('CD cover must be an image object or null')
+      cover = { ...cover, path: cover.path || null, url: fileUrl(cover.path) || cover.url }
+      if (!cover.url) throw new Error('CD cover path is required')
+      const image = await imageOverlay(cover)
+      if (typeof overlayImages !== 'undefined') overlayImages.set(cover.url, image)
+    }
+  }
   const background = { ...studio.video.background, ...(v.background || {}) }
   if (v.background && v.background.path && v.background.kind == null && background.kind === 'none') {
     background.kind = /\.(?:mp4|mov|m4v|webm|avi)$/i.test(v.background.path) ? 'video' : 'image'
@@ -151,7 +162,7 @@ async function configureVideo (params = {}, { selectTracks = true, cliToken = nu
   const nextVideo = { ...studio.video, ...v, fps: v.fps == null ? studio.video.fps : Number(v.fps),
     background,
     length: { ...studio.video.length, ...(v.length || {}) },
-    spectrum: { ...studio.video.spectrum, ...(v.spectrum || {}) },
+    spectrum: { ...studio.video.spectrum, ...(v.spectrum || {}), ...(cover !== undefined ? { cover } : {}) },
     eq: { ...studio.video.eq, ...(v.eq || {}) },
     tracklist: { ...studio.video.tracklist, ...(v.tracklist || {}) },
     overlays: overlays || studio.video.overlays }
@@ -230,7 +241,7 @@ async function roadCliCall (command, params = {}, cliToken = null, finalOutput =
       const song = songForCli(params)
       if (song.imported) return cliError('imported songs have no reusable generation settings', 'unsupported')
       const saved = userRequest(song)
-      const request = { title: song.title || '', style: saved.style, lyrics: saved.lyrics, engine: ['ace', 'yue'].includes(song.engine) ? song.engine : undefined, instrumental: Boolean(song.instrumental),
+      const request = { title: song.title || '', style: saved.style, lyrics: saved.lyrics, engine: saved.engine || undefined, instrumental: Boolean(song.instrumental),
         soundEffect: Boolean(song.soundEffect), targetSeconds: song.targetSeconds == null ? undefined : Number(song.targetSeconds),
         seed: song.seed == null ? undefined : Number(song.seed), cot: song.cot, parts: saved.parts, advanced: saved.advanced }
       for (const key of Object.keys(request)) if (request[key] === undefined) delete request[key]

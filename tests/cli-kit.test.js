@@ -5,8 +5,32 @@ const fs = require('node:fs/promises')
 const path = require('node:path')
 const os = require('node:os')
 const { execFileSync } = require('node:child_process')
-const { packageCli } = require('../scripts/package-cli')
+const { assertSkillsBundle, packageCli, packageFilter } = require('../scripts/package-cli')
 const { version } = require('../cli/package.json')
+
+test('CLI npm package declares the bundled motion-graphics skills without adding them to the desktop build', () => {
+  const manifest = require('../package.json')
+  assert.ok(manifest.files.includes('skills/music-road-skills/**'))
+  assert.ok(manifest.files.includes('scripts/setup-cli.js'))
+  assert.ok(!manifest.build.files.includes('skills/music-road-skills/**'))
+  assert.equal(packageFilter('/fixture/skills/music-road-skills/.git'), false)
+  assert.equal(packageFilter('/fixture/skills/music-road-skills/manifest.json'), true)
+})
+
+test('release ZIP creation fails closed when the required skill bundle is absent', { skip: process.platform !== 'darwin' }, async t => {
+  const bundle = path.join(__dirname, '..', 'skills', 'music-road-skills')
+  try { await fs.access(bundle); return } catch {}
+  const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'roadmusic-cli-release-'))
+  t.after(() => fs.rm(temp, { recursive: true, force: true }))
+  await assert.rejects(packageCli(temp, undefined, { requireSkillsBundle: true }), /music-road-skills 번들/)
+})
+
+test('release ZIP requires the bundle manifest, updater, and HTML studio files', async t => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'roadmusic-incomplete-skills-'))
+  t.after(() => fs.rm(root, { recursive: true, force: true }))
+  await fs.mkdir(path.join(root, 'skills', 'music-road-skills'), { recursive: true })
+  await assert.rejects(assertSkillsBundle(root), /완전한 skills\/music-road-skills 번들/)
+})
 
 test('CLI ZIP includes install instructions, locked dependencies, and a working schema', { skip: process.platform !== 'darwin' }, async t => {
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'roadmusic-cli-kit-'))
@@ -15,13 +39,18 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
   assert.ok(result.bytes > 1000)
   const entries = execFileSync('/usr/bin/unzip', ['-Z1', result.path], { encoding: 'utf8' }).trim().split('\n')
   const name = `RoadMusic-CLI-${version}`
-  for (const file of ['docs/README.md', 'docs/assets/brand/banner.svg', 'releases/README.md']) {
+  for (const file of ['docs/README.md', 'docs/assets/brand/banner.svg', 'releases/README.md', 'release/2026-10-18-cli-0-1-1-skills-studio.md']) {
     assert.ok(entries.includes(`${name}/${file}`), file)
   }
+  try {
+    await fs.access(path.join(__dirname, '..', 'skills', 'music-road-skills', 'manifest.json'))
+    assert.ok(entries.includes(`${name}/skills/music-road-skills/manifest.json`), 'bundled skills manifest')
+    assert.ok(entries.includes(`${name}/skills/music-road-skills/README.md`), 'bundled skills README')
+  } catch {}
   for (const file of ['AGENTS.md', 'CLAUDE.md', 'package-lock.json', 'cli/road-music.js', 'docs/cli-install.md', 'docs/ai-cli.md', 'docs/music-options.md', 'docs/genre-prompts.md', 'docs/music-research.md', 'docs/ace-prompt-guide.md', 'docs/vendor/ace-step-1.5/README.md', 'docs/vendor/ace-step-1.5/manifest.json', 'docs/vendor/ace-step-1.5/LICENSE', 'docs/vendor/ace-step-1.5/en/Tutorial.md', 'docs/vendor/ace-step-1.5/en/INFERENCE.md', 'docs/vendor/ace-step-1.5/en/ace_step_musicians_guide.md', 'docs/vendor/ace-step-1.5/ko/Tutorial.md', 'docs/vendor/ace-step-1.5/ko/INFERENCE.md', 'prompts/cli-workflows.md']) {
     assert.ok(entries.includes(`${name}/${file}`), file)
   }
-  assert.deepEqual(entries.filter(file => /(^|\/)(node_modules|\.git|\.omx|\.omc|\.impeccable|__pycache__)(\/|$)|\.pyc$/.test(file)), [])
+  assert.deepEqual(entries.filter(file => /(^|\/)(node_modules|\.git|\.omx|\.omc|\.impeccable|__pycache__)(\/|$)|\.pyc$/.test(file)), [], 'noGitMetadata')
   for (const file of ['docs/lyrics-tags.md', 'docs/music-review.md', 'skills/road-music-ace/SKILL.md', 'prompts/ace-review.md']) {
     assert.ok(entries.includes(`${name}/${file}`), `AI 음악 제작 자료 누락: ${file}`)
   }

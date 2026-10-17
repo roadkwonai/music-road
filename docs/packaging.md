@@ -29,7 +29,7 @@ npm run dist:mac
 npm run dist:cli
 # → dist/RoadMusic-0.1.0-mac-arm64.dmg (약 100MB)
 # → dist/mac-arm64/Road Music.app (dmg에 들어가는 앱)
-# → dist/RoadMusic-CLI-0.1.0.zip (독립 CLI 소스·잠금 파일·AI 지침·가이드)
+# → dist/RoadMusic-CLI-0.1.1.zip (독립 CLI 소스·잠금 파일·AI 지침·가이드)
 ```
 
 - **도구:** electron-builder 26.15.3(`devDependencies`에 고정)

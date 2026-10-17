@@ -4,6 +4,17 @@
 ;(function () {
   const locale = {
  "exact": {
+  "회전 CD": "Spinning CD",
+  "CD 크기": "CD size",
+  "CD 표지": "CD cover",
+  "표지 불러오기": "Import cover",
+  "표지 빼기": "Remove cover",
+  "표지 없음 (금속 CD)": "No cover (metal CD)",
+  "표지로 쓸 이미지 한 장을 고르세요": "Choose one image for the CD cover",
+  "표지를 불러오지 못했습니다.": "Could not load the cover.",
+  "저장된 CD 표지를 불러오지 못해 해제했습니다. 다른 표지를 선택해 주세요.": "The saved CD cover could not be loaded and was cleared. Please choose another cover.",
+  "CD 표지에는 로컬 이미지 파일이 필요합니다.": "The CD cover requires a local image file.",
+  "배경·표지·오버레이에는 로컬 파일 경로만 사용할 수 있습니다.": "Backgrounds, covers and overlays require local file paths.",
   "선택한 곡 중 현재 프로젝트의 완성곡이 아닌 항목이 있습니다.": "Some selected items are not completed songs in the current project.",
   "전체 선택": "Select all",
   "전체 해제": "Deselect all",
@@ -20,6 +31,7 @@
   "직접 입력할 길이 (초)": "Custom length (seconds)",
   "길이는 1~600초 사이의 숫자로 입력해 주세요.": "Enter a length between 1 and 600 seconds.",
   "YuE2 길이는 20~360초 사이의 숫자로 입력해 주세요. 더 짧은 음향은 ACE-Step을 사용해 주세요.": "Enter a YuE2 length between 20 and 360 seconds. Use ACE-Step for shorter audio.",
+  "Apple Silicon YuE2의 목표 길이는 기록·비교용이며 생성 길이를 직접 제어하지 않습니다. 실제 길이는 자연 종료에 따라 달라집니다.": "Apple Silicon YuE2 records the target length for comparison; it does not directly control generation length. The actual length varies with natural ending.",
   "효과음은 ACE-Step 1.5 엔진에서만 만들 수 있습니다.": "Sound effects require the ACE-Step 1.5 engine.",
   "효과음 길이는 1~30초로 지정해 주세요.": "Set a sound effect length between 1 and 30 seconds.",
   "효과음 모드에서는 악보·커버·녹음으로 만들기를 사용할 수 없습니다.": "Scores, covers and recordings are unavailable in sound effect mode.",
@@ -131,6 +143,8 @@
   "음향 합성": "Audio synthesis",
   "처음부터 만듭니다.": "It will start from the beginning.",
   "이어서 만드는 중입니다": "Resuming",
+  "이전 시도는 보존하고 새로 다시 생성합니다.": "The previous attempt is kept and a new generation starts.",
+  "이전 시도를 보존하고 새로 다시 생성하는 중입니다.": "Keeping the previous attempt and generating again.",
   "음악 폴더 (마지막 위치 기억)": "Music folder (remembers last location)",
   "길이": "Length",
   "형식": "Format",
@@ -1066,8 +1080,20 @@
    "Finish \"{0}\" now?\n{1}"
   ],
   [
+   "\"{0}\"의 이전 시도를 보존하고 새로 다시 생성할까요?\n{1}",
+   "Keep the previous attempt for \"{0}\" and generate again?\n{1}"
+  ],
+  [
+   "\"{0}\"의 이전 시도를 보존하고 대기열에서 새로 다시 생성할까요?\n{1}",
+   "Keep the previous attempt for \"{0}\" and generate it again in the queue?\n{1}"
+  ],
+  [
    "대기열 {0}번째로 넣었습니다",
    "Added to the queue at #{0}"
+  ],
+  [
+   "대기열 {0}번째로 넣었습니다. 이전 시도는 보존하고 새로 다시 생성합니다.",
+   "Added to the queue at #{0}. The previous attempt is kept and a new generation starts."
   ],
   [
    "{0} (목표 {1})",

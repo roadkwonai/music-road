@@ -9,7 +9,7 @@
 <p align="center">한국어 가사 · 보컬과 연주곡 · MP3/WAV · 가사 자막 · HTML 모션그래픽 플레이리스트</p>
 
 <p align="center">
-  <a href="https://github.com/roadkwonai/music-road/releases/tag/v0.1.0"><img src="https://img.shields.io/badge/app%20release-v0.1.0-172942?style=flat-square" alt="Road Music 앱 Release v0.1.0"></a>
+  <a href="https://github.com/roadkwonai/music-road/releases/tag/v0.1.1"><img src="https://img.shields.io/badge/app%20release-v0.1.1-172942?style=flat-square" alt="Road Music 앱 Release v0.1.1"></a>
   <a href="https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.2"><img src="https://img.shields.io/badge/CLI%20release-v0.1.2-172942?style=flat-square" alt="Road Music CLI Release v0.1.2"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-172942?style=flat-square" alt="MIT License"></a>
   <a href="docs/cli-install.md"><img src="https://img.shields.io/badge/CLI-Node.js%2024-172942?style=flat-square" alt="CLI 실행 환경 Node.js 24"></a>
@@ -236,7 +236,7 @@ DMG의 앱을 `Applications`로 복사하면 GUI를 사용할 수 있으며 Node
 > [!NOTE]
 > 현재 앱은 애드혹 서명이며 Apple 공증을 받지 않았습니다. 실제 검증 환경과 OS별 제한은 [검수 결과](docs/cli-qa-report.md)에 있습니다.
 
-현재 앱 정식 버전은 0.1.0, CLI 정식 버전은 0.1.2입니다. 앱 Release의 Latest가 앱 업데이트 대상이며, CLI는 `cli-v0.1.2` Release와 `RoadMusic-CLI-0.1.2.zip`을 사용합니다. 공통 초기 번호라도 앱과 CLI는 서로의 태그·asset·체크섬·설치 경로를 공유하지 않습니다.
+현재 앱 정식 버전은 0.1.1, CLI 정식 버전은 0.1.2입니다. 앱 Release의 Latest가 앱 업데이트 대상이며, CLI는 `cli-v0.1.2` Release와 `RoadMusic-CLI-0.1.2.zip`을 사용합니다. 공통 초기 번호라도 앱과 CLI는 서로의 태그·asset·체크섬·설치 경로를 공유하지 않습니다.
 
 앱과 CLI의 업데이트 방식은 다릅니다. 앱 서비스는 시작 시와 15분마다 앱 Release를 확인합니다. CLI는 AI 세션의 첫 연결에서 한 번 확인하며 상시 감시하지 않습니다.
 

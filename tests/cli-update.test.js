@@ -14,9 +14,9 @@ const update = require('../cli/update')
 
 const repo = 'roadkwonai/music-road'
 const api = `https://api.github.com/repos/${repo}/releases`
-const releaseBase = `https://github.com/${repo}/releases/download/cli-v0.1.1/`
+const releaseBase = `https://github.com/${repo}/releases/download/cli-v0.1.2/`
 
-async function makeKit (root, version = '0.1.1', { npmFailure = false } = {}) {
+async function makeKit (root, version = '0.1.2', { npmFailure = false } = {}) {
   const kit = path.join(root, `RoadMusic-CLI-${version}`)
   await fs.mkdir(path.join(kit, 'cli'), { recursive: true })
   await fs.writeFile(path.join(kit, 'package.json'), JSON.stringify({ name: 'road-music', version: '1.4.0' }))
@@ -30,7 +30,7 @@ async function makeKit (root, version = '0.1.1', { npmFailure = false } = {}) {
   return { archive, kit }
 }
 
-function release (asset, version = '0.1.1', overrides = {}) {
+function release (asset, version = '0.1.2', overrides = {}) {
   const digest = crypto.createHash('sha256').update(asset).digest('hex')
   const name = `RoadMusic-CLI-${version}.zip`
   const manifest = `${digest}  ${name}\n`
@@ -49,9 +49,9 @@ function release (asset, version = '0.1.1', overrides = {}) {
 async function fixture (t, options = {}) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'road-cli-update-'))
   const cliHome = path.join(root, 'cli-home')
-  const kit = await makeKit(root, options.version || '0.1.1', options)
+  const kit = await makeKit(root, options.version || '0.1.2', options)
   const asset = await fs.readFile(kit.archive)
-  const stable = release(asset, options.version || '0.1.1', options.release)
+  const stable = release(asset, options.version || '0.1.2', options.release)
   const previous = global.fetch
   const oldHome = process.env.ROADMUSIC_CLI_HOME
   process.env.ROADMUSIC_CLI_HOME = cliHome
@@ -59,7 +59,7 @@ async function fixture (t, options = {}) {
     const value = String(url)
     if (value === api) return new Response(JSON.stringify(options.releases || [stable]))
     if (value === `${releaseBase}SHA256SUMS.txt`) return new Response(stable._manifest)
-    if (value === `${releaseBase}RoadMusic-CLI-${options.version || '0.1.1'}.zip`) return new Response(options.asset || asset)
+    if (value === `${releaseBase}RoadMusic-CLI-${options.version || '0.1.2'}.zip`) return new Response(options.asset || asset)
     throw new Error(`unexpected fetch: ${value}`)
   }
   t.after(async () => {
@@ -79,10 +79,10 @@ test('check selects only the highest stable cli-v release with its matching asse
   global.fetch = async url => String(url) === api ? new Response(JSON.stringify([old, skipped, f.stable])) : saved(url)
   const result = await update.check()
   assert.deepEqual(result, {
-    current: '0.1.1', available: false, version: '0.1.1',
-    releaseUrl: 'https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.1',
+    current: '0.1.2', available: false, version: '0.1.2',
+    releaseUrl: 'https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.2',
     notes: '',
-    asset: { name: 'RoadMusic-CLI-0.1.1.zip', size: f.asset.length, url: `${releaseBase}RoadMusic-CLI-0.1.1.zip`, sumsUrl: `${releaseBase}SHA256SUMS.txt` },
+    asset: { name: 'RoadMusic-CLI-0.1.2.zip', size: f.asset.length, url: `${releaseBase}RoadMusic-CLI-0.1.2.zip`, sumsUrl: `${releaseBase}SHA256SUMS.txt` },
     installable: false
   })
   void old; void skipped
@@ -96,7 +96,7 @@ test('check rejects extra parameters and does not use app v tags as CLI updates'
   global.fetch = async url => String(url) === api ? new Response(JSON.stringify([appRelease, f.stable])) : saved(url)
   const result = await update.check()
   assert.equal(result.available, false)
-  assert.equal(result.version, '0.1.1')
+  assert.equal(result.version, '0.1.2')
   void appRelease
 })
 
@@ -110,18 +110,18 @@ test('check continues past an app-only first release page to find the latest CLI
     if (value === `${api}?page=2&per_page=30`) return new Response(JSON.stringify([f.stable]))
     return saved(url)
   }
-  assert.equal((await update.check()).version, '0.1.1')
+  assert.equal((await update.check()).version, '0.1.2')
 })
 
 test('install verifies the release archive, npm setup and new CLI before atomically recording its path', async t => {
   const f = await fixture(t)
   const result = await update.install({ targetDir: path.join(f.root, 'installed') })
-  assert.equal(result.cliVersion, '0.1.1')
+  assert.equal(result.cliVersion, '0.1.2')
   assert.equal(result.appVersion, '1.4.0')
   assert.equal(result.cliPath, path.join(f.root, 'installed', 'cli', 'road-music.js'))
   assert.match(result.command, /road-music\.js/)
   const active = JSON.parse(await fs.readFile(path.join(f.cliHome, 'current.json'), 'utf8'))
-  assert.deepEqual(active, { cliVersion: '0.1.1', cliPath: result.cliPath })
+  assert.deepEqual(active, { cliVersion: '0.1.2', cliPath: result.cliPath })
   await fs.access(result.cliPath)
 })
 
@@ -170,7 +170,7 @@ test('install accepts GitHub checksum CDN redirects only to its approved hosts',
     return saved(url)
   }
   const result = await update.install({ targetDir: path.join(f.root, 'redirected') })
-  assert.equal(result.cliVersion, '0.1.1')
+  assert.equal(result.cliVersion, '0.1.2')
 })
 
 test('default target is reused only after its completed-install marker verifies', async t => {
@@ -179,21 +179,21 @@ test('default target is reused only after its completed-install marker verifies'
   const second = await update.install()
   assert.equal(second.cliPath, first.cliPath)
   await fs.rm(path.join(f.cliHome, 'current.json'))
-  await fs.rm(path.join(f.cliHome, '0.1.1', '.road-music-cli-install.json'))
+  await fs.rm(path.join(f.cliHome, '0.1.2', '.road-music-cli-install.json'))
   await assert.rejects(update.install(), /완료 표식/)
 })
 
 test('default target with a legacy or different release checksum is preserved and requires a new folder', async t => {
   const f = await fixture(t)
   const first = await update.install()
-  const markerPath = path.join(f.cliHome, '0.1.1', '.road-music-cli-install.json')
+  const markerPath = path.join(f.cliHome, '0.1.2', '.road-music-cli-install.json')
   const original = JSON.parse(await fs.readFile(markerPath, 'utf8'))
-  await fs.writeFile(markerPath, JSON.stringify({ cliVersion: '0.1.1', appVersion: '1.4.0' }))
+  await fs.writeFile(markerPath, JSON.stringify({ cliVersion: '0.1.2', appVersion: '1.4.0' }))
   await assert.rejects(update.install(), /배포 체크섬/)
   await fs.writeFile(markerPath, JSON.stringify(original))
   const saved = global.fetch
   global.fetch = async url => String(url) === `${releaseBase}SHA256SUMS.txt`
-    ? new Response(`${'0'.repeat(64)}  RoadMusic-CLI-0.1.1.zip\n`) : saved(url)
+    ? new Response(`${'0'.repeat(64)}  RoadMusic-CLI-0.1.2.zip\n`) : saved(url)
   await assert.rejects(update.install(), /배포 체크섬/)
   assert.equal(await fs.readFile(markerPath, 'utf8'), JSON.stringify(original))
   await fs.access(first.cliPath)
@@ -202,16 +202,16 @@ test('default target with a legacy or different release checksum is preserved an
 test('install refuses symlink entries inside an otherwise valid CLI root before extraction', async t => {
   const f = await fixture(t)
   await fs.symlink('package.json', path.join(f.kit.kit, 'linked-package'))
-  const archive = path.join(f.root, 'RoadMusic-CLI-0.1.1.zip')
+  const archive = path.join(f.root, 'RoadMusic-CLI-0.1.2.zip')
   await fs.rm(archive)
-  await exec('/usr/bin/zip', ['-qry', archive, 'RoadMusic-CLI-0.1.1'], { cwd: f.root })
+  await exec('/usr/bin/zip', ['-qry', archive, 'RoadMusic-CLI-0.1.2'], { cwd: f.root })
   const bytes = await fs.readFile(archive)
   const digest = crypto.createHash('sha256').update(bytes).digest('hex')
-  const manifest = `${digest}  RoadMusic-CLI-0.1.1.zip\n`
+  const manifest = `${digest}  RoadMusic-CLI-0.1.2.zip\n`
   global.fetch = async url => {
     const value = String(url)
     if (value === api) return new Response(JSON.stringify([{ ...f.stable, assets: [
-      { name: 'RoadMusic-CLI-0.1.1.zip', size: bytes.length, browser_download_url: `${releaseBase}RoadMusic-CLI-0.1.1.zip` },
+      { name: 'RoadMusic-CLI-0.1.2.zip', size: bytes.length, browser_download_url: `${releaseBase}RoadMusic-CLI-0.1.2.zip` },
       { name: 'SHA256SUMS.txt', size: Buffer.byteLength(manifest), browser_download_url: `${releaseBase}SHA256SUMS.txt` }
     ] }]))
     if (value.endsWith('SHA256SUMS.txt')) return new Response(manifest)

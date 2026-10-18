@@ -51,7 +51,9 @@ GUI만 쓸 때는 Node.js가 필요 없다. AI 엔진과 `ffmpeg`/`ffprobe`는 �
 | 함께 설치되는 자료 | 용도 |
 | --- | --- |
 | `AGENTS.md`, `CLAUDE.md` | 공통 작업 순서, 검토·자동 위임 규칙과 스킬 진입점 |
-| `skills/road-music-ace/SKILL.md` | 작사·프롬프트·검증·검토·생성·근거 보고 워크플로 |
+| `skills/road-music/SKILL.md` | 작사·프롬프트·검증·검토·생성·근거 보고 워크플로 |
+| `skills/road-music-ace/SKILL.md` | 이전 이름의 호출을 공용 스킬로 연결하는 호환 진입점 |
+| `docs/yue-prompt-guide.md`, `docs/vendor/yue2/` | YuE2 공식·MLX 고정 원문, 입력·EOS·악보·검수 근거 |
 | `skills/music-road-skills/` | Showreel CD·Showreel MV·JIZURA·모션그래픽 HTML 스튜디오와 업데이트 스킬 번들 |
 | `docs/ace-prompt-guide.md`, `docs/vendor/ace-step-1.5/` | ACE 적용 가이드, 공식 원문·LICENSE·해시 |
 | `docs/yue-mlx.md` | Apple Silicon YuE2 설치·선택·생성, 메모리·라이선스·검증 한계 |
@@ -92,7 +94,7 @@ ROADMUSIC_DATA_DIR="/사용자가 선택한 임시 절대 경로/road-music-test
 
 ## 선택: 전역 명령 만들기
 
-소스 키트의 `cli` 하위 폴더에서 연결하면 독립 패키지 `road-music-cli@0.1.1`의 `road-music` 전역 명령을 만들 수 있다.
+소스 키트의 `cli` 하위 폴더에서 연결하면 독립 패키지 `road-music-cli@0.1.2`의 `road-music` 전역 명령을 만들 수 있다.
 
 ```bash
 cd "/사용자가 선택한 경로/RoadMusic-CLI-X.Y.Z"

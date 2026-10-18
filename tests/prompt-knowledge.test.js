@@ -82,7 +82,7 @@ test('guide UI is read-only and never assigns a guide result to lyric or style i
 
 test('desktop build bundles the local guidance files used by prompt knowledge', () => {
   const files = require('../package.json').build.files
-  for (const pattern of ['docs/**', 'AGENTS.md', 'skills/road-music-ace/**', 'prompts/ace-review.md', 'prompts/cli-workflows.md']) {
+  for (const pattern of ['docs/**', 'AGENTS.md', 'skills/road-music/**', 'skills/road-music-ace/**', 'prompts/ace-review.md', 'prompts/cli-workflows.md']) {
     assert.ok(files.includes(pattern), `${pattern} must be packaged`)
   }
 })

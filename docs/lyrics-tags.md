@@ -4,7 +4,7 @@
 
 `[Verse]`, `[Chorus]`는 **가사 안에서 곡의 전개를 알려주는 태그**다. `bpm`처럼 CLI JSON에 넣는 독립 옵션이 아니다. 예를 들어 `"verse":true`를 추가하지 않고 `lyrics` 문자열에 `[Verse]`와 실제 부를 가사를 적는다.
 
-이 문서는 [공식 ACE Tutorial](vendor/ace-step-1.5/en/Tutorial.md#about-lyrics-the-temporal-script)에 실린 구조·보컬·에너지 태그와 로드뮤직의 실제 처리 차이를 정리한다. 공식 태그가 모두 로드뮤직을 통해 그대로 전달되지는 않는다. 생성 전에는 [ACE 가이드](ace-prompt-guide.md)와 [요청자 검토 규칙](music-review.md)을 함께 따른다.
+이 문서는 [공식 ACE Tutorial](vendor/ace-step-1.5/en/Tutorial.md#about-lyrics-the-temporal-script)에 실린 구조·보컬·에너지 태그와 로드뮤직의 실제 처리 차이를 정리한다. 정리·변환 표는 ACE·YuE·`yue-mlx`가 공유하는 전처리 계약이며, ACE가 설명하는 음악적 효과를 YuE의 지원 보장으로 확대하지 않는다. 생성 전에는 선택한 엔진의 [ACE 가이드](ace-prompt-guide.md) 또는 [YuE 가이드](yue-prompt-guide.md)와 [요청자 검토 규칙](music-review.md)을 함께 따른다. 공식 태그가 모두 로드뮤직을 통해 그대로 전달되지는 않는다.
 
 ## 목차
 
@@ -86,7 +86,7 @@ style로 옮기면 곡 전체의 성향을 요청하는 것이다. 특정 줄만
 | `[dreamy]` | 삭제 | 몽환적인 질감 → `dreamy texture` |
 | `[aggressive]` | 삭제 | 공격적 전달 → `aggressive rhythm` |
 
-공식 문서에 없는 임의 태그를 계속 추가하는 방식으로 제어 범위를 넓히지 않는다. 보컬·감정 태그를 style로 옮길 때에도 같은 뜻을 중복해서 늘리지 말고 **최종 caption 512자** 안에 우선순위가 높은 요구를 담는다.
+공식 문서에 없는 임의 태그를 계속 추가하는 방식으로 제어 범위를 넓히지 않는다. 보컬·감정 태그를 style로 옮길 때에도 같은 뜻을 중복해서 늘리지 않는다. **ACE 경로만 최종 caption 512자** 안에 우선순위가 높은 요구를 담으며, YuE의 입력을 이 한계로 줄이지 않는다.
 
 <a id="normalization"></a>
 
@@ -214,6 +214,6 @@ node cli/road-music.js lyrics:check --json '{"text":"[Verse]\n오늘의 안부�
 2. Verse는 장면·서사, Chorus는 핵심 감정·훅, Bridge는 새로운 관점처럼 구간의 역할을 나눠 창작한다.
 3. 한국어 가사를 실제로 쓰고, 후렴 반복은 가사에도 직접 적는다. 편곡 지시를 노랫말에 섞지 않는다.
 4. 공식 태그가 변환·삭제되면 지원 구간으로 옮기고 style을 보완한다. 이 차이를 검토안에 표시한다.
-5. [작사·생성 스킬](../skills/road-music-ace/SKILL.md)과 [검토 규칙](music-review.md)에 따라 승인 또는 자동 위임을 확인한 뒤 생성한다.
+5. [작사·생성 스킬](../skills/road-music/SKILL.md)과 [검토 규칙](music-review.md)에 따라 승인 또는 자동 위임을 확인한 뒤 생성한다.
 
 공식 문서의 태그는 음악적 의도를 전달하는 수단이다. 정확한 초 단위 구조·가창·보컬 고정 기능이나 ACE 전체 기능을 100% 통제하는 명령으로 안내하지 않는다.

@@ -1,36 +1,10 @@
 ---
 name: road-music-ace
-description: Prepare ACE lyrics and music prompts through Road Music CLI, or adapt those inputs for explicitly requested model comparisons, with input preservation and generation review.
+description: Resolve legacy road-music-ace invocations to the shared Road Music song-production skill.
 ---
 
-# Road Music ACE 작사·생성
+# Road Music 이전 이름 호환
 
-CLI 키트에 동봉하는 작업 스킬이다. 기준 경로는 이 파일에서 두 단계 위의 키트 루트다. 프로젝트 [AGENTS.md](../../AGENTS.md)를 따르며, 문서 작성·설치만 요청된 작업에 음악 생성을 추가하지 않는다.
+기존 `road-music-ace` 호출과 옛 문서의 경로 참조를 위한 진입점이다. [Road Music 공용 제작 스킬](../road-music/SKILL.md)을 읽고 그 절차를 적용한다. 요청한 엔진·원문·승인 범위를 유지한다.
 
-## 먼저 읽을 자료
-
-- 매 음악 요청: [ACE 적용 가이드](../../docs/ace-prompt-guide.md), [태그 사용법](../../docs/lyrics-tags.md), [검토·자동 생성 규칙](../../docs/music-review.md).
-- 필요한 부분만: [옵션](../../docs/music-options.md), [장르 레시피](../../docs/genre-prompts.md). 최신 인기·플레이리스트가 언급되면 [리서치 절차](../../docs/music-research.md).
-- 모델별 프롬프트·FLOW 조정, 1.7B LM·네이티브 XL·YuE2 MLX 비교를 요청받으면 [모델별 제작·비교](../../docs/model-production-guide.md)를 읽는다. Apple Silicon YuE2 생성은 [YuE2 Apple Silicon](../../docs/yue-mlx.md)의 `yue-mlx` 공개 설치·생성 경로를 쓰며 기존 `yue`는 Windows NVIDIA용이다. CLI에서는 `prompt:knowledge`의 `models` topic으로 조회한다. 기본 ACE 요청에 비교 실험의 설정을 자동 적용하지 않는다.
-- 공식 원문은 적용 가이드가 연결한 해당 절을 읽는다. 네이티브 ACE 기능을 로드뮤직 지원 옵션으로 오인하지 않는다.
-
-## 작업 흐름
-
-1. CLI에 처음 연결한 세션이면 `cli:version`과 `cli:update:check`을 읽기 전용으로 한 번 실행한다. 새 CLI는 알리기만 하며, 음악 요청으로 설치·재설치·상시 감시를 시작하지 않는다. 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 위임할 때만 새 `cliPath`에 설치하고 버전·스키마·지식 조회를 확인한다.
-2. 요청의 곡 수·언어·장르·보컬·길이를 파악한다. **일반 “곡 만들어줘”는 기본 검토 모드다.** 가사와 프롬프트의 결정부터 생성까지 전부 자동 위임한 경우에만 요청자 검토를 생략한다. 한쪽만 자동 위임했거나 “초안만” 요청했다면 생성하지 않는다. 이미 승인된 완성안을 그대로 생성하라는 요청은 재승인 없이 진행한다.
-3. 태그 가이드로 필요한 구간을 선택한다. 모든 태그를 억지로 넣지 않는다. 실제 부를 가사는 섹션 아래에, 보컬·편곡 지시는 style에 둔다. `parts.structure`로 보컬 가사를 자동 구성한다고 가정하지 않는다. 빠진 취향은 합리적인 안으로 제안해 가정을 표시하고, 곡 수 미지정은 1곡으로 한다. 필수 원문·파일·권한이 없으면 해당 작업만 확인한다.
-4. 생성 준비에는 상태·schema를 확인하고 `lyrics:clean` 전후의 태그·본문, `lyrics:check`, `prompt:compose`의 notes와 최종 caption을 점검한다. ACE 최종 caption 512자·가사 4,096자와 요청의 의미를 보존한다. 지원되지 않는 전용 필드를 추가하지 않는다. 단순 텍스트 초안만 요청한 경우는 태그·의미·분량을 정적으로 점검하고 도구 미실행을 밝힌다. 초안만을 위해 서비스를 시작하지 않는다.
-5. 생성까지 요청된 기본 검토는 **완성 가사·최종 caption·입력 JSON·검증 결과·출처**를 한 번에 보여주고 응답을 기다린다. 승인 전 생성 제출은 하지 않는다. 자동 위임은 질문으로 멈추지 않고 검증 후 요청 범위에서 생성한다.
-6. 승인/위임 범위의 JSON으로 제출하고 완료를 확인한다. 이후 음악·실제 가사·caption·설정·seed·참고 자료·선택 이유·검증 한계를 제공한다. 비교에는 목표와 실제 길이, 생성 본체와 실패·복구 시간, 실제 로드한 모델을 구분한다. ASR 전사 일치도를 실제 가창·청취 점수로 바꾸지 않는다. 승인 후 의미가 달라지는 AI의 수정은 재검토받되, 사용자가 구체적 수정과 즉시 생성을 함께 요청했다면 그 지시를 따른다.
-
-## 음악 생성 뒤 HTML 모션그래픽 연결
-
-사용자가 **음악과 HTML 모션그래픽 제작을 함께 요청했을 때만** 적용한다. 음악만 요청한 경우에는 이 단계를 추가하지 않는다.
-
-1. `song:generate` 뒤 `job:wait`으로 완료를 확인한다. `--wait`을 사용했어도 각 완료 결과의 성공·실패를 읽는다.
-2. `songs:list`으로 완료 목록을 다시 읽고, 완료 응답과 목록에 있는 실제 절대 `dir`·`audio` 경로를 그대로 사용한다. 제목으로 경로를 추측하거나 원곡 파일을 이동·변경하지 않는다.
-3. 비어 있는 새 절대 출력 폴더를 정해 `motion:handoff --json '{"music":"완료 응답의 audio 절대 경로","out":"새 프로젝트 절대 경로","mode":"..."}'`를 호출한다. 결과의 `nextCommand`를 그대로 이어 `motion:studio`를 연다.
-4. HTML 제작실에서 사용자가 선택·업로드·청취를 마친 뒤 반환된 `selection`, `request`, CD/Showreel의 `showreel-request.json`을 읽는다. 선택한 모드의 동봉 `SKILL.md`와 [모션그래픽 연결 가이드](../../docs/cli-motion-graphics.md)를 따라 이미지·자막·영상 작업을 진행한다. 선택 값을 임의로 교체하지 않는다.
-5. 음악 없이 화면 구성부터 요청받은 경우에는 `music`을 생략해 프로젝트를 만들고 HTML에서 파일을 업로드한다. CD/Showreel 생성 단계에서는 실제 음악 입력이 준비된 뒤에만 `plan/create --selection`을 진행한다.
-
-태그 의미와 실제 처리의 차이는 태그 가이드, 승인 범위·부분 위임·수정·재시도는 검토 문서가 기준이다. 별도 에이전트가 있으면 [검수 역할](../../prompts/ace-review.md)로 입력과 근거를 독립 점검하게 할 수 있다. 검수 에이전트의 판단은 요청자의 승인을 대신하지 않으며, 에이전트가 없으면 동일한 기술 점검을 직접 수행한다. 도구·에이전트가 없는 기능을 수행했다고 주장하지 않는다.
+새 요청과 문서는 `skills/road-music/SKILL.md`를 사용한다.

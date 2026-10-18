@@ -47,7 +47,7 @@ async function packageCli (outputDir = path.join(root, 'dist'), projectRoot = ro
     const entries = ['cli', 'electron', 'renderer', 'python', 'docs', 'releases', 'release', 'tests', 'scripts',
       'package.json', 'package-lock.json', 'README.md', 'LICENSE', 'AGENTS.md', 'CLAUDE.md',
       'build/icon.png', 'build/icon.icns', 'prompts/cli-workflows.md', 'prompts/ace-review.md',
-      'skills/road-music-ace']
+      'skills/road-music', 'skills/road-music-ace']
     if (requireSkillsBundle) {
       await assertSkillsBundle(projectRoot)
       entries.push('skills/music-road-skills')

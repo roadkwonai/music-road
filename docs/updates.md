@@ -2,7 +2,7 @@
 
 [Road Music](../README.md) · [문서 지도](README.md) · [릴리스 노트](../releases/README.md)
 
-Road Music 앱과 CLI는 별도 버전과 별도 GitHub Release를 사용한다. 앱 정식 버전은 `package.json`과 `vX.Y.Z` 태그를 따르며, 현재 기준은 0.1.0이다. CLI 정식 버전은 `cli/package.json`과 `cli-vX.Y.Z` 태그를 따르며, 현재 기준은 0.1.1이다. 같은 초기 번호라도 앱 최신 Release와 CLI 최신 Release를 서로 대체하지 않는다.
+Road Music 앱과 CLI는 별도 버전과 별도 GitHub Release를 사용한다. 앱 정식 버전은 `package.json`과 `vX.Y.Z` 태그를 따르며, 현재 기준은 0.1.0이다. CLI 정식 버전은 `cli/package.json`과 `cli-vX.Y.Z` 태그를 따르며, 현재 기준은 0.1.2이다. 같은 초기 번호라도 앱 최신 Release와 CLI 최신 Release를 서로 대체하지 않는다.
 
 <a id="consolidated-140"></a>
 
@@ -43,7 +43,7 @@ CLI는 `cli-v*` 정식 Release만 조회한다. `cli:update:*`는 앱을 시작�
 node cli/road-music.js cli:version
 node cli/road-music.js cli:update:check
 node cli/road-music.js cli:update:install \
-  --json '{"targetDir":"/absolute/path/road-music-cli-0.1.1"}' \
+  --json '{"targetDir":"/absolute/path/road-music-cli-0.1.2"}' \
   --timeout 1800000
 ```
 

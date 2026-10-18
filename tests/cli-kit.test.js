@@ -54,18 +54,21 @@ test('CLI ZIP includes install instructions, locked dependencies, and a working 
     assert.ok(entries.includes(`${name}/${file}`), file)
   }
   assert.deepEqual(entries.filter(file => /(^|\/)(node_modules|\.git|\.omx|\.omc|\.impeccable|__pycache__)(\/|$)|\.pyc$/.test(file)), [], 'noGitMetadata')
-  for (const file of ['docs/lyrics-tags.md', 'docs/music-review.md', 'docs/model-production-guide.md', 'skills/road-music-ace/SKILL.md', 'prompts/ace-review.md']) {
+  for (const file of ['docs/lyrics-tags.md', 'docs/music-review.md', 'docs/model-production-guide.md', 'docs/yue-prompt-guide.md', 'docs/vendor/yue2/manifest.json', 'skills/road-music/SKILL.md', 'skills/road-music-ace/SKILL.md', 'prompts/ace-review.md']) {
     assert.ok(entries.includes(`${name}/${file}`), `AI 음악 제작 자료 누락: ${file}`)
   }
   const extracted = path.join(temp, 'extracted')
   execFileSync('/usr/bin/ditto', ['-x', '-k', result.path, extracted])
   const kitRoot = path.join(extracted, name)
-  const skillPath = path.join(kitRoot, 'skills/road-music-ace/SKILL.md')
-  const skill = await fs.readFile(skillPath, 'utf8')
-  for (const [, reference] of skill.matchAll(/\]\(([^)]+)\)/g)) {
-    const target = path.resolve(path.dirname(skillPath), reference.split('#')[0])
-    assert.ok(target.startsWith(kitRoot + path.sep), `키트 밖 스킬 참조: ${reference}`)
-    await fs.access(target)
+  for (const name of ['road-music', 'road-music-ace']) {
+    const skillPath = path.join(kitRoot, 'skills', name, 'SKILL.md')
+    const skill = await fs.readFile(skillPath, 'utf8')
+    assert.equal(skill.match(/^name: (.+)$/m)[1], name)
+    for (const [, reference] of skill.matchAll(/\]\(([^)]+)\)/g)) {
+      const target = path.resolve(path.dirname(skillPath), reference.split('#')[0])
+      assert.ok(target.startsWith(kitRoot + path.sep), `키트 밖 스킬 참조: ${reference}`)
+      await fs.access(target)
+    }
   }
   const row = JSON.parse(execFileSync(process.execPath, [path.join(extracted, name, 'cli/road-music.js'), 'schema'], { cwd: temp, encoding: 'utf8' }))
   assert.equal(row.ok, true)

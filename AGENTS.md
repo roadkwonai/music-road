@@ -2,6 +2,14 @@
 
 한국어로 응답한다.
 
+## 로컬 Git·GitHub 인증
+
+- 로컬 Git·GitHub 작업 전 저장소 또는 가장 가까운 신뢰할 수 있는 상위 경로의 `.envrc`를 현재 셸에 로드한다. `GH_TOKEN`과 Git 작성자·커미터 등 정의된 환경값을 사용하며, 다른 계정의 기존 인증이나 SSH부터 시도하지 않는다. GitHub Actions는 워크플로에 정의된 인증을 유지한다.
+- 셸 추적을 끄고 `set -a; source /absolute/path/.envrc >/dev/null 2>&1; set +a`로 적용한다. `.envrc` 원문·토큰·인증 헤더를 출력하거나 Git·로그·산출물에 포함하지 않는다. 파일이 없거나 `GH_TOKEN`이 비어 있으면 인증 누락을 보고한다.
+- `gh api user`와 `gh repo view OWNER/REPO --json viewerPermission`으로 적용 계정·저장소 권한을 확인한다. PR·Release 등 GitHub 작업은 GitHub CLI(`gh`)를 사용한다.
+- HTTPS Git push/fetch도 같은 인증을 쓰도록 `git -c credential.helper= -c 'credential.helper=!gh auth git-credential' ...`로 실행한다. 전역 Git 인증 설정이나 remote URL에 토큰을 기록하지 않는다. 인증 오류가 나면 `.envrc` 적용 여부와 저장소 권한부터 다시 확인한다.
+
+
 이 저장소에서 Road Music CLI를 호출하거나 수정하는 AI 에이전트는 먼저 [CLI 설치와 AI 사용](docs/cli-install.md), [CLI 사용법](docs/cli.md), [CLI 레퍼런스](docs/cli-reference.md), [CLI 검수 결과](docs/cli-qa-report.md)를 읽는다. 실제 실행 버전에서는 `node cli/road-music.js schema`가 명령과 입력값의 최종 기준이다.
 
 ## 작업 순서

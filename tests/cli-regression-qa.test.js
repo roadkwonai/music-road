@@ -14,7 +14,7 @@ const cliPath = path.resolve(__dirname, '../cli/road-music.js')
 function runCli (dataDir, args) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [cliPath, ...args], {
-      env: { ...process.env, ROADMUSIC_DATA_DIR: dataDir }, stdio: ['ignore', 'pipe', 'pipe']
+      env: { ...process.env, ROADMUSIC_DATA_DIR: dataDir, ROADMUSIC_STUDIO_AUTO_OPEN: '0' }, stdio: ['ignore', 'pipe', 'pipe']
     })
     let stdout = ''; let stderr = ''
     child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8')

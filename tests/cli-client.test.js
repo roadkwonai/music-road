@@ -463,15 +463,53 @@ test('service start waits for a stopping service before reporting a new status',
   }
   try {
     let stdout = ''
-    const code = await run(['service:start'], { endpoint: socket, userData: dir, spawnProcess, stdout: { write: (text) => { stdout += text } } })
+    let opened = 0
+    const code = await run(['service:start'], { endpoint: socket, userData: dir, spawnProcess, openStudio: async () => { opened += 1 }, stdout: { write: (text) => { stdout += text } } })
     assert.equal(code, 0)
     assert.equal(starts, 1)
+    assert.equal(opened, 1)
     assert.equal(JSON.parse(stdout).result.pid, 'new')
   } finally {
     if (stoppingServer.listening) await new Promise((resolve) => stoppingServer.close(resolve))
     if (nextServer && nextServer.listening) await new Promise((resolve) => nextServer.close(resolve))
     fs.rmSync(dir, { recursive: true, force: true })
   }
+})
+
+test('opens the studio only after a successful interactive service start', async () => {
+  await withServer((message, client) => {
+    client.end(JSON.stringify({ id: message.id, result: { ok: true, pid: 'ready', stopping: false } }) + '\n')
+  }, async (endpoint) => {
+    let stdout = ''
+    let stderr = ''
+    let opened = 0
+    const base = { endpoint, stdout: { write: text => { stdout += text } }, stderr: { write: text => { stderr += text } } }
+    assert.equal(await run(['service:start'], { ...base, openStudio: async () => { opened += 1 } }), 0)
+    assert.equal(opened, 1)
+    assert.deepEqual(JSON.parse(stdout), { ok: true, result: { ok: true, pid: 'ready', stopping: false } })
+    stdout = ''
+    assert.equal(await run(['service:start'], { ...base, env: { ROADMUSIC_STUDIO_AUTO_OPEN: '0' }, openStudio: async () => { throw new Error('must not open') } }), 0)
+    assert.equal(stderr, '')
+    stdout = ''
+    assert.equal(await run(['service:start'], { ...base, openStudio: async () => { const error = new Error('제작실 없음'); error.code = 'studio_unavailable'; throw error } }), 0)
+    assert.deepEqual(JSON.parse(stderr), { type: 'warning', channel: 'studio:open', error: { code: 'studio_unavailable', message: '제작실 없음' } })
+  })
+})
+
+test('does not open the studio for a batch service start alias', async () => {
+  await withServer((message, client) => {
+    client.end(JSON.stringify({ id: message.id, result: { command: message.command } }) + '\n')
+  }, async (endpoint) => {
+    let stdout = ''
+    const code = await run(['batch'], {
+      endpoint,
+      stdinText: '{"id":"start","command":"service:start"}',
+      openStudio: async () => { throw new Error('must not open') },
+      stdout: { write: text => { stdout += text } }
+    })
+    assert.equal(code, 0)
+    assert.deepEqual(JSON.parse(stdout), { id: 'start', ok: true, result: { command: 'cli:status' } })
+  })
 })
 
 test('batch responds to each stdin JSONL line before stdin closes', async () => {

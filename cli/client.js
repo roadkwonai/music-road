@@ -565,6 +565,13 @@ async function run (argv = process.argv.slice(2), supplied = {}) {
       writeJson(options.stdout, { ok: false, error: failedResult(result) })
       return 1
     }
+    if (normalized.start && (options.env || process.env).ROADMUSIC_STUDIO_AUTO_OPEN !== '0') {
+      try {
+        await (options.openStudio || require('./studio').openStudio)(options)
+      } catch (error) {
+        writeJson(options.stderr, { type: 'warning', channel: 'studio:open', error: errorShape(error) })
+      }
+    }
     writeJson(options.stdout, { ok: true, result })
     return 0
   } catch (error) {

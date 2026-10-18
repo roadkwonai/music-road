@@ -64,7 +64,7 @@ node cli/road-music.js song:generate --file song.json --events --wait
 | 주악기 1~3개 | `parts.instruments` | 지원 악기 목록으로 스타일을 조합한다 |
 | BPM | 최상위 `bpm` 또는 `parts.bpm` | ACE는 생성 인수에도 전달, YuE는 스타일 태그로 요청 |
 | 보컬 없는 연주곡 | `instrumental:true` | 가사를 연주곡용 골격으로 교체하고 보컬 억제 태그 추가 |
-| 곡 길이 | `targetSeconds` | 엔진별 처리 범위 적용; 최종 길이는 파일로 확인 |
+| 곡 길이 | `targetSeconds` | ACE는 생성 길이에 사용한다. `yue-mlx`는 기록·비교용 목표값이며, 최종 길이는 파일로 확인 |
 | 비교 후보 | `count`, `seed` | 여러 작업을 제출하고 seed를 달리한다 |
 | 후렴 위치·반복 | `lyrics`의 섹션과 가사 | 보컬곡은 직접 구성해야 한다 |
 | 조성·박자 | `style`의 `A minor`, `six eight time` 등 | 독립 옵션이 아니므로 정확한 준수는 확인이 필요하다. `/`는 태그 구분자로 정리되므로 박자는 슬래시 없는 표현 사용 |
@@ -82,10 +82,10 @@ CCM을 주로 만든다면 [CCM 세부 옵션](ccm-prompts.md#options)과 [완�
 | 옵션 | 허용값·범위 | 사용할 때 |
 | --- | --- | --- |
 | `title` | 최대 200자 | 결과를 구분할 제목. 비교 후보는 A·B 등 접미사가 붙는다 |
-| `engine` | `ace` 기본, `yue` | 설치 상태 우선. macOS Apple Silicon은 ACE 사용 |
+| `engine` | `ace` 기본, Windows NVIDIA용 `yue`, Apple Silicon용 `yue-mlx` | 설치 상태 우선. 두 YuE2 경로의 런타임은 다르다 |
 | `style` | CLI 최대 2,000자 | ACE는 조합된 최종 caption의 앞 512자만 전달 |
 | `lyrics` | CLI 최대 20,000자 | 보컬곡의 실제 가사. ACE는 정리 후 앞 4,096자만 전달 |
-| `targetSeconds` | ACE 1~600, YuE 20~360, 또는 `null` | 명시하지 않으면 엔진 경로에 맡긴다. 처음에는 짧은 샘플로 비교 가능 |
+| `targetSeconds` | ACE 1~600, YuE2 20~360, 또는 `null` | `yue-mlx`는 유효 범위만 검사하고 모델 생성 길이에 직접 전달하지 않는다. 자연 EOS의 실제 길이를 기록·보고한다 |
 | `count` | 정수 1~8, 생략 시 1 | 같은 사양의 후보 수. 서로 다른 장르 3곡은 별도 요청 3개로 나눈다 |
 | `seed` | 정수 0~2,147,483,647 또는 `null` | 비교 조건 기록. 생략/`null`이면 무작위; 같은 seed도 환경 간 동일 음원을 보장하지 않는다 |
 | `instrumental` | `true` / `false` | `true`면 입력 가사를 버린다. `parts.instrumental:true`도 같은 효과 |
@@ -318,7 +318,7 @@ node cli/road-music.js prompt:compose --json '{"genre":"Korean ballad, female vo
 
 ## YuE 전용 고급 옵션
 
-ACE 사용자에게 이 값들을 기본 템플릿으로 넣을 필요는 없다. `advanced`는 YuE 워커에서만 사용한다. macOS Apple Silicon에서는 YuE 실행을 지원하지 않으므로 아래는 지원 환경에 설치된 YuE를 위한 예시다.
+ACE 사용자에게 이 값들을 기본 템플릿으로 넣을 필요는 없다. `advanced`는 YuE 워커에서만 사용한다. Windows NVIDIA는 `yue`, Apple Silicon은 `yue-mlx`를 사용한다. Apple Silicon 설치·메모리·복구 한계는 [YuE2 Apple Silicon](yue-mlx.md)을 따른다.
 
 | 옵션 | CLI 허용 범위 | 조절 목적과 주의점 |
 | --- | --- | --- |

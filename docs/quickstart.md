@@ -43,11 +43,13 @@ node cli/road-music.js songs:list
 
 첫 상태 요청은 숨겨진 서비스를 시작하고 데이터 폴더를 초기화할 수 있다. macOS 기본 폴더는 `~/Library/Application Support/Road Music`이다. GUI와 CLI는 같은 데이터 폴더를 쓰면 곡과 대기열을 공유한다.
 
-Apple Silicon에서는 ACE-Step을 사용한다. 이미 설치됐다면 다음 다운로드 명령을 건너뛴다. 설치되지 않았고 엔진 설치를 진행하려는 경우에만 실행한다. 모델 다운로드에는 시간과 디스크 공간이 필요하다.
+Apple Silicon에서는 ACE-Step을 기본으로 사용하며, YuE2 Apple Silicon도 별도로 설치해 선택할 수 있다. 이미 설치됐다면 다음 다운로드 명령을 건너뛴다. 설치되지 않았고 엔진 설치를 진행하려는 경우에만 실행한다. 모델 다운로드에는 시간과 디스크 공간이 필요하다.
 
 ```bash
 node cli/road-music.js engines:install --events --json '{"id":"ace"}'
 ```
+
+YuE2 Apple Silicon은 macOS 14.2 이상과 통합 메모리 32GB 이상이 필요하며 64GB 이상을 권장한다. M5는 macOS 26.2 이상이어야 하고 곡 생성에는 전원 연결이 필요하다. 설치 요청을 받았을 때만 `"id":"yue-mlx"`로 설치한다. 32GB Mac은 아직 실측하지 않았다. [YuE2 Apple Silicon](yue-mlx.md)을 따른다.
 
 AI는 사용자가 설치를 요청하지 않았다면 미설치 상태를 보고하고 자동 다운로드하지 않는다. 자세한 준비물은 [CLI 설치](cli-install.md)와 [엔진 설치 안내](getting-started.md)에 있다.
 

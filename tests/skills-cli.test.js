@@ -30,8 +30,8 @@ test('skills and motion commands are public local CLI commands with constrained 
   assert.doesNotThrow(() => validate('motion:studio', { project: '/tmp/project', review: true }))
 })
 
-test('ACE skill keeps music-only requests separate from the completed-music HTML handoff', () => {
-  const skill = require('node:fs').readFileSync(path.join(__dirname, '..', 'skills', 'road-music-ace', 'SKILL.md'), 'utf8')
+test('shared music skill keeps music-only requests separate from the completed-music HTML handoff', () => {
+  const skill = require('node:fs').readFileSync(path.join(__dirname, '..', 'skills', 'road-music', 'SKILL.md'), 'utf8')
   assert.match(skill, /음악과 HTML 모션그래픽 제작을 함께 요청했을 때만/)
   assert.match(skill, /job:wait/)
   assert.match(skill, /songs:list/)

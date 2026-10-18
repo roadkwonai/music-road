@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/roadkwonai/music-road/releases/tag/v0.1.0"><img src="https://img.shields.io/badge/app%20release-v0.1.0-172942?style=flat-square" alt="Road Music 앱 Release v0.1.0"></a>
-  <a href="https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.1"><img src="https://img.shields.io/badge/CLI%20release-v0.1.1-172942?style=flat-square" alt="Road Music CLI Release v0.1.1"></a>
+  <a href="https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.2"><img src="https://img.shields.io/badge/CLI%20release-v0.1.2-172942?style=flat-square" alt="Road Music CLI Release v0.1.2"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-172942?style=flat-square" alt="MIT License"></a>
   <a href="docs/cli-install.md"><img src="https://img.shields.io/badge/CLI-Node.js%2024-172942?style=flat-square" alt="CLI 실행 환경 Node.js 24"></a>
   <a href="docs/ace-prompt-guide.md"><img src="https://img.shields.io/badge/engine-ACE--Step%201.5-172942?style=flat-square" alt="ACE-Step 1.5"></a>
@@ -78,7 +78,7 @@ https://github.com/roadkwonai/music-road 의 AGENTS.md와 설치 지침을 따�
 
 ```text
 로드뮤직 앱과 CLI는 이미 설치돼 있어. 이 컴퓨터에서 기존 CLI 설치 폴더를 자동으로 찾아줘.
-찾은 폴더의 AGENTS.md와 docs/ai-cli.md에 따라 재설치 없이 연결·ACE 준비 상태를 확인해줘.
+찾은 폴더의 AGENTS.md와 docs/ai-cli.md에 따라 재설치 없이 연결·엔진 준비 상태를 확인해줘.
 이후 음악 요청은 동봉 스킬과 공식 가이드로 처리해줘.
 ```
 
@@ -124,7 +124,7 @@ node cli/road-music.js motion:studio --json '{"project":"/absolute/new-motion-pr
 
 ## AI에서 사용
 
-CLI 자체에 작사·웹 리서치 AI가 내장된 구조는 아닙니다. AI 에이전트가 [동봉 스킬](skills/road-music-ace/SKILL.md)과 공식 문서를 참고해 입력을 만들고, CLI가 로컬 엔진으로 생성합니다. MCP 서버는 포함하지 않습니다.
+CLI 자체에 작사·웹 리서치 AI가 내장된 구조는 아닙니다. AI 에이전트가 [동봉 스킬](skills/road-music/SKILL.md)과 공식 문서를 참고해 입력을 만들고, CLI가 로컬 엔진으로 생성합니다. MCP 서버는 포함하지 않습니다.
 
 **CCM으로 시작하기**
 
@@ -212,6 +212,7 @@ flowchart LR
 | 더 세밀하게 만들려면 | 참고 문서 |
 | --- | --- |
 | 공식 ACE 가이드에 맞춘 입력 최적화 | [ACE 적용 가이드](docs/ace-prompt-guide.md) |
+| Apple Silicon YuE2 설치·선택·생성 | [YuE2 Apple Silicon](docs/yue-mlx.md) |
 | Verse·Chorus 등 구간의 의미와 배치 | [가사 태그](docs/lyrics-tags.md) |
 | 보컬·악기·BPM·길이·seed·실행 JSON | [음악 생성 옵션](docs/music-options.md) |
 | 장르별 간단 요청과 상세 레시피 | [장르별 프롬프트](docs/genre-prompts.md) |
@@ -235,7 +236,7 @@ DMG의 앱을 `Applications`로 복사하면 GUI를 사용할 수 있으며 Node
 > [!NOTE]
 > 현재 앱은 애드혹 서명이며 Apple 공증을 받지 않았습니다. 실제 검증 환경과 OS별 제한은 [검수 결과](docs/cli-qa-report.md)에 있습니다.
 
-현재 앱 정식 버전은 0.1.0, CLI 정식 버전은 0.1.1입니다. 앱 Release의 Latest가 앱 업데이트 대상이며, CLI는 `cli-v0.1.1` Release와 `RoadMusic-CLI-0.1.1.zip`을 사용합니다. 공통 초기 번호라도 앱과 CLI는 서로의 태그·asset·체크섬·설치 경로를 공유하지 않습니다.
+현재 앱 정식 버전은 0.1.0, CLI 정식 버전은 0.1.2입니다. 앱 Release의 Latest가 앱 업데이트 대상이며, CLI는 `cli-v0.1.2` Release와 `RoadMusic-CLI-0.1.2.zip`을 사용합니다. 공통 초기 번호라도 앱과 CLI는 서로의 태그·asset·체크섬·설치 경로를 공유하지 않습니다.
 
 앱과 CLI의 업데이트 방식은 다릅니다. 앱 서비스는 시작 시와 15분마다 앱 Release를 확인합니다. CLI는 AI 세션의 첫 연결에서 한 번 확인하며 상시 감시하지 않습니다.
 
@@ -265,7 +266,7 @@ node cli/road-music.js cli:update:install --timeout 1800000
 | 목적 | 바로가기 |
 | --- | --- |
 | 설치하고 첫 곡 완성 | [CLI 설치](docs/cli-install.md) · [빠른 시작](docs/quickstart.md) · [GUI 시작](docs/getting-started.md) |
-| 다른 AI에서 사용 | [AI 사용·새 세션](docs/ai-cli.md) · [작사 스킬](skills/road-music-ace/SKILL.md) · [검수 역할](prompts/ace-review.md) |
+| 다른 AI에서 사용 | [AI 사용·새 세션](docs/ai-cli.md) · [작사 스킬](skills/road-music/SKILL.md) · [검수 역할](prompts/ace-review.md) |
 | 음악 다음 HTML 모션그래픽 제작 | [CLI 모션그래픽 연결](docs/cli-motion-graphics.md) · [music-road-skills](https://github.com/roadkwonai/music-road-skills) |
 | 음악과 가사 설계 | [ACE 가이드](docs/ace-prompt-guide.md) · [옵션](docs/music-options.md) · [태그](docs/lyrics-tags.md) · [장르](docs/genre-prompts.md) |
 | Apple Silicon에서 YuE2로 제작 | [YuE2 Apple Silicon](docs/yue-mlx.md) · [모델별 제작·비교](docs/model-production-guide.md) |

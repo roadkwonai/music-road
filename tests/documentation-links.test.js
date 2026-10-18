@@ -6,6 +6,10 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 const root = path.resolve(__dirname, '..')
+const yueManifest = path.join(root, 'docs/vendor/yue2/manifest.json')
+const yueSources = new Set(fs.existsSync(yueManifest)
+  ? JSON.parse(fs.readFileSync(yueManifest, 'utf8')).files.map(file => path.join(path.dirname(yueManifest), file.path))
+  : [])
 
 function markdownFiles (directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
@@ -33,10 +37,11 @@ function anchors (text) {
 }
 
 test('first-party documentation links resolve to local files and existing sections', () => {
-  const files = ['README.md', 'AGENTS.md', 'CLAUDE.md', 'prompts/cli-workflows.md', 'prompts/ace-review.md', 'skills/road-music-ace/SKILL.md']
+  const files = ['README.md', 'AGENTS.md', 'CLAUDE.md', 'prompts/cli-workflows.md', 'prompts/ace-review.md', 'skills/road-music/SKILL.md', 'skills/road-music-ace/SKILL.md']
     .map(file => path.join(root, file)).concat(markdownFiles(path.join(root, 'docs')), markdownFiles(path.join(root, 'releases')))
   const failures = []
   for (const file of files) {
+    if (yueSources.has(file)) continue // External snapshots keep upstream relative links; their bytes are checked separately.
     const text = withoutCode(fs.readFileSync(file, 'utf8'))
     const references = [
       ...[...text.matchAll(/\]\((?:<([^>]+)>|([^\s)]+))(?:\s+"[^"]*")?\)/g)].map(match => match[1] || match[2]),

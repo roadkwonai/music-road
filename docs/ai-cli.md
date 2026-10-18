@@ -75,7 +75,7 @@ AI는 설치 루트와 실행 명령을 **현재 대화의 문맥**으로 유지
 | --- | --- | --- |
 | [`AGENTS.md`](../AGENTS.md) | Codex 등 에이전트의 공통 작업 순서·안전 경계 | 현재 작업 디렉터리 또는 상위 경로에서 세션을 시작할 때 Codex가 읽는다. |
 | [`CLAUDE.md`](../CLAUDE.md) | Claude Code가 같은 지침을 재사용하는 진입점 | Claude Code가 프로젝트 메모리를 읽을 때 `@AGENTS.md`를 가져온다. |
-| [동봉 작사·생성 스킬](../skills/road-music-ace/SKILL.md) | 태그 선택·프롬프트·기술 검증·요청자 검토·자동 생성 | `AGENTS.md`를 읽은 AI가 요청마다 파일을 읽어 적용한다. 전역 스킬 등록은 전제하지 않는다. |
+| [동봉 작사·생성 스킬](../skills/road-music/SKILL.md) | 태그 선택·프롬프트·기술 검증·요청자 검토·자동 생성 | `AGENTS.md`를 읽은 AI가 요청마다 파일을 읽어 적용한다. 전역 스킬 등록은 전제하지 않는다. |
 | [검수 에이전트 역할](../prompts/ace-review.md) | 별도 에이전트가 있을 때 독립 입력 검수 | 선택적 사용. 없으면 동일 항목을 직접 검수한다. |
 | [`prompts/cli-workflows.md`](../prompts/cli-workflows.md) | 반복 작업용 프롬프트 5개 | 자동 로드하지 않는다. 작업 시작 전에 명시적으로 읽는다. |
 | [CLI 사용법](cli.md)·[레퍼런스](cli-reference.md) | 명령 순서·입력 스키마 | 자동 로드하지 않는다. 실제 요청 전 필요한 부분을 읽는다. |
@@ -108,16 +108,19 @@ CLI 설치와 환경 점검은 [CLI 설치](cli-install.md), 명령별 상세 �
 
 ## 음악 요청 예시 찾기
 
-CLI가 `prompt:knowledge`를 지원하면 앱을 시작하지 않고 장르 지식을 읽을 수 있다. 우선 목록을 읽고 CCM은 `ccm`, 옛 찬송 리메이크는 `hymn-remake`, 원문 보존·추천은 `review`를 조회한다. [명령 사용법](cli.md#knowledge)을 따른다. 사용자 가사·프롬프트가 이미 있으면 문서 예시로 바꾸지 않고 미지정 부분만 제안한다. 전처리가 원문과 충돌하면 차이와 근거를 보여주고 승인 없이 수정하지 않는다.
+CLI가 `prompt:knowledge`를 지원하면 앱을 시작하지 않고 장르 지식을 읽을 수 있다. 우선 목록을 읽고 CCM은 `ccm`, 옛 찬송 리메이크는 `hymn-remake`, 원문 보존·추천은 `review`, 모델별 제작·비교는 `models`를 조회한다. [명령 사용법](cli.md#knowledge)을 따른다. 사용자 가사·프롬프트가 이미 있으면 문서 예시로 바꾸지 않고 미지정 부분만 제안한다. 전처리가 원문과 충돌하면 차이와 근거를 보여주고 승인 없이 수정하지 않는다.
 
 ```bash
 node cli/road-music.js prompt:knowledge --json '{"topic":"genres"}'
 node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
+node cli/road-music.js prompt:knowledge --json '{"topic":"models"}'
 ```
 
 | 필요한 내용 | 문서 |
 | --- | --- |
 | ACE 생성 전 필수 참고, 공식 원문·프롬프트 최적화 | [ACE 최적화 가이드](ace-prompt-guide.md) · [공식 보관본](vendor/ace-step-1.5/README.md) |
+| 모델별 입력·FLOW 조정과 비교, 시험값·길이·ASR·복구 한계 | [모델별 제작·비교](model-production-guide.md) |
+| Apple Silicon YuE2 설치·선택·생성, 메모리·라이선스 | [YuE2 Apple Silicon](yue-mlx.md) |
 | Verse·Chorus 등 구간 태그, 기본 검토·전체 자동 위임 | [태그 가이드](lyrics-tags.md) · [검토 규칙](music-review.md) |
 | 자연어 요청을 지원 옵션으로 바꾸기, JSON 파일 실행 | [음악 생성 옵션](music-options.md) |
 | 장르별 상세 요청·한 줄 요청·여성 보컬·여러 곡 | [장르별 프롬프트](genre-prompts.md) |
@@ -125,3 +128,5 @@ node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
 | 내보내기·자막·영상·오류 진단 | [작업 프롬프트](../prompts/cli-workflows.md) |
 
 에이전트가 공통 지침과 스킬을 읽은 뒤에는 “한국어 여성 락발라드 1곡, 150초, 피아노와 기타 중심으로 만들어줘”처럼 요청해도 된다. 기본은 검증한 가사·프롬프트를 제시한 뒤 승인받아 생성한다. “가사와 프롬프트까지 전부 자동으로 정해 생성해줘”라고 위임하면 승인 질문 없이 검증·생성하고 음악·사용 가사·최종 옵션·참고 자료·선택 이유를 제공한다. 조사·설정만 요청했다면 생성하지 않는다.
+
+이전 `skills/road-music-ace/SKILL.md` 경로는 공용 `road-music` 스킬로 연결한다. 새 연동은 공용 경로를 사용하며 공식 원문은 선택한 엔진에 맞춰 읽는다.

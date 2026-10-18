@@ -33,7 +33,8 @@ CLI 작업 순서는 [빠른 시작](quickstart.md), 전체 앱 동작은 [상�
 | 엔진 | 용도 | macOS Apple Silicon | 라이선스 고지 |
 | --- | --- | --- | --- |
 | ACE-Step 1.5 | 음악 생성, 커버, 녹음 파일, 효과음 | 지원 | MIT |
-| YuE2 | ABC 작곡·소리 합성 및 해당 전용 기능 | 지원하지 않음 | 코드·가중치 CC BY-NC 4.0 |
+| YuE2 Apple Silicon (`yue-mlx`) | ABC 계획·소리 합성 | macOS 14.2 이상, 32GB 이상 메모리(64GB 권장) | 모델 CC-BY-NC 4.0, 런타임 Apache-2.0 |
+| YuE2 Windows NVIDIA (`yue`) | ABC 작곡·소리 합성 및 해당 전용 기능 | 지원하지 않음 | 코드·가중치 CC BY-NC 4.0 |
 
 엔진·모델은 앱이 따로 다운로드하며 저장소나 DMG에 포함되지 않는다. Node.js는 CLI·소스 실행·빌드에 필요하고, `ffmpeg`와 `ffprobe`는 변환·영상에 필요하다. 준비물과 설치는 [CLI 설치](cli-install.md)를 참고한다.
 

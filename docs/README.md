@@ -34,6 +34,7 @@
 | 만들고 싶은 것 | 문서 | 핵심 내용 |
 | --- | --- | --- |
 | 공식 ACE 가이드에 맞춘 곡 | [ACE 프롬프트 최적화](ace-prompt-guide.md) | caption·가사·엔진별 옵션·실효 길이 검증 |
+| 공식 YuE2 가이드에 맞춘 곡 | [YuE 제작 가이드](yue-prompt-guide.md) · [공식·MLX 원문](vendor/yue2/README.md) | 모델 세대·입력·악보·EOS·검수 구분 |
 | Verse·Chorus·간주를 갖춘 가사 | [구간 태그](lyrics-tags.md) | 역할·배치 시점·실제 변환/삭제 결과 |
 | 보컬·악기·템포·길이를 세밀하게 지정 | [음악 생성 옵션](music-options.md) | 지원 값·우선순위·완전한 JSON 예시 |
 | K-POP·트로트·락발라드·BGM | [장르별 프롬프트](genre-prompts.md) | 간단 요청·상세 레시피·여러 곡 비교 |
@@ -49,7 +50,7 @@
 | AI가 읽는 동봉 자료 | 역할 |
 | --- | --- |
 | [AGENTS.md](../AGENTS.md) · [CLAUDE.md](../CLAUDE.md) | 공통 실행 규칙과 같은 지침을 읽는 진입점 |
-| [작사·생성 스킬](../skills/road-music-ace/SKILL.md) | 공식 근거·태그 선택·입력 검증·검토·생성 흐름 |
+| [작사·생성 스킬](../skills/road-music/SKILL.md) | 공식 근거·태그 선택·입력 검증·검토·생성 흐름 |
 | [검수 에이전트 역할](../prompts/ace-review.md) | 별도 에이전트가 있을 때 읽기 전용 독립 검수 |
 
 > [!IMPORTANT]

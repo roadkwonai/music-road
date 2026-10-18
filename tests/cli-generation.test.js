@@ -35,3 +35,16 @@ test('strong instrument guidance preserves expert overrides', () => {
   assert.equal(prepareRequests(input)[0].advanced.cfgScale, 1.5)
   assert.equal(prepareRequests({ ...input, advanced: { cfgScale: 2 } })[0].advanced.cfgScale, 2)
 })
+
+test('MLX YuE2 requests retain their engine, lyrics, target and explicit sampling', () => {
+  const input = { title: '맥 발라드', engine: 'yue-mlx', style: 'Korean piano ballad, female vocal',
+    lyrics: '[Verse]\n너 없는 저녁에\n불을 켜고 기다려', targetSeconds: 180, seed: 42,
+    advanced: { temperature: 1, cfgScale: 1 }, cot: 'full' }
+  const [job] = prepareRequests(input)
+  assert.equal(job.engine, 'yue-mlx')
+  assert.equal(job.lyrics, input.lyrics)
+  assert.equal(job.targetSeconds, 180)
+  assert.deepEqual(job.advanced, input.advanced)
+  assert.equal(job.advanced.minTokens, undefined)
+  assert.equal(job.cot, 'full')
+})

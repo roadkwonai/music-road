@@ -4,14 +4,16 @@
 
 ACE로 음악을 만들거나 가사·생성 옵션을 설계할 때 **작업 요청마다 먼저 읽는 가이드**다. 공식 권장사항을 로드뮤직의 실제 입력 처리에 맞게 적용한다. 품질은 가사 전달력·장르 적합성·편곡·음원 결함을 들어서 판단하며, 문서를 따랐다는 이유만으로 보장하지 않는다.
 
-기준: ACE-Step 1.5 `acestep-v15-turbo` + `acestep-5Hz-lm-0.6B`. **확인일: 2026-10-15 KST.** 공식 원문은 [로컬 보관본](vendor/ace-step-1.5/README.md)에 있다. 이 문서는 공식 문서의 전문 번역이 아니라 로드뮤직 적용 가이드다.
+기준: ACE-Step 1.5 `acestep-v15-turbo` + `acestep-5Hz-lm-0.6B`. **재확인일: 2026-10-18 KST.** 공식 원문은 [로컬 보관본](vendor/ace-step-1.5/README.md)에 있다. 이 문서는 공식 문서의 전문 번역이 아니라 로드뮤직 적용 가이드다.
 
-작업 스킬은 [road-music-ace](../skills/road-music-ace/SKILL.md), 태그 선택은 [구간 태그 가이드](lyrics-tags.md)를 따른다. **기본은 가사·프롬프트 검토 후 생성**이며, 두 항목부터 생성까지 전부 자동 위임한 경우의 예외와 결과 자료는 [검토 규칙](music-review.md)에 정리했다.
+작업 스킬은 [road-music](../skills/road-music/SKILL.md), 태그 선택은 [구간 태그 가이드](lyrics-tags.md)를 따른다. **기본은 가사·프롬프트 검토 후 생성**이며, 두 항목부터 생성까지 전부 자동 위임한 경우의 예외와 결과 자료는 [검토 규칙](music-review.md)에 정리했다.
 
 사용자가 준 가사·프롬프트는 아래 최적화 예시보다 우선한다. 전처리·편곡 개선이 필요해도 원문을 덮어쓰지 말고 [원문·전달본과 추천](music-review.md#preserve-input)을 구분한다. 찬송가 원형을 유지하는 작업은 [참조 기반 리메이크](hymn-remake-guide.md#modes)도 확인한다.
 
 > [!IMPORTANT]
 > 이 문서는 현재 공개 CLI와 ACE Turbo·0.6B에 맞춘 적용 가이드다. 실제 입력 필드와 범위는 실행 버전의 `schema`가 우선한다.
+
+1.7B LM·네이티브 XL·YuE2 MLX 비교나 모델별 FLOW 조정을 요청받았다면 [모델별 제작·비교 가이드](model-production-guide.md)를 함께 읽는다. 2026-10-16 비교의 입력 보존·실패 복구 절차와 실험 결과를 구분해 기록했다. CoT 비활성화·CFG·샘플링 조정은 보편적 가사 개선 설정으로 확인되지 않았으며, 이 문서의 기본 공개 CLI 옵션을 추가하거나 변경하지 않는다. `prompt:knowledge`의 `models` topic에서 별도로 조회할 수 있다.
 
 ## 목차
 

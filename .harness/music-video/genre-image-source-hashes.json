@@ -1,0 +1,6 @@
+{
+  ".agents/skills/road-music-mv/SKILL.md": "49e49fa7af22d00c96f3abd2b1e36e64f7919b12f18f30f583154f1d3c6d6426",
+  ".agents/skills/road-music-mv/scripts/validate_preproduction.py": "f72e211b2e973260a25d70283bdc0336ce7a777ee39e6a1c6e23ced00e5cc50a",
+  "tests/test_mv_preproduction.py": "9f58110c1380a3e104d4c41758272283ad73318d6a9ccd4f697cd1af0c2a1447",
+  ".agents/skills/road-music-mv/references/harness-spec.json": "e1cd5270049f84081dd48f836bfc1fbe54471cd2d859da58689fa015eccb8a4f"
+}

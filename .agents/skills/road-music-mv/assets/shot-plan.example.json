@@ -1,0 +1,106 @@
+{
+  "shots": [
+    {
+      "id": "shot-01",
+      "character_ids": [
+        "hero"
+      ],
+      "location_id": "stage-a",
+      "start_image_asset_id": "shot-01-start",
+      "end_image_asset_id": null,
+      "start_frame": 0,
+      "end_frame_exclusive": 96,
+            "delivery_fps": 24,
+            "music_section_ids": [
+                "opening-confession"
+            ],
+            "story_beat_id": "hesitation",
+            "emotional_purpose": "가사가 확인되기 전의 조용한 고백을 인물과 편지의 거리로 보여주는 도입 예시다.",
+            "action_start": "hero는 마이크 옆에서 접힌 편지를 왼손 허리 높이에 든 채 정면보다 약간 아래를 본다.",
+            "action_end": "hero는 한 번 숨을 고른 뒤 편지를 왼손 허리 높이에 그대로 유지하고 시선만 빈 객석 쪽으로 옮긴다.",
+            "camera": {
+                "size": "medium-wide full torso",
+                "angle": "eye level from audience center",
+                "movement": "slow, restrained forward drift",
+                "composition": "hero and microphone in center foreground, piano rear left, lamp rear right",
+                "focus": "hero's face and folded letter while the background remains legible",
+                "lens_intent": "natural audience distance; no claim of a fixed focal length"
+            },
+            "lighting": "rear-right amber practical lamp is visible, a soft warm key shapes the left side of hero, and a faint cool rim comes from stage left over the charcoal curtain.",
+            "film_look": "AI-generated digital cinematic look with restrained simulated grain and gentle highlight roll-off; this is not a claim of physical film stock or lens control.",
+            "props": [
+                {
+                    "id": "letter-prop",
+                    "state": "closed once-folded letter with the envelope hidden from view",
+                    "holder_character_id": "hero",
+                    "screen_position": "left hand at lower center, paper fold facing the camera"
+                }
+            ],
+            "effects": [
+                {
+                    "category": "visual-sfx",
+                    "choice": "a very small amount of visible dust in the warm lamp beam",
+                    "purpose": "give the quiet opening air without competing with the singer or the letter",
+                    "execution": "post-production overlay only if the basic cut remains clear; no sound effect is implied"
+                }
+            ],
+            "transition_out": {
+                "type": "cut",
+                "purpose": "move closer when the example musical section changes from hesitation to response",
+                "execution": "editorial cut after the last usable held frame",
+                "handle_frames": 0
+            }
+    },
+    {
+      "id": "shot-02",
+      "character_ids": [
+        "hero"
+      ],
+      "location_id": "stage-a",
+      "start_image_asset_id": "shot-02-start",
+      "end_image_asset_id": null,
+      "start_frame": 96,
+      "end_frame_exclusive": 192,
+            "delivery_fps": 24,
+            "music_section_ids": [
+                "answering-phrase"
+            ],
+            "story_beat_id": "release",
+            "emotional_purpose": "도입의 망설임 뒤에 시선이 올라가는 작은 결심을 가까운 관찰로 연결하는 예시다.",
+            "action_start": "hero는 접힌 편지를 왼손에 낮게 둔 채 렌즈 옆 빈 공간을 바라본다.",
+            "action_end": "hero는 편지를 가슴 가까이 유지하고 턱을 조금 들어 다음 구절을 시작할 준비를 한다.",
+            "camera": {
+                "size": "chest-up close medium",
+                "angle": "three-quarter from stage right",
+                "movement": "almost locked frame with a short, slow push-in",
+                "composition": "hero occupies right-center, microphone stays in the foreground edge, warm lamp remains a rear-right cue",
+                "focus": "eyes first, then the lowered folded letter at the bottom of frame",
+                "lens_intent": "reduce audience distance while retaining the stage orientation; no claim of a fixed focal length"
+            },
+            "lighting": "the same rear-right amber practical and stage-left cool rim continue; the warmer key is slightly closer on hero's face while the room stays darker behind her.",
+            "film_look": "AI-generated digital cinematic look matched to shot-01 with restrained simulated grain; not physical film photography.",
+            "props": [
+                {
+                    "id": "letter-prop",
+                    "state": "the same closed once-folded letter, lowered but visible at the lower frame edge",
+                    "holder_character_id": "hero",
+                    "screen_position": "lower center-left, fold direction unchanged from shot-01"
+                }
+            ],
+            "effects": [
+                {
+                    "category": "vfx",
+                    "choice": "no composited visual effect beyond continuity color correction",
+                    "purpose": "keep the response phrase on the singer's expression rather than a spectacle",
+                    "execution": "no VFX pass unless a verified continuity repair is required in post-production"
+                }
+            ],
+            "transition_out": {
+                "type": "end",
+                "purpose": "this illustrative eight-second plan ends on the held resolving look",
+                "execution": "retain the final clean frame for the editor; no transition is generated",
+                "handle_frames": 0
+            }
+    }
+  ]
+}

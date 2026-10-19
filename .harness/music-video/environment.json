@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-10-16",
+  "roadmusic_cli_version": "0.1.0",
+  "cli_update_available": false,
+  "app": "0.1.0",
+  "hardware": "Apple M1 Ultra / 64GB",
+  "ffmpeg": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "ltx_executable": "/Users/freelife/.local/share/roadmusic-ltx23/src/.venv/bin/ltx-2-mlx",
+  "ltx_generation_tested_in_this_task": false,
+  "local_model_paths": [
+    {
+      "path": "/Users/freelife/.local/share/roadmusic-ltx23/models/ltx-2.3-mlx-q4",
+      "exists": true
+    },
+    {
+      "path": "/Users/freelife/.local/share/roadmusic-ltx23/models/gemma-3-12b-it-4bit",
+      "exists": true
+    }
+  ],
+  "source_kit_had_preexisting_modifications": true,
+  "upstream_harness_commit": "80f8217b5b6d3f220a31f05f9c0adaf09dac40f4"
+}

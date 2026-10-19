@@ -1,0 +1,116 @@
+usage: ltx-2-mlx a2v [-h] --prompt PROMPT --output OUTPUT [--model MODEL]
+                     [--gemma GEMMA] [--seed SEED] [--quiet]
+                     [--stepwise-image-output-dir STEPWISE_IMAGE_OUTPUT_DIR]
+                     [--stepwise-interval STEPWISE_INTERVAL]
+                     [--stepwise-frames STEPWISE_FRAMES]
+                     [--stepwise-frame STEPWISE_FRAME] [--height HEIGHT]
+                     [--width WIDTH] [--frames FRAMES] --frame-rate FRAME_RATE
+                     [--low-ram] [--enable-teacache]
+                     [--teacache-thresh TEACACHE_THRESH] --audio AUDIO
+                     [--audio-start AUDIO_START] [--distilled]
+                     [--stage1-steps STAGE1_STEPS]
+                     [--stage2-steps STAGE2_STEPS] [--cfg-scale CFG_SCALE]
+                     [--negative-prompt NEGATIVE_PROMPT]
+                     [--stg-scale STG_SCALE] [--image ARG [ARG ...]]
+
+options:
+  -h, --help            show this help message and exit
+  --prompt PROMPT, -p PROMPT
+                        Text prompt
+  --output OUTPUT, -o OUTPUT
+                        Output video path (.mp4)
+  --model MODEL, -m MODEL
+                        Model weights (HF repo or path, default:
+                        dgrauet/ltx-2.3-mlx-q8)
+  --gemma GEMMA         Gemma model for text encoding (default: mlx-
+                        community/gemma-3-12b-it-4bit)
+  --seed SEED, -s SEED  Random seed (-1 = random)
+  --quiet, -q           Suppress progress output
+  --stepwise-image-output-dir STEPWISE_IMAGE_OUTPUT_DIR
+                        [EXPERIMENTAL] Every N denoising steps, decode a short
+                        window of latent frames from the in-progress
+                        prediction and write it to this directory as a self-
+                        contained animated WebP — a couple of seconds of real
+                        motion at the current denoise quality. One file per
+                        step, written once; play them back to back for the
+                        whole progression. Keeps the VAE decoder resident
+                        through denoising, which raises peak memory. May
+                        change in future versions.
+  --stepwise-interval STEPWISE_INTERVAL
+                        Preview every N denoising steps (default: 1). The
+                        final step is always previewed.
+  --stepwise-frames STEPWISE_FRAMES
+                        Latent frames decoded per preview (default: 8). The
+                        VAE upsamples time 8x, so N latent frames yield 8N-7
+                        pixel frames — the default gives 57, about 2.3 s at 25
+                        fps. Cost is linear in this and independent of the
+                        clip's length. Set to 1 for a single still and no
+                        motion.
+  --stepwise-frame STEPWISE_FRAME
+                        Latent frame the preview window is centred on
+                        (default: the middle of the clip). Negative values
+                        count from the end, so -1 is the last frame.
+  --height HEIGHT, -H HEIGHT
+                        Video height (default: 480)
+  --width WIDTH, -W WIDTH
+                        Video width (default: 704)
+  --frames FRAMES, -f FRAMES
+                        Number of frames (default: 97)
+  --frame-rate FRAME_RATE
+                        Output frame rate (mandatory; matches upstream
+                        `frame_rate=` on every pipeline). LTX-2.3 was trained
+                        at 24; values far from that drift out of distribution.
+  --low-ram             Stream transformer blocks from mmap'd safetensors via
+                        mx.compile + per-block sync + Metal heap release. Cuts
+                        transformer peak Metal ~75% (e.g. q8 ~10-12 GB -> ~2.8
+                        GB). Targets 16 GB Macs (q8) and 32 GB Macs (bf16).
+                        Supported on every generate mode (incl. --distilled
+                        and --dfr), a2v, keyframe, ic-lora, hdr-ic-lora,
+                        lipdub, retake, and extend. Compatible with generate's
+                        --lora flag via per-block BlockLoraSource bind-time
+                        fusion. Two-stage at LoRA strength 1.0 swaps to the
+                        pre-fused transformer-distilled.safetensors at the
+                        stage 1->2 transition; custom strengths trigger bind-
+                        time LoRA fusion (slower but supports any strength).
+  --enable-teacache     generate --two-stage / --two-stages-hq and a2v (not
+                        --distilled) only (LTX-2.3 packs): enable TeaCache
+                        stage-1 acceleration (opt-in, ~1.46x speedup on Euler
+                        at default thresh; see CLAUDE.md)
+  --teacache-thresh TEACACHE_THRESH
+                        Override TeaCache rel_l1_thresh (default 0.5 on --two-
+                        stage and a2v, 1.0 on --two-stages-hq; higher = more
+                        skipping = faster but lossier). Ignored unless
+                        --enable-teacache is set.
+  --audio AUDIO, -a AUDIO
+                        Input audio file (WAV/MP3/etc.)
+  --audio-start AUDIO_START
+                        Audio start time in seconds (default: 0)
+  --distilled           [experimental] Distilled two-stage A2V: the distilled
+                        model at half resolution, upscale, distilled refine,
+                        no CFG, the input audio frozen in both stages. Mirrors
+                        Lightricks' LTX-2.5_A2V_Two_Stage_Distilled ComfyUI
+                        workflow and costs a generate --distilled render. With
+                        music or loud ambience, pass the isolated vocals.
+  --stage1-steps STAGE1_STEPS
+                        Stage 1 steps (default: 30; with --distilled: 8)
+  --stage2-steps STAGE2_STEPS
+                        Stage 2 steps (default: 3)
+  --cfg-scale CFG_SCALE
+                        CFG guidance scale (default: 3.0; rejected by
+                        --distilled)
+  --negative-prompt NEGATIVE_PROMPT
+                        Negative prompt for CFG: what should not appear in the
+                        video. Default: the upstream DEFAULT_NEGATIVE_PROMPT
+                        (common artifacts and quality issues). An empty string
+                        encodes "" verbatim. CFG pipelines only: rejected by
+                        --distilled.
+  --stg-scale STG_SCALE
+                        STG guidance scale (default: 1.0 — upstream
+                        LTX_2_3_PARAMS; rejected by --distilled)
+  --image ARG [ARG ...], -i ARG [ARG ...]
+                        Reference image for I2V. Form: PATH [FRAME_IDX
+                        STRENGTH [CRF]]. Repeatable to anchor multiple frames.
+                        PATH alone defaults to FRAME_IDX=0 STRENGTH=1.0
+                        (legacy single-image). CRF (0 = no re-compression)
+                        defaults to the model's: 33 before LTX-2.4, 18 from
+                        2.4.

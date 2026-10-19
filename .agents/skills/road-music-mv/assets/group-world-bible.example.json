@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "status": "proposed_not_approved",
+  "example_only": true,
+  "group": {
+    "id": "lumi4", "name": "LUMI:4 / 루미포 (가칭)", "fictional": true, "member_count": 4, "age_reference_year": 2026, "adult_cast": true,
+    "music_identity": "contemporary Korean pop girl-group context for video direction only; final audio remains a separate handoff",
+    "vocal_targets": "멤버별 파트·음색은 영상 기획 의도이며 실제 보컬 분리나 가창 성능을 보장하지 않음",
+    "wardrobe_style": "공유된 고유 색 포인트는 유지하되 멤버별 실루엣과 소재가 다른 무대·도시 의상",
+    "mood": "자신감 있는 단체 퍼포먼스와 일상적인 친밀감, 선택적 몽환",
+    "members": [
+      {"id":"noa","name":"노아","age_years":24,"adult":true,"role":"리더·리드보컬","voice_intent":"명료한 중음 리드와 차분한 도입","hairstyle":"짙은 밤색 긴 생머리, 왼쪽 가르마","identity_invariants":["oval face, almond-shaped dark brown eyes, small mole below the right eye, long straight dark chestnut hair with left side part","same adult face, age, hair color and body proportions across shots"],"wardrobe_ids":["noa-stage-a","noa-street-b"],"signature_color":"cyan","identity_asset_id":"noa-master"},
+      {"id":"miru","name":"미루","age_years":23,"adult":true,"role":"메인보컬","voice_intent":"후렴을 이끄는 밝고 힘 있는 리드","hairstyle":"자연 검정 턱선 단발, 중앙 가르마","identity_invariants":["soft round face, rounded dark brown eyes, short straight natural-black bob at chin length, center part","same adult face, age, hair color and body proportions across shots"],"wardrobe_ids":["miru-stage-a","miru-street-b"],"signature_color":"violet","identity_asset_id":"miru-master"},
+      {"id":"sei","name":"세이","age_years":22,"adult":true,"role":"메인댄서·리듬 파트","voice_intent":"짧고 또렷한 리듬 구절과 퍼포먼스","hairstyle":"어두운 갈색 어깨 길이 웨이브, 옆머리","identity_invariants":["angular oval face, defined brows, shoulder-length softly wavy dark-brown hair with side-swept fringe","same adult face, age, hair color and body proportions across shots"],"wardrobe_ids":["sei-stage-a","sei-street-b"],"signature_color":"coral","identity_asset_id":"sei-master"},
+      {"id":"lua","name":"루아","age_years":21,"adult":true,"role":"서브보컬·퍼포먼스","voice_intent":"후렴 응답과 부드러운 연결 구간","hairstyle":"적갈색 긴 포니테일","identity_invariants":["heart-shaped face, wide dark brown eyes, a few subtle freckles on the right cheek, long auburn ponytail","same adult face, age, hair color and body proportions across shots"],"wardrobe_ids":["lua-stage-a","lua-street-b"],"signature_color":"amber","identity_asset_id":"lua-master"}
+    ]
+  },
+  "world": {"id":"haeryu-2026","year":2026,"era":"2026년의 현실 기반 허구 도시","season":"늦봄","mood":"채광, 바람, 도시의 움직임과 가까운 친구 같은 에너지","rules":["그룹과 장소는 창작 설정이며 실제 촬영 사실이나 특정 실존 장소·인물과의 유사성을 주장하지 않음","얼굴·헤어·나이·체형과 멤버별 색 포인트는 모든 장면에서 유지","무대와 거리 의상은 멤버별로 다르게 유지하고 명시된 장소에서만 사용","몽환 효과는 선택곡과 레퍼런스가 요구할 때만 현실 장면 위에 절제해 추가"]},
+  "locations": [
+    {"id":"sunlit-studio","name":"채광 스튜디오","setting_type":"studio","environment":"interior","interior_exterior":"interior","existence":"fictional","realism":"photorealistic","year":2026,"season":"late-spring","time_of_day":"late morning natural light","weather":"controlled indoor","actual_place_name":null,"reference_sources":[],"geography":"도시 안의 창이 큰 허구 촬영 스튜디오","layout_invariants":["왼쪽의 큰 확산 창과 흰 벽, 뒤쪽 이동식 크림 커튼","나무 바닥 중앙의 단체 대형 영역과 오른쪽 빈 여백","창빛 방향과 거울 없는 후면 벽 유지"],"background_asset_id":"sunlit-studio-bg"},
+    {"id":"city-rooftop","name":"도시 옥상","setting_type":"on-location","environment":"urban","interior_exterior":"exterior","existence":"fictional","realism":"photorealistic","year":2026,"season":"late-spring","time_of_day":"blue hour","weather":"약한 바람과 마른 바닥","actual_place_name":null,"reference_sources":[],"geography":"특정 랜드마크를 복제하지 않는 허구 도심의 낮은 상업 건물 옥상","layout_invariants":["전면 낮은 난간과 뒤쪽의 일반적인 도심 스카이라인","중앙 단체 대형 영역과 오른쪽 출입문","난간·출입문·도시 불빛의 상대 위치 유지"],"background_asset_id":"city-rooftop-bg"},
+    {"id":"street-cafe","name":"거리 카페","setting_type":"on-location","environment":"street","interior_exterior":"mixed","existence":"fictional","realism":"photorealistic","year":2026,"season":"late-spring","time_of_day":"afternoon","weather":"맑은 날, 부드러운 그림자","actual_place_name":null,"reference_sources":[],"geography":"특정 상호·실존 거리를 복제하지 않는 허구 보행자 거리와 작은 카페 외부","layout_invariants":["왼쪽 카페 차양, 중앙 보행로, 오른쪽 작은 야외 테이블","유리 반사에는 카메라·추가 인물이 나타나지 않음","카페 문·차양·테이블 위치 유지"],"background_asset_id":"street-cafe-bg"},
+    {"id":"coastal-road","name":"해안도로","setting_type":"on-location","environment":"coastal","interior_exterior":"exterior","existence":"fictional","realism":"photorealistic","year":2026,"season":"late-spring","time_of_day":"golden hour","weather":"잔잔한 바람, 맑은 하늘","actual_place_name":null,"reference_sources":[],"geography":"특정 해안 도시·관광지를 복제하지 않는 허구의 바다 옆 2차선 도로","layout_invariants":["바다 쪽 낮은 안전 난간과 반대쪽 풀·낮은 언덕","도로 진행 방향과 지평선 위치 유지","이동 장면은 보행 구간에서만, 차량 위험 연출 없음"],"background_asset_id":"coastal-road-bg"}
+  ],
+  "wardrobes": [
+    {"id":"noa-stage-a","character_id":"noa","palette":["ivory","charcoal","cyan"],"description":"구조적인 아이보리 재킷과 차콜 쇼츠, cyan 실크 스카프 포인트의 테일러드 무대 룩","era":"2026 contemporary stagewear","location_ids":["sunlit-studio","city-rooftop"]},
+    {"id":"noa-street-b","character_id":"noa","palette":["denim","off-white","cyan"],"description":"오프화이트 니트, 스트레이트 데님, cyan 미니 숄더백의 편안한 도시 룩","era":"2026 contemporary casual","location_ids":["street-cafe","coastal-road"]},
+    {"id":"miru-stage-a","character_id":"miru","palette":["black","silver","violet"],"description":"violet 스티치의 검정 슬리브리스 탑과 은빛 플리츠 스커트, 낮은 부츠의 경쾌한 무대 룩","era":"2026 contemporary stagewear","location_ids":["sunlit-studio","city-rooftop"]},
+    {"id":"miru-street-b","character_id":"miru","palette":["cream","violet","grey"],"description":"크림 카디건, 회색 플리츠 스커트, violet 헤어핀의 산뜻한 카페 룩","era":"2026 contemporary casual","location_ids":["street-cafe","coastal-road"]},
+    {"id":"sei-stage-a","character_id":"sei","palette":["graphite","coral","black"],"description":"coral 라인 그래픽의 그래파이트 크롭 재킷과 와이드 팬츠, 검정 스니커즈의 댄스 룩","era":"2026 contemporary stagewear","location_ids":["sunlit-studio","city-rooftop"]},
+    {"id":"sei-street-b","character_id":"sei","palette":["olive","white","coral"],"description":"올리브 윈드브레이커, 흰 티셔츠, coral 팔찌의 활동적인 거리 룩","era":"2026 contemporary casual","location_ids":["street-cafe","coastal-road"]},
+    {"id":"lua-stage-a","character_id":"lua","palette":["amber","navy","ivory"],"description":"amber 비대칭 톱과 navy 미니 스커트, 아이보리 부츠의 부드러운 무대 룩","era":"2026 contemporary stagewear","location_ids":["sunlit-studio","city-rooftop"]},
+    {"id":"lua-street-b","character_id":"lua","palette":["amber","blue","white"],"description":"하늘색 셔츠, 흰 반바지, amber 벨트의 가벼운 해안 산책 룩","era":"2026 contemporary casual","location_ids":["street-cafe","coastal-road"]}
+  ],
+  "source_audio_status": "awaiting_final_audio_from_separate_music_task",
+  "production_note": "미확정 기획 제안이다. 확정 음원·가사·실제 길이와 사용자 선택 전에는 타임코드, BPM, 선택곡, 이미지 또는 영상 생성을 확정하지 않는다."
+}

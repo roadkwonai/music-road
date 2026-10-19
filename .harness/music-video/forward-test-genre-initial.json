@@ -1,0 +1,18 @@
+{
+  "run_id": "mv-genre-image-20261016",
+  "task_id": "forward-test",
+  "status": "blocked",
+  "summary": "독립 검증 중 실제 결함을 수정해 입력 지문이 바뀌었다. 이 스냅샷을 완료 처리하지 않고 새 run에서 재검증한다.",
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "입력 신선도",
+      "status": "not_run",
+      "required": true,
+      "evidence": "초기 snapshot 이후 validator·tests·이미지 계약 문서 갱신. 고정한 최종 source를 새 실행에 바인딩해야 함."
+    }
+  ],
+  "issues": [
+    "입력 변경으로 superseded; 현재 소스의 기능 실패 판정은 아님"
+  ]
+}

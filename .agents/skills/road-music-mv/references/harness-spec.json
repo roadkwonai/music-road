@@ -1,0 +1,593 @@
+{
+  "schema_version": "1.0",
+  "name": "road-music-mv",
+  "display_name": "Road Music MV",
+  "description": "Use when 확정 음원의 전체 연출·키시트·이미지 스토리보드·애니매틱부터 LTX 2.5 MV를 제작·독립 검수할 때.",
+  "goal": "별도 음악 작업에서 인계한 원곡·가사를 보존하며 음악별 전체 결정과 스토리라인, 키시트·실제 이미지 스토리보드·애니매틱을 검수한 일관된 LTX 2.5 MV를 납품한다.",
+  "language": "ko",
+  "risk_level": "standard",
+  "architecture": "pipeline",
+  "generation_defaults": {
+    "model": "LTX-2.5",
+    "pipeline": "distilled",
+    "quantization": "q8",
+    "model_pack": "dgrauet/ltx-2.5-mlx-q8",
+    "text_encoder": "bundled-gemma-4",
+    "automatic_fallback": false
+  },
+  "triggers": [
+    "이 MV를 전 프레임 분석해 내 곡의 LTX 2.5 MV를 만들어줘",
+    "뮤직비디오 카메라·VFX·전환 분석부터 샷 제작까지",
+    "기존 MV 샷과 편집을 수정하고 다시 검수해줘",
+    "발라드·록발라드·트로트에 맞게 아이돌형 또는 라이브형 MV를 설계해줘",
+    "캐릭터시트·배경·샷 이미지를 GPT Image 2.5 API로 먼저 만들고 LTX로 제작해줘",
+    "음악에 맞는 그룹·연령·컨셉·미술·필름룩·효과를 정하고 키시트와 이미지 스토리보드부터 체계적으로 제작해줘"
+  ],
+  "non_triggers": [
+    "여성 보컬 발라드 가사를 써줘",
+    "CD 스펙트럼 영상만 내보내줘",
+    "LTX 모델을 설치만 해줘"
+  ],
+  "inputs": [
+    {
+      "id": "brief",
+      "description": "원문과 위임 범위·예산·출력 조건",
+      "required": true
+    },
+    {
+      "id": "reference-media",
+      "description": "실제 확보한 레퍼런스와 원본 SHA-256",
+      "required": true
+    },
+    {
+      "id": "audio",
+      "description": "별도 음악 작업에서 확정·인계한 실제 음원 절대 경로·SHA-256·길이·가사 원문; 음악 제작을 위한 생성·후보 청취/평가·후보 선정은 하지 않으며 MV 구간/비트/동기 검수에는 사용",
+      "required": true
+    },
+    {
+      "id": "capabilities",
+      "description": "실행일 Road Music schema·LTX help·generation_defaults 또는 사용자 지정 모델의 실제 로컬 설치 상태 점검",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "analysis",
+      "path": ".harness/work/{run_id}/references/analysis.json",
+      "required": true
+    },
+    {
+      "id": "lookdev-research",
+      "path": ".harness/work/{run_id}/references/lookdev-research.md",
+      "required": true
+    },
+    {
+      "id": "treatment",
+      "path": ".harness/work/{run_id}/direction/treatment.md",
+      "required": true
+    },
+    {
+      "id": "production-design",
+      "path": ".harness/work/{run_id}/direction/production-design.json",
+      "required": true
+    },
+    {
+      "id": "bible",
+      "path": ".harness/work/{run_id}/direction/bible.json",
+      "required": false
+    },
+    {
+      "id": "shot-plan",
+      "path": ".harness/work/{run_id}/direction/shot-plan.json",
+      "required": true
+    },
+    {
+      "id": "image-plan",
+      "path": ".harness/work/{run_id}/direction/image-plan.json",
+      "required": true
+    },
+    {
+      "id": "storyboard-plan",
+      "path": ".harness/work/{run_id}/direction/storyboard.json",
+      "required": true
+    },
+    {
+      "id": "preflight-review",
+      "path": ".harness/work/{run_id}/review/preflight.json",
+      "required": true
+    },
+    {
+      "id": "key-manifest",
+      "path": ".harness/work/{run_id}/visuals/keys-manifest.json",
+      "required": true
+    },
+    {
+      "id": "key-review",
+      "path": ".harness/work/{run_id}/review/keys.json",
+      "required": true
+    },
+    {
+      "id": "asset-manifest",
+      "path": ".harness/work/{run_id}/visuals/asset-manifest.json",
+      "required": true
+    },
+    {
+      "id": "image-review",
+      "path": ".harness/work/{run_id}/review/images.json",
+      "required": true
+    },
+    {
+      "id": "animatic",
+      "path": ".harness/work/{run_id}/preproduction/animatic.mov",
+      "required": true
+    },
+    {
+      "id": "animatic-build",
+      "path": ".harness/work/{run_id}/preproduction/build.json",
+      "required": true
+    },
+    {
+      "id": "animatic-review",
+      "path": ".harness/work/{run_id}/review/animatic.json",
+      "required": true
+    },
+    {
+      "id": "master",
+      "path": ".harness/work/{run_id}/production/master.mp4",
+      "required": true
+    },
+    {
+      "id": "delivery-manifest",
+      "path": ".harness/work/{run_id}/production/delivery.json",
+      "required": true
+    },
+    {
+      "id": "final-review",
+      "path": ".harness/work/{run_id}/review/final.json",
+      "required": true
+    },
+    {
+      "id": "sample-manifest",
+      "path": ".harness/work/{run_id}/visuals/samples-manifest.json",
+      "required": true
+    },
+    {
+      "id": "sample-review",
+      "path": ".harness/work/{run_id}/review/samples.json",
+      "required": true
+    }
+  ],
+  "roles": [
+    {
+      "name": "mv_reference_analyst",
+      "purpose": "원본·전 프레임·샷·전환의 증거 작성",
+      "kind": "custom",
+      "custom_agent": true,
+      "custom_agent_reason": "원본·전 프레임·샷·전환의 증거 작성를 반복 실행에서 안정된 전문 책임으로 분리한다.",
+      "read_only": false,
+      "owns": [
+        ".harness/work/{run_id}/references"
+      ],
+      "instructions": "실제로 본 범위만 기록. 원본 부재는 blocker이며 추정으로 채우지 않음."
+    },
+    {
+      "name": "mv_director",
+      "purpose": "음악별 전체 연출·스토리라인·샷·스토리보드·이미지 계획",
+      "kind": "custom",
+      "custom_agent": true,
+      "custom_agent_reason": "음악·감정·시점·미술·샷·편집 설계를 반복 실행에서 안정된 전문 책임으로 분리한다.",
+      "read_only": false,
+      "owns": [
+        ".harness/work/{run_id}/direction"
+      ],
+      "instructions": "확정 음원 보존. production-design의 음악 구간/16결정/beat와 bible·shot·prop·panel/page를 연결. 실제 이미지 없는 storyboard 계획을 완료 이미지로 주장하지 않음."
+    },
+    {
+      "name": "mv_ltx_producer",
+      "purpose": "원곡 애니매틱과 검증된 LTX 2.5 proof·샷·편집·납품",
+      "kind": "custom",
+      "custom_agent": true,
+      "custom_agent_reason": "검증된 LTX 2.5 생성·편집·납품를 반복 실행에서 안정된 전문 책임으로 분리한다.",
+      "read_only": false,
+      "owns": [
+        ".harness/work/{run_id}/preproduction",
+        ".harness/work/{run_id}/production"
+      ],
+      "instructions": "스토리보드 실제 이미지 검수 후 원곡 애니매틱. 독립 animatic gate 뒤에만 LTX proof 및 샷. generation_defaults와 사용자 지정 모델을 확인하고 실제 로컬 모델을 명시한다. 미설치 모델의 자동 다운로드·2.3 자동 대체 금지. 실제 help/모델 확인, 위임 없는 생성/설치/게시 금지."
+    },
+    {
+      "name": "mv_quality_reviewer",
+      "purpose": "단계별 키시트·보드·애니매틱·최종 영상의 독립 실제 검수",
+      "kind": "custom",
+      "custom_agent": true,
+      "custom_agent_reason": "독립 검수와 차단 판단를 반복 실행에서 안정된 전문 책임으로 분리한다.",
+      "read_only": false,
+      "owns": [
+        ".harness/work/{run_id}/review"
+      ],
+      "instructions": "실제 파일/프레임/재생을 보고 canonical 계획digest와 source/image/video SHA에 판정 결속. 미실행이나 자기검토를 독립승인으로 대체하지 않음."
+    },
+    {
+      "name": "mv_art_director",
+      "purpose": "기본 GPT Image 2.5 API/선택 image_gen 키시트·샷 패널과 실제 스토리보드 이미지 페이지 제작",
+      "kind": "custom",
+      "custom_agent": true,
+      "custom_agent_reason": "인물·의상·배경·샷 이미지의 참조 계보와 실제 파일을 반복 제작하는 안정된 책임이다.",
+      "read_only": false,
+      "owns": [
+        ".harness/work/{run_id}/visuals"
+      ],
+      "instructions": "키시트 독립 검수 후 단일 샷 이미지와 무변형 로컬 보드 조립. 실제파일/도구/계보 보존. sheet collage는 I2V 금지. 음악 맞춤 의상/장소/소품 조사를 소비하고 새 의상 master→고정 원문 시트 및 배경/소품 key부터 기본 GPT Image 2.5 API, 키 부재/명시 image_gen 선택 시 내장 도구로 제작. 실사형은 빛/크롭/접촉/재질 실제 대조."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "analyze",
+      "owner": "mv_reference_analyst",
+      "depends_on": [],
+      "inputs": [
+        "brief",
+        "reference-media"
+      ],
+      "outputs": [
+        "analysis",
+        "lookdev-research"
+      ],
+      "parallel_group": null,
+      "completion": "2160p 우선/최소1080p 원본 품질과 실제 관찰·coverage·전환 근거. 추출/메타데이터만으로 전수 의미분석 완료를 주장하지 않음. 새 이미지 제작 범위에서는 음악에 맞는 의상·장소/스튜디오·소품·화보 구도의 공식 출처/실제 관찰/선택 이유/권리 범위를 조사한다.",
+      "required": true
+    },
+    {
+      "id": "direct",
+      "owner": "mv_director",
+      "depends_on": [
+        "analyze"
+      ],
+      "inputs": [
+        "brief",
+        "audio",
+        "analysis",
+        "lookdev-research"
+      ],
+      "outputs": [
+        "treatment",
+        "production-design",
+        "bible",
+        "shot-plan",
+        "image-plan",
+        "storyboard-plan"
+      ],
+      "parallel_group": null,
+      "completion": "원곡 실측 구간과 16개 연출 결정·선택 이유·story beat·전체shot·prop·panel/page·완성 이미지 프롬프트가 연결됨. Bible이 있으면 구조/binding. planning-only는 실제자산 미완료를 표시. 실제 샷 구도 분포·구체적 eyeline/시작끝 자세·단일 카메라 경로와 대표 샷 검수 범위를 대조한다. 미술 리서치의 선택/탈락 이유와 새 룩 master→원문 시트·배경 시점·소품을 image plan에 연결.",
+      "required": true
+    },
+    {
+      "id": "preflight",
+      "owner": "mv_quality_reviewer",
+      "depends_on": [
+        "analyze",
+        "direct"
+      ],
+      "inputs": [
+        "analysis",
+        "audio",
+        "treatment",
+        "production-design",
+        "bible",
+        "shot-plan",
+        "image-plan",
+        "storyboard-plan",
+        "capabilities"
+      ],
+      "outputs": [
+        "preflight-review"
+      ],
+      "parallel_group": null,
+      "completion": "음악·장르·인원·시대·공간·스토리·촬영/필름look·시각효과·전환·키시트/보드 구조를 독립 검토. 전체곡 shot timeline gap/overlap 없음, critical/high 없음. 실제 샷 구도 분포·구체적 eyeline/시작끝 자세·단일 카메라 경로와 대표 샷 검수 범위를 대조한다.",
+      "required": true
+    },
+    {
+      "id": "create-keys",
+      "owner": "mv_art_director",
+      "depends_on": [
+        "direct",
+        "preflight"
+      ],
+      "inputs": [
+        "image-plan",
+        "production-design",
+        "bible",
+        "preflight-review"
+      ],
+      "outputs": [
+        "key-manifest"
+      ],
+      "parallel_group": null,
+      "completion": "인물별 master/캐릭터·표정/의상과 장소·소품 키시트를 참조 순서대로 기본 GPT Image 2.5 API 또는 키 부재/명시 선택 시 image_gen/충족된 재사용으로 실제 확보. 영상 keyframes/pages는 이 단계에서 완료로 주장하지 않음.",
+      "required": true
+    },
+    {
+      "id": "review-keys",
+      "owner": "mv_quality_reviewer",
+      "depends_on": [
+        "direct",
+        "create-keys"
+      ],
+      "inputs": [
+        "key-manifest",
+        "image-plan",
+        "shot-plan",
+        "production-design",
+        "storyboard-plan",
+        "bible"
+      ],
+      "outputs": [
+        "key-review"
+      ],
+      "parallel_group": null,
+      "completion": "실제 키시트의 얼굴·나이·의상·배경·소품을 독립 대조. --production-design --storyboard --stage keys --require-ready 통과. 미사용 optional 자산을 강제하지 않음. keys 전역판정도 현재4문서 canonical digest에 결속하여 계획변경후오래된키승인을거부한다.",
+      "required": true
+    },
+    {
+      "parallel_group": null,
+      "required": true,
+      "id": "create-samples",
+      "owner": "mv_art_director",
+      "depends_on": [
+        "direct",
+        "create-keys",
+        "review-keys"
+      ],
+      "inputs": [
+        "key-manifest",
+        "key-review",
+        "production-design",
+        "bible",
+        "image-plan",
+        "shot-plan",
+        "storyboard-plan"
+      ],
+      "outputs": [
+        "sample-manifest"
+      ],
+      "completion": "감독이 정한 서로 다른 핵심 구도·eyeline·다인 배치 대표 샷만 먼저 실제 확보하고 부분 manifest/원문·참조·파일 지문을 보존한다. 이 샷은 최종 집합에 포함하며 키/나머지 샷을 중복 생성하지 않는다."
+    },
+    {
+      "parallel_group": null,
+      "required": true,
+      "id": "review-samples",
+      "owner": "mv_quality_reviewer",
+      "depends_on": [
+        "direct",
+        "create-keys",
+        "review-keys",
+        "create-samples"
+      ],
+      "inputs": [
+        "sample-manifest",
+        "key-manifest",
+        "key-review",
+        "production-design",
+        "bible",
+        "image-plan",
+        "shot-plan",
+        "storyboard-plan"
+      ],
+      "outputs": [
+        "sample-review"
+      ],
+      "completion": "실제 대표 샷의 시선·몸 방향·화면 위치·시작 자세·shot-size/angle과 서사 읽힘을 계획과 독립 대조한다. 현재4문서 digest·표본ID·실제producer/reviewer·파일SHA에 판정을 결속한다. 부분 표본의 pass는 전체 storyboard/animatic ready가 아니다."
+    },
+    {
+      "id": "create-storyboard",
+      "owner": "mv_art_director",
+      "depends_on": [
+        "direct",
+        "create-keys",
+        "review-keys",
+        "create-samples",
+        "review-samples"
+      ],
+      "inputs": [
+        "key-manifest",
+        "key-review",
+        "production-design",
+        "bible",
+        "image-plan",
+        "shot-plan",
+        "storyboard-plan",
+        "sample-manifest",
+        "sample-review"
+      ],
+      "outputs": [
+        "asset-manifest"
+      ],
+      "parallel_group": null,
+      "completion": "승인 keys를 참조한 단일 shot-start/end 이미지와 그 패널들을 변형 없이 조립한 실제 storyboard-sheet PNG 페이지. 승인 keys를 변경하지 않고 full manifest에서 파일/해시를 재참조. 승인 대표 샷은 재생성하지 않고 나머지만 완성한다.",
+      "required": true
+    },
+    {
+      "id": "review-storyboard",
+      "owner": "mv_quality_reviewer",
+      "depends_on": [
+        "direct",
+        "review-keys",
+        "create-storyboard",
+        "create-samples"
+      ],
+      "inputs": [
+        "asset-manifest",
+        "key-review",
+        "production-design",
+        "bible",
+        "image-plan",
+        "shot-plan",
+        "storyboard-plan",
+        "sample-manifest"
+      ],
+      "outputs": [
+        "image-review"
+      ],
+      "parallel_group": null,
+      "completion": "전체 패널·페이지·인물/의상/소품·시선/방향·이야기/에너지/전환을 실제 이미지로 검수. 전역 storyboard 판정을 4문서 canonical digest·전체 panel ID·실제 producer/reviewer에 결속하고 --stage storyboard --require-ready 통과.",
+      "required": true
+    },
+    {
+      "id": "build-animatic",
+      "owner": "mv_ltx_producer",
+      "depends_on": [
+        "direct",
+        "create-storyboard",
+        "review-storyboard",
+        "create-samples"
+      ],
+      "inputs": [
+        "audio",
+        "production-design",
+        "shot-plan",
+        "storyboard-plan",
+        "image-plan",
+        "asset-manifest",
+        "image-review",
+        "sample-manifest"
+      ],
+      "outputs": [
+        "animatic",
+        "animatic-build"
+      ],
+      "parallel_group": null,
+      "completion": "검수 패널의 at_frame과 원곡으로 실제 애니매틱 영상 생성. 원곡 길이/속도/순서 보존, 실제 도구·명령·파일/source hash·타이밍을 build 기록에 저장. preproduction/animatic.mov에 무손실 PCM-s32 기준음원을 유지하고 source와 동일sample_rate/channels로 비교 가능한 신호를 보존한다.",
+      "required": true
+    },
+    {
+      "id": "review-animatic",
+      "owner": "mv_quality_reviewer",
+      "depends_on": [
+        "direct",
+        "create-storyboard",
+        "review-storyboard",
+        "build-animatic",
+        "create-samples"
+      ],
+      "inputs": [
+        "audio",
+        "animatic",
+        "animatic-build",
+        "production-design",
+        "bible",
+        "image-plan",
+        "shot-plan",
+        "storyboard-plan",
+        "asset-manifest",
+        "image-review",
+        "sample-manifest"
+      ],
+      "outputs": [
+        "animatic-review"
+      ],
+      "parallel_group": null,
+      "completion": "원곡과 실제 애니매틱을 정상속도로 재생해 이야기·감정·반복·패널 길이·싱크/전환 검토. 실제 media SHA·source audio SHA·4문서 digest 결속 및 --stage animatic --animatic-review ... --require-ready 통과. 실제내장오디오와source의 normalized PCM-s32 samplecount/지문이 일치하고 전체길이가 유지돼야 한다. 선언SHA나오디오존재만으로 통과하지 않는다.",
+      "required": true
+    },
+    {
+      "id": "produce",
+      "owner": "mv_ltx_producer",
+      "depends_on": [
+        "direct",
+        "preflight",
+        "create-storyboard",
+        "review-storyboard",
+        "build-animatic",
+        "review-animatic",
+        "create-samples"
+      ],
+      "inputs": [
+        "audio",
+        "capabilities",
+        "production-design",
+        "bible",
+        "shot-plan",
+        "image-plan",
+        "storyboard-plan",
+        "preflight-review",
+        "asset-manifest",
+        "image-review",
+        "animatic",
+        "animatic-review",
+        "sample-manifest"
+      ],
+      "outputs": [
+        "master",
+        "delivery-manifest"
+      ],
+      "parallel_group": null,
+      "completion": "선행 이미지/스토리보드/애니매틱 실제 검수 통과 뒤 어려운 얼굴·손·군무·립싱크 proof. LTX 2.5 기본 선택 또는 사용자 지정 모델의 실제 help/로컬 모델/argv로 검증된 단일 샷 입력을 생성·편집하고 원곡·기록 보존.",
+      "required": true
+    },
+    {
+      "id": "review",
+      "owner": "mv_quality_reviewer",
+      "depends_on": [
+        "analyze",
+        "direct",
+        "create-storyboard",
+        "review-storyboard",
+        "review-animatic",
+        "produce",
+        "create-samples"
+      ],
+      "inputs": [
+        "master",
+        "delivery-manifest",
+        "production-design",
+        "bible",
+        "shot-plan",
+        "image-plan",
+        "storyboard-plan",
+        "analysis",
+        "treatment",
+        "asset-manifest",
+        "image-review",
+        "animatic-review",
+        "sample-manifest"
+      ],
+      "outputs": [
+        "final-review"
+      ],
+      "parallel_group": null,
+      "completion": "최종 실제 영상·원곡·프레임 경계·인물/소품·효과·출력조건을 독립 재생 검수. critical/high 없음. 미실행을 통과로 처리하지 않음.",
+      "required": true
+    }
+  ],
+  "review_policy": {
+    "reviewer": "mv_quality_reviewer",
+    "max_revisions": 2,
+    "block_on": [
+      "critical",
+      "high"
+    ]
+  },
+  "failure_policy": {
+    "retry_limit": 1,
+    "required_failure": "stop",
+    "optional_failure": "partial",
+    "timeout": "원인과 실제 결과를 확인하고 해당 작업 중단; 예산 초과 재시도 금지"
+  },
+  "evidence_policy": {
+    "sources_required": true,
+    "effective_date_required": true,
+    "jurisdiction_required": false,
+    "uncertainty_required": true,
+    "human_review_required": false
+  },
+  "image_generation_defaults": {
+    "method": "openai-images-api",
+    "model": "gpt-image-2.5-sunburst",
+    "fallback_method": "image_gen",
+    "fallback_when": [
+      "OPENAI_API_KEY missing or blank",
+      "user explicitly selects image_gen"
+    ],
+    "fallback_on_api_error": false
+  }
+}

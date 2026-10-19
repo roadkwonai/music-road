@@ -1,0 +1,41 @@
+usage: ltx-2-mlx [-h]
+                 {generate,a2v,retake,extend,keyframe,ic-lora,lipdub,hdr-ic-lora,enhance,info,train,preprocess,slice}
+                 ...
+
+LTX-2.3 / LTX-2.5 video generation on Apple Silicon (MLX)
+
+positional arguments:
+  {generate,a2v,retake,extend,keyframe,ic-lora,lipdub,hdr-ic-lora,enhance,info,train,preprocess,slice}
+    generate            Generate video from text (T2V) or image (I2V)
+    a2v                 [beta] Generate video from audio + text prompt
+    retake              [beta] Regenerate a time segment of an existing video
+    extend              [beta] Add frames before or after an existing video
+    keyframe            Interpolate between keyframe images
+    ic-lora             Generate video with IC-LoRA control conditioning
+    lipdub              [experimental] Lip-dub a reference video: re-generate
+                        visuals matching the reference audio.
+    hdr-ic-lora         [experimental] SDR-to-HDR IC-LoRA, single-stage
+                        ACEScct (LTX-2.5 packs only; HLG mp4 + EXR frames)
+    enhance             Enhance a prompt using Gemma (no video generation)
+    info                Show model info and memory estimate
+    train               Train a LoRA or full model (requires ltx-trainer-mlx)
+    preprocess          Preprocess videos into latents + conditions for
+                        training
+    slice               Slice long videos into normalized training clips
+                        (audio retained)
+
+options:
+  -h, --help            show this help message and exit
+
+examples:
+  ltx-2-mlx generate --prompt "a sunset" --distilled -f 97 --frame-rate 24 --output sunset.mp4
+  ltx-2-mlx generate --prompt "animate" --image photo.jpg --two-stage -f 97 --frame-rate 24 -o anim.mp4
+  ltx-2-mlx generate --prompt "a scene" --two-stage -f 97 --frame-rate 24 -o hires.mp4
+  ltx-2-mlx generate --prompt "a vlogger talking" --distilled --nag --negative-prompt "microphone" -f 97 --frame-rate 24 -o nag.mp4
+  ltx-2-mlx a2v --prompt "music video" --audio music.wav --frame-rate 24 -o a2v.mp4
+  ltx-2-mlx retake --prompt "new scene" --video source.mp4 --start 1 --end 3 -o out.mp4
+  ltx-2-mlx extend --prompt "continue" --video source.mp4 --extend-frames 2 -o out.mp4
+  ltx-2-mlx keyframe --prompt "transition" --start img1.png --end img2.png --frame-rate 24 -o out.mp4
+  ltx-2-mlx ic-lora --prompt "scene" --lora lora.safetensors 1.0 --video-conditioning depth.mp4 1.0 --frame-rate 24 -o out.mp4
+  ltx-2-mlx enhance --prompt "a cat walking" --mode t2v
+  ltx-2-mlx info --model dgrauet/ltx-2.3-mlx-q4

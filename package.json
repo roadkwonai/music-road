@@ -1,0 +1,109 @@
+{
+  "name": "road-music",
+  "productName": "Road Music",
+  "version": "0.1.0",
+  "description": "Road Music - 로컬 GPU로 노래를 만드는 무료 AI 작곡 프로그램",
+  "main": "electron/main.js",
+  "bin": {
+    "road-music": "cli/road-music.js"
+  },
+  "files": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "cli/*.js",
+    "cli/package.json",
+    "electron/*.js",
+    "renderer/*.js",
+    "renderer/*.css",
+    "renderer/*.html",
+    "renderer/locales/*.js",
+    "python/*.py",
+    "python/LICENSE*.txt",
+    "build/icon.*",
+    "README.md",
+    "LICENSE",
+    "docs/**",
+    "!**/__pycache__/**",
+    "!**/*.pyc",
+    "skills/road-music/**",
+    "skills/road-music-ace/**",
+    "skills/road-music-storage/**",
+    "skills/road-music-production-records/**",
+    ".agents/skills/road-music-video-studio/**",
+    "!.agents/skills/road-music-video-studio/**/__pycache__/**",
+    "!.agents/skills/road-music-video-studio/**/*.pyc",
+    "!.agents/skills/road-music-video-studio/**/generatedOutput/**",
+    "!.agents/skills/road-music-video-studio/**/node_modules/**",
+    "prompts/ace-review.md",
+    "prompts/cli-workflows.md",
+    "releases/**",
+    "scripts/release-notes.js",
+    "scripts/setup-cli.js",
+    "skills/music-road-skills/**"
+  ],
+  "author": "하이밸류연구소",
+  "homepage": "https://roadkwon.dev",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "cli": "node cli/road-music.js",
+    "test": "node --test tests/*.test.js",
+    "dist:cli": "node scripts/package-cli.js",
+    "release:assets": "node scripts/release-assets.js",
+    "release:note": "node scripts/release-notes.js",
+    "dist:mac": "electron-builder --mac dmg --arm64",
+    "dist:source": "node scripts/package-app-source.js",
+    "setup:cli": "node scripts/setup-cli.js"
+  },
+  "build": {
+    "appId": "dev.roadkwon.roadmusic",
+    "files": [
+      "cli/**",
+      "electron/**",
+      "renderer/**",
+      "docs/**",
+      "!**/__pycache__/**",
+      "!**/*.pyc",
+      "releases/**",
+      "CLAUDE.md",
+      "README.md",
+      "AGENTS.md",
+      "skills/road-music/**",
+      "skills/road-music-ace/**",
+      "skills/road-music-storage/**",
+      "skills/road-music-production-records/**",
+      ".agents/skills/road-music-video-studio/**",
+      "!.agents/skills/road-music-video-studio/**/__pycache__/**",
+      "!.agents/skills/road-music-video-studio/**/*.pyc",
+      "!.agents/skills/road-music-video-studio/**/generatedOutput/**",
+      "!.agents/skills/road-music-video-studio/**/node_modules/**",
+      "prompts/ace-review.md",
+      "prompts/cli-workflows.md",
+      "python/**",
+      "!python/__pycache__/**",
+      "build/icon.png",
+      "LICENSE"
+    ],
+    "asarUnpack": [
+      "python/**",
+      ".agents/skills/road-music-video-studio/scripts/**",
+      "electron/spectrum-worker.js",
+      "electron/spectrum-analysis.js"
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "icon": "build/icon.icns",
+      "identity": "-",
+      "hardenedRuntime": false
+    },
+    "dmg": {
+      "artifactName": "RoadMusic-${version}-mac-${arch}.${ext}",
+      "writeUpdateInfo": false
+    },
+    "publish": null
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "26.15.3"
+  }
+}

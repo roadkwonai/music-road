@@ -1,0 +1,45 @@
+'use strict'
+const test = require('node:test')
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { run } = require('../cli/client')
+const catalog = require('../electron/cli-catalog')
+const { getSchema } = require('../electron/cli-transport')
+
+test('production commands are bounded local commands and reject unsafe parameters', () => {
+  const names = ['request', 'task-start', 'task-progress', 'task-finish', 'projects', 'prompts', 'tasks', 'files', 'files-record', 'dashboard', 'activity', 'components', 'component-record'].map(name => `production:${name}`)
+  for (const name of names) assert.ok(getSchema().localCommands.includes(name), name)
+  assert.throws(() => catalog.validate('production:projects', { limit: 101 }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('production:dashboard', { groupIds: ['a'.repeat(64), 'bad'] }), { code: 'INVALID_ARGUMENT' })
+  assert.deepEqual(catalog.validate('production:dashboard', { groupIds: ['a'.repeat(64)] }).paramsValue.groupIds, ['a'.repeat(64)])
+  assert.equal(catalog.validate('production:activity', { offset: 0 }).paramsValue.offset, 0)
+  assert.throws(() => catalog.validate('production:activity', { offset: -1 }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('production:prompts', { cursor: 0 }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('production:task-finish', { taskId: 'x', status: 'succeeded' }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('production:task-progress', { taskId: 'a'.repeat(48) }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('production:task-progress', { taskId: 'a'.repeat(48), progress: 1.1 }), { code: 'INVALID_ARGUMENT' })
+  assert.deepEqual(catalog.validate('production:task-start', { project: '/tmp/work', domain: 'motion', taskType: 'render', expectedMediaSeconds: 36, expectedFrameCount: 1080 }).paramsValue.expectedFrameCount, 1080)
+  assert.throws(() => catalog.validate('production:request', { project: '/tmp/work', domain: 'music', prompt: '', extra: true }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('production:request', { project: '/tmp/work', domain: 'music', prompt: 'x'.repeat(65537) }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('production:component-record', { componentId: 'app', name: 'app', kind: 'app', installedVersion: '1', sourceUrl: 'javascript:alert(1)' }), { code: 'INVALID_ARGUMENT' })
+  assert.throws(() => catalog.validate('song:prepare', { requestPrompt: '가'.repeat(22000) }), { code: 'INVALID_ARGUMENT' })
+  const result = catalog.validate('song:prepare', { requestPrompt: '사용자의\n최초 요청', requestId: 'a'.repeat(48) })
+  assert.equal(result.paramsValue.requestPrompt, '사용자의\n최초 요청')
+})
+
+test('direct and batch production logging never start Electron', async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'road-production-cli-'))
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }))
+  const script = path.join(root, 'fixture.js')
+  fs.writeFileSync(script, "process.stdout.write(JSON.stringify({ok:true,result:{action:process.argv[2],params:JSON.parse(require('node:fs').readFileSync(0,'utf8')),profile:process.env.ROADMUSIC_DATA_DIR}})+'\\n')")
+  const options = { storageOptions: { script, python: process.execPath }, userData: path.join(root, 'profile'), spawnProcess: () => { throw new Error('Electron must not start') } }
+  let output = ''
+  assert.equal(await run(['production:request', '--json', JSON.stringify({ project: root, domain: 'motion', prompt: '프리즘 빛을 더 부드럽게' })], { ...options, stdout: { write: text => { output += text } } }), 0)
+  assert.equal(JSON.parse(output).result.params.prompt, '프리즘 빛을 더 부드럽게')
+  assert.equal(JSON.parse(output).result.profile, options.userData)
+  output = ''
+  assert.equal(await run(['batch', '--no-start'], { ...options, stdinText: '{"id":"metrics","command":"production:activity","params":{}}', stdout: { write: text => { output += text } } }), 0)
+  assert.equal(JSON.parse(output).result.action, 'activity')
+})

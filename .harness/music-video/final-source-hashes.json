@@ -1,0 +1,5 @@
+{
+  ".agents/skills/road-music-mv/scripts/inspect_video.py": "4758a06b1c702fb8ef906e759e8241b8a2a904563fe3917314f9c4fd7d9c52f7",
+  ".agents/skills/road-music-mv/scripts/audit_coverage.py": "cd33b0ba32d959bfd404f0071e214b2d8ee867aca4eb414eb9c4407beea6be37",
+  "tests/test_mv_tools.py": "6e896e8427d593f060c7500bef17bf9914a3e2cf09c67a1c35ba6ef51de92e13"
+}

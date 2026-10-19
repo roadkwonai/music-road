@@ -1,0 +1,73 @@
+{
+  "objective": "장르/형식·이미지 선행 제작 하네스의 계약·게이트·현실적 사용 분기를 독립 검증한다. 현재 역할은 노출된 code-reviewer/verifier로 대체 실행한다.",
+  "tasks": [
+    {
+      "id": "code-review",
+      "role": "mv_quality_reviewer",
+      "dependencies": [],
+      "ownership": [
+        ".harness/work/mv-genre-image-20261016/code-review.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-genre-image-20261016/input.json",
+        ".agents/skills/road-music-mv/SKILL.md",
+        ".agents/skills/road-music-mv/references/genre-style-guide.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/harness-spec.json",
+        ".agents/skills/road-music-mv/assets/plan-template.json",
+        ".agents/skills/road-music-mv/assets/image-plan.example.json",
+        ".agents/skills/road-music-mv/assets/shot-plan.example.json",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        "tests/test_mv_preproduction.py",
+        ".codex/agents/mv_art_director.toml"
+      ],
+      "context": {
+        "decisions": [
+          "builtin 대체 역할의 실제 실행을 기록",
+          "미생성 예시와 실제 파일/검수를 구분"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "현재 소스·실제 검사 증거에 critical/high 미해결 없음; 필수이미지/검수 누락은 제작 차단; 기획-only 생성 없음"
+      ],
+      "required": true
+    },
+    {
+      "id": "forward-test",
+      "role": "mv_quality_reviewer",
+      "dependencies": [],
+      "ownership": [
+        ".harness/work/mv-genre-image-20261016/forward-test.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-genre-image-20261016/input.json",
+        ".agents/skills/road-music-mv/SKILL.md",
+        ".agents/skills/road-music-mv/references/genre-style-guide.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/harness-spec.json",
+        ".agents/skills/road-music-mv/assets/plan-template.json",
+        ".agents/skills/road-music-mv/assets/image-plan.example.json",
+        ".agents/skills/road-music-mv/assets/shot-plan.example.json",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        "tests/test_mv_preproduction.py",
+        ".codex/agents/mv_art_director.toml"
+      ],
+      "context": {
+        "decisions": [
+          "builtin 대체 역할의 실제 실행을 기록",
+          "미생성 예시와 실제 파일/검수를 구분"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "현재 소스·실제 검사 증거에 critical/high 미해결 없음; 필수이미지/검수 누락은 제작 차단; 기획-only 생성 없음"
+      ],
+      "required": true
+    }
+  ]
+}

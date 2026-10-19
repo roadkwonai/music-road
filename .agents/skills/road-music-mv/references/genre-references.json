@@ -1,0 +1,288 @@
+{
+  "as_of": "2026-10-16",
+  "scope": "발라드·록발라드·트로트 및 공식 라이브 비교의 분석 후보. 미관찰 영상의 앵글/컷 분석은 없음. 2026 최신 인기 목록 아님.",
+  "existing_pop_idol_corpus": "reference-corpus.json",
+  "items": [
+    {
+      "id": "iu-love-wins-all",
+      "artist": "IU",
+      "title": "Love wins all",
+      "official_url": "https://www.youtube.com/watch?v=JleoAppaxi0",
+      "source_type": "official_mv",
+      "audio_release_date": "2024-01-24",
+      "music_genres": [
+        "ballad"
+      ],
+      "genre_evidence": {
+        "source": null,
+        "status": "provisional; label primary genre text not directly obtained"
+      },
+      "visual_formats": [
+        "narrative",
+        "cinematic"
+      ],
+      "format_status": "candidate_not_observed",
+      "popularity": {
+        "status": "not_verified",
+        "scope": "MV",
+        "metric": null,
+        "period": null,
+        "source": null
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": null,
+      "note": "MV 한국 공개 2024-01-24 KST; YouTube UTC 날짜 표기 차이 가능. 검색 캐시 조회수 사용 안 함."
+    },
+    {
+      "id": "adele-easy-on-me-mv",
+      "artist": "Adele",
+      "title": "Easy On Me",
+      "official_url": "https://www.youtube.com/watch?v=U3ASj1L6_sY",
+      "source_type": "official_mv",
+      "audio_release_date": "2021-10-15",
+      "music_genres": [
+        "ballad"
+      ],
+      "genre_evidence": {
+        "source": "https://www.officialcharts.com/songs/adele-easy-on-me/",
+        "status": "verified_piano_ballad"
+      },
+      "visual_formats": [
+        "narrative",
+        "solo"
+      ],
+      "format_status": "candidate_not_observed",
+      "popularity": {
+        "status": "verified_historical",
+        "scope": "audio_UK_singles",
+        "metric": "UK number 1 debut; 217300 chart sales; 24M UK streams",
+        "period": "first chart week reported 2021-10-22",
+        "source": "https://www.officialcharts.com/chart-news/adeles-easy-on-me-makes-record-breaking-number-1-debut-on-the-official-singles-chart__34286/",
+        "caution": "음원 성과이며 MV 조회수·연출 품질·현재 인기를 입증하지 않음"
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": "adele-easy-on-me",
+      "note": "YouTube 업로드 날짜는2021-10-14. 음원발매와 구분."
+    },
+    {
+      "id": "ftisland-wind-mv",
+      "artist": "FTISLAND",
+      "title": "Wind",
+      "official_url": "https://www.youtube.com/watch?v=9GMaloinMlE",
+      "source_type": "official_mv",
+      "audio_release_date": "2017-06-07",
+      "music_genres": [
+        "rock-ballad"
+      ],
+      "genre_evidence": {
+        "source": "https://www.fncent.com/?bid=gallery_01&cat=&m=bbs&uid=24963",
+        "status": "verified_label_description"
+      },
+      "visual_formats": [
+        "band-live",
+        "narrative"
+      ],
+      "format_status": "candidate_not_observed",
+      "popularity": {
+        "status": "not_verified",
+        "scope": "MV",
+        "metric": null,
+        "period": null,
+        "source": null
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": "ftisland-wind",
+      "note": "FNC 공식 소개가 록발라드와 악기 점층·스트링을 명시. 장르 적합 후보이며 최신 인기 아님."
+    },
+    {
+      "id": "ftisland-severely",
+      "artist": "FTISLAND",
+      "title": "지독하게 / Severely",
+      "official_url": "https://www.youtube.com/watch?v=unIH-SEVsx0",
+      "source_type": "official_mv",
+      "audio_release_date": "2012-01-31",
+      "music_genres": [
+        "rock-ballad"
+      ],
+      "genre_evidence": {
+        "source": null,
+        "status": "provisional; primary genre text not directly obtained"
+      },
+      "visual_formats": [
+        "narrative"
+      ],
+      "format_status": "candidate_not_observed",
+      "popularity": {
+        "status": "not_verified",
+        "scope": "MV",
+        "metric": null,
+        "period": null,
+        "source": null
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": null,
+      "note": "FNC 현재 업로드2017-05-15는 재업로드. 발매일과 혼동 금지. 인기·세부 연출 미확인."
+    },
+    {
+      "id": "lim-starlight",
+      "artist": "임영웅",
+      "title": "별빛 같은 나의 사랑아",
+      "official_url": "https://www.youtube.com/watch?v=9_33DJ4sAkQ",
+      "source_type": "official_label_mv",
+      "audio_release_date": "2021-03-09",
+      "music_genres": [
+        "trot",
+        "ballad-trot"
+      ],
+      "genre_evidence": {
+        "source": "https://m.melon.com/musicstory/detail.htm?mstorySeq=11187",
+        "status": "promotional_context; detailed_genre_tag_pending"
+      },
+      "visual_formats": [
+        "solo-live",
+        "narrative"
+      ],
+      "format_status": "candidate_not_observed",
+      "popularity": {
+        "status": "not_verified",
+        "scope": "MV",
+        "metric": null,
+        "period": null,
+        "source": null
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": null,
+      "note": "공식 촬영기·프로모션 근거. 뉴에라 업로드와 다른 채널 업로드의 조회수를 합치지 않음. 현재 인기 실측 없음."
+    },
+    {
+      "id": "jang-call-the-soul",
+      "artist": "장윤정",
+      "title": "초혼 / Call the soul",
+      "official_url": "https://www.youtube.com/watch?v=CZRFlIqlbuA",
+      "source_type": "official_distributor_mv",
+      "audio_release_date": "2010-06-08",
+      "music_genres": [
+        "ballad",
+        "trot"
+      ],
+      "genre_evidence": {
+        "source": "https://music.bugs.co.kr/album/225470",
+        "status": "version_specific; original described oriental ballad"
+      },
+      "visual_formats": [
+        "narrative"
+      ],
+      "format_status": "candidate_not_observed",
+      "popularity": {
+        "status": "representative_work_only",
+        "scope": "catalogue",
+        "metric": "2020 BEST 앨범 소개의 대표곡",
+        "period": "2020 compilation",
+        "source": "https://music.bugs.co.kr/album/20351402",
+        "caution": "현재 인기·조회수 아님"
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": null,
+      "note": "원앨범은 오리엔탈 느낌 발라드. 2016 SBS 듀엣판은 성인가요/트로트 https://music.bugs.co.kr/album/20023280 . 곡·편곡 버전별 근거 보존. 권리 이관 재업로드 날짜 미확인."
+    },
+    {
+      "id": "adele-easy-on-me-live",
+      "artist": "Adele",
+      "title": "Easy On Me — Live at the NRJ Awards 2021",
+      "official_url": "https://www.youtube.com/watch?v=ffcitRgiNDs",
+      "source_type": "official_live",
+      "audio_release_date": null,
+      "music_genres": [
+        "ballad"
+      ],
+      "genre_evidence": {
+        "source": "https://www.officialcharts.com/songs/adele-easy-on-me/",
+        "status": "same_song; live_arrangement_to_check"
+      },
+      "visual_formats": [
+        "solo-live"
+      ],
+      "format_status": "official_title_live; camera_not_observed",
+      "popularity": {
+        "status": "not_verified",
+        "scope": "MV",
+        "metric": null,
+        "period": null,
+        "source": null
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": "adele-easy-on-me",
+      "note": "영상 업로드2021-11-23. 생방송·카메라 수·현장오디오 처리 미확인. 캐시 조회수 사용안함."
+    },
+    {
+      "id": "ftisland-wind-live",
+      "artist": "FTISLAND",
+      "title": "Wind — 2017 FTISLAND LIVE [X] IN SEOUL Ver.",
+      "official_url": "https://www.youtube.com/watch?v=DBitzOyNRWI",
+      "source_type": "official_special_live",
+      "audio_release_date": null,
+      "music_genres": [
+        "rock-ballad"
+      ],
+      "genre_evidence": {
+        "source": "https://www.fncent.com/?bid=gallery_01&cat=&m=bbs&uid=24963",
+        "status": "same_song; live_arrangement_to_check"
+      },
+      "visual_formats": [
+        "band-live"
+      ],
+      "format_status": "official_title_live; camera_not_observed",
+      "popularity": {
+        "status": "not_verified",
+        "scope": "MV",
+        "metric": null,
+        "period": null,
+        "source": null
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": "ftisland-wind",
+      "note": "공연연도2017, 업로드일 미확인. MV와 다른 편곡·길이일 수 있으므로 음악 구간 대응을 직접 확인."
+    },
+    {
+      "id": "hwang-firefly",
+      "artist": "황가람",
+      "title": "나는 반딧불",
+      "official_url": "https://www.youtube.com/watch?v=MezvFK_r-MI",
+      "source_type": "official_artist_video",
+      "audio_release_date": "2024-10-21",
+      "music_genres": [
+        "ballad",
+        "indie",
+        "indie-pop"
+      ],
+      "genre_evidence": {
+        "source": "https://music.bugs.co.kr/album/4108756",
+        "status": "verified_distributor_metadata"
+      },
+      "visual_formats": [],
+      "format_status": "candidate_not_observed",
+      "popularity": {
+        "status": "verified_historical",
+        "scope": "audio_Circle_2025_first_half",
+        "metric": "2025 상반기3위; 2025 08주 Digital 2위",
+        "period": "2025 first half / 2025 week08",
+        "source": "https://circlechart.kr/page_article/view.circle?idx=25194&sgenre=opinion",
+        "secondary_source": "https://circlechart.kr/page_chart/onoff.circle?hitYear=2025&nationGbn=T&serviceGbn=ALL&targetTime=08&termGbn=week&yearTime=3",
+        "caution": "음원 지표이며 MV 조회수·2026 현재 인기 아님"
+      },
+      "retrieved_at": "2026-10-16",
+      "analysis_status": "metadata_researched / frames_not_observed / no_download",
+      "comparison_pair": null,
+      "note": "해당 영상 게시2025-03-30. 공식제목에MV표기가없어 official_mv로 단정하지 않음."
+    }
+  ],
+  "selection_policy": "사용자 선택 우선. 실제 장르/형식·버전·인기 대상/기간을 검증하고 source/frames/coverage를 확보한 범위만 분석 완료로 기록."
+}

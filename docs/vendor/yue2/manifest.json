@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "retrievedOn": "2026-10-18",
+  "timezone": "Asia/Seoul",
+  "sources": {
+    "official": {
+      "repository": "https://github.com/multimodal-art-projection/YuE",
+      "ref": "yue2-v0.1.6",
+      "revision": "9c6c4b349be978b06a9d0d958471a07a6cdeff4d",
+      "authority": "official-runtime-pinned"
+    },
+    "current": {
+      "repository": "https://github.com/multimodal-art-projection/YuE",
+      "ref": "main",
+      "revision": "1647252d68b70cbead046ffd3f7caf036dde47ee",
+      "authority": "official-current-reference-only"
+    },
+    "legacy": {
+      "repository": "https://github.com/multimodal-art-projection/YuE",
+      "ref": "YuE-v1",
+      "revision": "6d4f0b1f8ce6a55fb2392e959394c46e07ee334d",
+      "authority": "official-legacy-reference-only"
+    },
+    "mlx": {
+      "repository": "https://github.com/vanch007/mlx-Yue",
+      "ref": "runtime-pinned",
+      "revision": "c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8",
+      "authority": "community-apple-silicon-port"
+    },
+    "model": {
+      "repository": "https://huggingface.co/m-a-p/YuE2-3B",
+      "ref": "runtime-pinned",
+      "revision": "1a96eca688d6ae5d7f0feb88573fec89920fcd19",
+      "authority": "official-model-card"
+    },
+    "vae": {
+      "repository": "https://huggingface.co/m-a-p/YuE2-Vae",
+      "ref": "runtime-pinned",
+      "revision": "95535e72a97bc0f09b8ada125d26b4009428c0e8",
+      "authority": "official-model-card"
+    },
+    "model-current": {
+      "repository": "https://huggingface.co/m-a-p/YuE2-3B",
+      "ref": "current-reference",
+      "revision": "8f24312f187763b9854adeec87e437e2b03bbff1",
+      "authority": "official-current-model-card"
+    },
+    "vae-current": {
+      "repository": "https://huggingface.co/m-a-p/YuE2-Vae",
+      "ref": "current-reference",
+      "revision": "152733a19ad43aa67e367f9b5503ef8075bb5126",
+      "authority": "official-current-model-card"
+    }
+  },
+  "files": [
+    {
+      "path": "official/README.md",
+      "sourceId": "official",
+      "source": "README.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/README.md",
+      "sha256": "0fb3740d4b917741b65c1b475be1b2aafda6fb1fa874588ae98d08d019cf3747",
+      "bytes": 12668
+    },
+    {
+      "path": "official/LICENSE",
+      "sourceId": "official",
+      "source": "LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/LICENSE",
+      "sha256": "2549dd4f0ee9a6df7e0877915b359bd96d0da624c11ff6fb59650b44e7ba9b6c",
+      "bytes": 20126
+    },
+    {
+      "path": "official/MODEL_LICENSE",
+      "sourceId": "official",
+      "source": "MODEL_LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/MODEL_LICENSE",
+      "sha256": "623b5b238853e2ab79d87933ee5ea7ff474ec31e348f128ca4063cda64b901bc",
+      "bytes": 20308
+    },
+    {
+      "path": "official/THIRD_PARTY_NOTICES.md",
+      "sourceId": "official",
+      "source": "THIRD_PARTY_NOTICES.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/THIRD_PARTY_NOTICES.md",
+      "sha256": "395f9073249ef34782e5ec16bbbae4ff3a49226d506ee8e166806024de00386b",
+      "bytes": 799
+    },
+    {
+      "path": "official/docs/generation.md",
+      "sourceId": "official",
+      "source": "docs/generation.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/docs/generation.md",
+      "sha256": "3e36e2f4371f69f18879ce3c43057f8e9ba89bbcb1c873e28fb96e9d410c5973",
+      "bytes": 4195
+    },
+    {
+      "path": "official/docs/covers.md",
+      "sourceId": "official",
+      "source": "docs/covers.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/docs/covers.md",
+      "sha256": "2f6ecfd551f5f674404b657fad749abc5142c2c83970786b268e1cfdad92922b",
+      "bytes": 3663
+    },
+    {
+      "path": "official/docs/editing.md",
+      "sourceId": "official",
+      "source": "docs/editing.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/docs/editing.md",
+      "sha256": "370e7e556b3ba3787df90de5fb2e5e3b17a18957575d2dc766073251a310840b",
+      "bytes": 3736
+    },
+    {
+      "path": "official/docs/source-notes.md",
+      "sourceId": "official",
+      "source": "docs/source-notes.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/docs/source-notes.md",
+      "sha256": "8ccb35b3ce6a8208f4ee40d0593544644a0fbcb27982f66389231dbec5fc0196",
+      "bytes": 1596
+    },
+    {
+      "path": "official/examples/README.md",
+      "sourceId": "official",
+      "source": "examples/README.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/examples/README.md",
+      "sha256": "a7b33e9dda80a8a313f154368ce60113f057bfb5915def34d0ba04f387230473",
+      "bytes": 1738
+    },
+    {
+      "path": "official/examples/song.json",
+      "sourceId": "official",
+      "source": "examples/song.json",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/examples/song.json",
+      "sha256": "6b590fc427a8262e2c07d4097ae213384d70d9ac9d62357bb0d26485eb19fc50",
+      "bytes": 498
+    },
+    {
+      "path": "official/skills/yue2-music/SKILL.md",
+      "sourceId": "official",
+      "source": "skills/yue2-music/SKILL.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/SKILL.md",
+      "sha256": "02872deebd3c9dca15bab277667f9f081fc0f6a9bd0795e9bc4e67ae5075754c",
+      "bytes": 8455
+    },
+    {
+      "path": "official/skills/yue2-music/LICENSE",
+      "sourceId": "official",
+      "source": "skills/yue2-music/LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/LICENSE",
+      "sha256": "d5e39ab3e0f237e9f1ce8d00f4d9f550f9b29aa0c0d67de9458575e9a6c241fe",
+      "bytes": 20156
+    },
+    {
+      "path": "official/skills/yue2-music/references/generation-and-covers.md",
+      "sourceId": "official",
+      "source": "skills/yue2-music/references/generation-and-covers.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/references/generation-and-covers.md",
+      "sha256": "f8bc42ce439747bf6022ac410b45edf6f915fc669030048b76c576d40e644a22",
+      "bytes": 12533
+    },
+    {
+      "path": "official/skills/yue2-music/references/abc-editing.md",
+      "sourceId": "official",
+      "source": "skills/yue2-music/references/abc-editing.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/references/abc-editing.md",
+      "sha256": "398e239ab21d6a05bbf943bf9f71aaa81886d735b877e52548b04f5543f14c43",
+      "bytes": 12858
+    },
+    {
+      "path": "official/skills/yue2-music/references/editing-workflows.md",
+      "sourceId": "official",
+      "source": "skills/yue2-music/references/editing-workflows.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/references/editing-workflows.md",
+      "sha256": "6d1ed38facc21e9670d16891561885c2e360e8df3ebc382a147a6a6467a3b398",
+      "bytes": 9514
+    },
+    {
+      "path": "official/skills/yue2-music/references/listening-and-evaluation.md",
+      "sourceId": "official",
+      "source": "skills/yue2-music/references/listening-and-evaluation.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/references/listening-and-evaluation.md",
+      "sha256": "ea41431718aef6e3fc3aa94d84bde3e883bac8c3022cab9922907037ece1ee73",
+      "bytes": 8143
+    },
+    {
+      "path": "official/skills/yue2-music/references/models-and-setup.md",
+      "sourceId": "official",
+      "source": "skills/yue2-music/references/models-and-setup.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/references/models-and-setup.md",
+      "sha256": "dffa706e2b74bfa75a6eb21ca8511e396bf0f2839ef0711a79ff0e7cb3c7e1de",
+      "bytes": 17275
+    },
+    {
+      "path": "official/src/yue2/protocol.py",
+      "sourceId": "official",
+      "source": "src/yue2/protocol.py",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/src/yue2/protocol.py",
+      "sha256": "e00d32bf22baac46c7d4dafaeecd4f3d5a4753d651b3dc8f4164b9f3774980ad",
+      "bytes": 6059
+    },
+    {
+      "path": "official/src/yue2/sampling.py",
+      "sourceId": "official",
+      "source": "src/yue2/sampling.py",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/src/yue2/sampling.py",
+      "sha256": "b680afd5d6b6694b0e8d430b4c1b6d3b5108107672b06500ecc6645c471bf6c4",
+      "bytes": 7636
+    },
+    {
+      "path": "current/README.md",
+      "sourceId": "current",
+      "source": "README.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/README.md",
+      "sha256": "ca41207b5edc1bbd9902ae21ade99986d7a81deff706a47bff252f7c3f987810",
+      "bytes": 23785
+    },
+    {
+      "path": "current/MODEL_LICENSE",
+      "sourceId": "current",
+      "source": "MODEL_LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/MODEL_LICENSE",
+      "sha256": "c7a0e99360555513ff56815b5dbbc8f0b27a3ad762ceaeeab6838baea9743b3a",
+      "bytes": 23876
+    },
+    {
+      "path": "current/skills/yue2-music/instrumental/SKILL.md",
+      "sourceId": "current",
+      "source": "skills/yue2-music/instrumental/SKILL.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/skills/yue2-music/instrumental/SKILL.md",
+      "sha256": "bb4cae9cfbff4355c7b5b8c377a2156c2c36350fd674caea5c9af9e636ecc0c2",
+      "bytes": 4291
+    },
+    {
+      "path": "legacy/README.md",
+      "sourceId": "legacy",
+      "source": "README.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/6d4f0b1f8ce6a55fb2392e959394c46e07ee334d/README.md",
+      "sha256": "c330c270e7b5847ceeb7ae3f239cfd3e03650acdd0f66b9f6db4fdf1b3df30be",
+      "bytes": 19339
+    },
+    {
+      "path": "legacy/LICENSE",
+      "sourceId": "legacy",
+      "source": "LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/6d4f0b1f8ce6a55fb2392e959394c46e07ee334d/LICENSE",
+      "sha256": "389bb897637d317775612b7975c686371e55dafe3b5072719b1b8bce57e705f2",
+      "bytes": 12969
+    },
+    {
+      "path": "mlx/README.md",
+      "sourceId": "mlx",
+      "source": "README.md",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/README.md",
+      "sha256": "0b2332ab83e7e66d2dde16fdea24d3a573f1473d885c9abc7266db411c21bdbc",
+      "bytes": 14053
+    },
+    {
+      "path": "mlx/LICENSE",
+      "sourceId": "mlx",
+      "source": "LICENSE",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358
+    },
+    {
+      "path": "mlx/docs/usage.md",
+      "sourceId": "mlx",
+      "source": "docs/usage.md",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/docs/usage.md",
+      "sha256": "0e73744fbc0d8beaf6f4e41f1e4b084c8a1c07bda33402c32a741c53e5edd479",
+      "bytes": 15748
+    },
+    {
+      "path": "mlx/docs/IMPLEMENTATION.md",
+      "sourceId": "mlx",
+      "source": "docs/IMPLEMENTATION.md",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/docs/IMPLEMENTATION.md",
+      "sha256": "66cd888c43fa91495ae1126d213119e2f1a399776ac2738e5e583e5cd784ea3d",
+      "bytes": 9810
+    },
+    {
+      "path": "mlx/src/lyra/cli.py",
+      "sourceId": "mlx",
+      "source": "src/lyra/cli.py",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/src/lyra/cli.py",
+      "sha256": "40d6e9c34b11e0be043dd20d881922f3a68cc47257b8454af0d3fe9d08ff6bc9",
+      "bytes": 15750
+    },
+    {
+      "path": "mlx/src/lyra/pipeline.py",
+      "sourceId": "mlx",
+      "source": "src/lyra/pipeline.py",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/src/lyra/pipeline.py",
+      "sha256": "f37128f7889c95eddeef3511dd16a0df7b72b97a6e8c1334a01fb3fb63e1536f",
+      "bytes": 26179
+    },
+    {
+      "path": "mlx/src/lyra/sampling.py",
+      "sourceId": "mlx",
+      "source": "src/lyra/sampling.py",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/src/lyra/sampling.py",
+      "sha256": "5b74067cccad4d518c4da83c23153c9e0d4e1b1d9d89fe81d87e7a0846361c8e",
+      "bytes": 7501
+    },
+    {
+      "path": "mlx/vendor/yue/MODEL_LICENSE",
+      "sourceId": "mlx",
+      "source": "vendor/yue/MODEL_LICENSE",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/vendor/yue/MODEL_LICENSE",
+      "sha256": "623b5b238853e2ab79d87933ee5ea7ff474ec31e348f128ca4063cda64b901bc",
+      "bytes": 20308
+    },
+    {
+      "path": "models/pinned-model/README.md",
+      "sourceId": "model",
+      "source": "README.md",
+      "url": "https://huggingface.co/m-a-p/YuE2-3B/resolve/1a96eca688d6ae5d7f0feb88573fec89920fcd19/README.md",
+      "sha256": "70bba7556a6f873eaddcaa80b5514a798154c0744dda5a8611adf66778eb99c2",
+      "bytes": 19050
+    },
+    {
+      "path": "models/pinned-model/LICENSE",
+      "sourceId": "model",
+      "source": "LICENSE",
+      "url": "https://huggingface.co/m-a-p/YuE2-3B/resolve/1a96eca688d6ae5d7f0feb88573fec89920fcd19/LICENSE",
+      "sha256": "060985741d20e70613b4c189c7de106cabd3fb2109fbbfb6d705c9d619417dd0",
+      "bytes": 20309
+    },
+    {
+      "path": "models/pinned-vae/README.md",
+      "sourceId": "vae",
+      "source": "README.md",
+      "url": "https://huggingface.co/m-a-p/YuE2-Vae/resolve/95535e72a97bc0f09b8ada125d26b4009428c0e8/README.md",
+      "sha256": "4ff58df7b4b6a4a51fb2a709d21a5bba1b9cb4f142d50767c3efa40e53b6e88d",
+      "bytes": 8975
+    },
+    {
+      "path": "models/pinned-vae/LICENSE",
+      "sourceId": "vae",
+      "source": "LICENSE",
+      "url": "https://huggingface.co/m-a-p/YuE2-Vae/resolve/95535e72a97bc0f09b8ada125d26b4009428c0e8/LICENSE",
+      "sha256": "060985741d20e70613b4c189c7de106cabd3fb2109fbbfb6d705c9d619417dd0",
+      "bytes": 20309
+    },
+    {
+      "path": "models/current-model/README.md",
+      "sourceId": "model-current",
+      "source": "README.md",
+      "url": "https://huggingface.co/m-a-p/YuE2-3B/resolve/8f24312f187763b9854adeec87e437e2b03bbff1/README.md",
+      "sha256": "469ac88a01ef1be99a60ece8fdf1f3b81221e7c6943048782ed7487e06d159f0",
+      "bytes": 21898
+    },
+    {
+      "path": "models/current-model/LICENSE",
+      "sourceId": "model-current",
+      "source": "LICENSE",
+      "url": "https://huggingface.co/m-a-p/YuE2-3B/resolve/8f24312f187763b9854adeec87e437e2b03bbff1/LICENSE",
+      "sha256": "060985741d20e70613b4c189c7de106cabd3fb2109fbbfb6d705c9d619417dd0",
+      "bytes": 20309
+    },
+    {
+      "path": "models/current-vae/README.md",
+      "sourceId": "vae-current",
+      "source": "README.md",
+      "url": "https://huggingface.co/m-a-p/YuE2-Vae/resolve/152733a19ad43aa67e367f9b5503ef8075bb5126/README.md",
+      "sha256": "7c4359464599b946cbcb979a6143c81ea8f047023638b18d709702b8f97d52b2",
+      "bytes": 10434
+    },
+    {
+      "path": "models/current-vae/LICENSE",
+      "sourceId": "vae-current",
+      "source": "LICENSE",
+      "url": "https://huggingface.co/m-a-p/YuE2-Vae/resolve/152733a19ad43aa67e367f9b5503ef8075bb5126/LICENSE",
+      "sha256": "060985741d20e70613b4c189c7de106cabd3fb2109fbbfb6d705c9d619417dd0",
+      "bytes": 20309
+    },
+    {
+      "path": "current/LICENSE",
+      "sourceId": "current",
+      "source": "LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358
+    },
+    {
+      "path": "mlx/vendor/yue/LICENSE",
+      "sourceId": "mlx",
+      "source": "vendor/yue/LICENSE",
+      "url": "https://raw.githubusercontent.com/vanch007/mlx-Yue/c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8/vendor/yue/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358
+    },
+    {
+      "path": "official/skills/yue2-music/scripts/abc_tools.py",
+      "sourceId": "official",
+      "source": "skills/yue2-music/scripts/abc_tools.py",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/9c6c4b349be978b06a9d0d958471a07a6cdeff4d/skills/yue2-music/scripts/abc_tools.py",
+      "sha256": "ea04b922dacebec7ad257a2f8d83bdb5dfecb7a23110c1a3121c5c41c313930e",
+      "bytes": 15734
+    }
+  ],
+  "scope": "Documentation and small public contract sources only; no model weights, audio, runtime installation, or engine version changes."
+}

@@ -1,0 +1,16 @@
+{
+  "run_id": "mv-genre-image-20261016-final",
+  "task_id": "forward-test",
+  "status": "completed",
+  "summary": "독립 사용 시나리오 PASS; 실제 이미지 부재를 제작 완료로 승격하지 않음",
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "독립 실제 관찰·재현",
+      "status": "passed",
+      "required": true,
+      "evidence": "A발라드솔로/B3인아이돌록발라드혼합/C수채화트로트와경계번들 재실행. 일반검증exit0 readyfalse,require-ready exit3. 기획-only/이미지-only/전체MV 분기와 tool대체금지·인기근거 구분 확인."
+    }
+  ],
+  "issues": []
+}

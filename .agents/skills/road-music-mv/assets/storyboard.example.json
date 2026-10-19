@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "panels": [
+    {
+      "id": "panel-01",
+      "shot_id": "shot-01",
+      "image_asset_id": "shot-01-start",
+      "at_frame": 0,
+      "caption": "0–95f — opening-confession: eye-level medium-wide. Hero holds the folded letter low beside the center microphone, breathes, then shifts her gaze toward the empty audience; amber lamp and cool rim keep the stage axis visible. Cut out at the next musical section."
+    },
+    {
+      "id": "panel-02",
+      "shot_id": "shot-02",
+      "image_asset_id": "shot-02-start",
+      "at_frame": 96,
+      "caption": "96–191f — answering-phrase: stage-right chest-up three-quarter. The same folded letter stays at the lower frame edge while hero raises her gaze; the camera moves in only slightly, with no VFX spectacle, then holds to the end."
+    }
+  ],
+  "pages": [
+    {
+      "id": "storyboard-page-01",
+      "asset_id": "storyboard-page-01-sheet",
+      "panel_ids": [
+        "panel-01",
+        "panel-02"
+      ]
+    }
+  ]
+}

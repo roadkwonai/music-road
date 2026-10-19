@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">Road Music — Local AI Music Studio</title>
+  <desc id="desc">A dark blue banner with the Road Music wordmark and a cyan sound wave.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b1222"/><stop offset="1" stop-color="#172942"/></linearGradient>
+    <linearGradient id="wave" x1="0" x2="1"><stop stop-color="#65e5cb"/><stop offset="1" stop-color="#82aaff"/></linearGradient>
+  </defs>
+  <rect width="1200" height="340" rx="28" fill="url(#bg)"/>
+  <g fill="none" stroke="#8ba5c6" opacity=".12"><path d="M640 70H1140M640 120H1140M640 170H1140M640 220H1140M640 270H1140"/><path d="M690 45V295M790 45V295M890 45V295M990 45V295M1090 45V295"/></g>
+  <text x="74" y="75" fill="#65e5cb" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="4">LOCAL AI MUSIC STUDIO</text>
+  <text x="70" y="157" fill="#f5f8ff" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="700" letter-spacing="-2">Road Music</text>
+  <text x="74" y="204" fill="#b8c9df" font-family="Arial, Helvetica, sans-serif" font-size="21">From a small idea to your next song.</text>
+  <rect x="74" y="247" width="167" height="34" rx="17" fill="#223951"/>
+  <text x="95" y="269" fill="#e5f8f4" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" letter-spacing="1">GUI + JSON CLI</text>
+  <path d="M646 170h35l12-19 14 38 16-64 18 94 20-145 20 193 22-230 22 260 22-250 22 213 20-167 20 119 18-79 17 48 16-30 15 16h39" fill="none" stroke="url(#wave)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1088" cy="170" r="5" fill="#82aaff"/>
+</svg>

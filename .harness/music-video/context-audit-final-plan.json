@@ -1,0 +1,91 @@
+{
+  "objective": "MV 음악작업분리와상세그룹세계관계약의독립검증",
+  "tasks": [
+    {
+      "id": "code-review",
+      "role": "mv_quality_reviewer",
+      "dependencies": [],
+      "ownership": [
+        ".harness/work/mv-context-audit-20261016-v2/code-review.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-context-audit-20261016-v2/input.json",
+        ".agents/skills/road-music-mv/SKILL.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        "tests/test_mv_context.py",
+        "tests/test_mv_preproduction.py",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/references/harness-spec.json",
+        ".agents/skills/road-music-mv/assets/plan-template.json",
+        ".agents/skills/road-music-mv/assets/group-world-bible.example.json",
+        ".codex/agents/mv_director.toml",
+        ".codex/agents/mv_art_director.toml",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".codex/agents/mv_ltx_producer.toml",
+        ".agents/skills/road-music-mv/references/ltx-roadmusic.md",
+        "docs/music-video-harness.md",
+        "Output/lumi4-yue2-kpop-preproduction-20261016/context/bible.json"
+      ],
+      "context": {
+        "decisions": [
+          "실제 builtin 대체역할의관찰결과를메인이보고서로보존",
+          "음악제작은별도작업;프레임재생과실제생성완료를꾸미지않음"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "현재코드/참조에서독립review4건수정검증및남은critical/high/medium재현결함없음"
+      ],
+      "required": true
+    },
+    {
+      "id": "forward-test",
+      "role": "mv_quality_reviewer",
+      "dependencies": [],
+      "ownership": [
+        ".harness/work/mv-context-audit-20261016-v2/forward-test.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-context-audit-20261016-v2/input.json",
+        ".agents/skills/road-music-mv/SKILL.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        "tests/test_mv_context.py",
+        "tests/test_mv_preproduction.py",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/references/harness-spec.json",
+        ".agents/skills/road-music-mv/assets/plan-template.json",
+        ".agents/skills/road-music-mv/assets/group-world-bible.example.json",
+        ".codex/agents/mv_director.toml",
+        ".codex/agents/mv_art_director.toml",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".codex/agents/mv_ltx_producer.toml",
+        ".agents/skills/road-music-mv/references/ltx-roadmusic.md",
+        "docs/music-video-harness.md",
+        "Output/lumi4-yue2-kpop-preproduction-20261016/context/bible.json"
+      ],
+      "context": {
+        "decisions": [
+          "실제 builtin 대체역할의관찰결과를메인이보고서로보존",
+          "음악제작은별도작업;프레임재생과실제생성완료를꾸미지않음"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "음악작업분리,멤버/장소/시대/의상/참조계보/optional계약과실제준비단계시나리오검증;없는생성결과허위통과없음"
+      ],
+      "required": true
+    }
+  ]
+}

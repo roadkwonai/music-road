@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "source_audio": {
+    "path": "/example/not-yet-confirmed-source-audio.wav",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "duration_seconds": 8
+  },
+  "delivery": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "total_frames": 192
+  },
+  "story": {
+    "mode": "hybrid",
+    "theme": "말하지 못한 마음을 접힌 편지와 시선의 변화로 드러내는 짧은 공연 서사",
+    "logline": "허구의 성인 솔로 보컬이 빈 스튜디오 무대에서 접힌 편지를 들고 한 구절의 망설임을 지나 시선을 들어 응답한다.",
+    "arc": "도입에서 hero는 편지를 숨기듯 낮게 든 채 망설이고, 다음 구절에서 카메라가 가까워지며 시선이 빈 객석 쪽으로 올라가고, 마지막 정지에서 편지를 가슴 가까이 둔 결심으로 끝난다."
+  },
+  "decisions": {
+    "cast": {
+      "choice": "실존 인물을 닮게 만들지 않는 한 명의 허구 성인 여성 솔로 보컬 hero만 출연하며 관객은 화면에 넣지 않는다.",
+      "music_reason": "8초 예시는 한 화자의 내면적 고백을 가정하므로 앙상블이나 4인 그룹보다 한 사람의 시선과 손동작이 감정 변화를 읽기 쉽다."
+    },
+    "age_range": {
+      "choice": "hero는 약 30세의 성인으로 설정하고, 미성년자 또는 실제 인물의 외모를 참조하지 않는다.",
+      "music_reason": "성인의 차분한 회상과 절제된 공연 행동을 쓰는 예시이며, 실제 곡의 화자 연령을 주장하지 않는다."
+    },
+    "concept": {
+      "choice": "공연 70%, 작은 서사 행동 30%의 현실 기반 허구 스튜디오 하이브리드다. 접힌 편지가 반복 모티프다.",
+      "music_reason": "도입의 정지와 다음 구절의 응답을 장소 전환 대신 하나의 물체와 시선 변화로 연결해 음악의 작은 상승을 과장하지 않는다."
+    },
+    "wardrobe": {
+      "choice": "midnight-blue tailored jacket, ivory blouse, dark straight trousers, simple black shoes를 hero-look-a로 고정한다.",
+      "music_reason": "낮은 채도의 남색과 아이보리 대비가 절제된 발라드 예시의 차분한 온도와 접힌 편지의 색을 연결한다."
+    },
+    "hair_makeup": {
+      "choice": "center-part shoulder-length straight black hair, 자연스러운 피부 질감, 절제된 중성 메이크업을 모든 shot에서 유지한다.",
+      "music_reason": "가까운 두 번째 샷에서 감정 변화가 스타일 변화로 오인되지 않도록 얼굴·헤어를 안정적으로 유지한다."
+    },
+    "locations_sets": {
+      "choice": "2026년의 특정 실존 장소를 복제하지 않는 허구의 intimate music studio stage-a 하나만 쓴다. rear-left piano, rear-right amber lamp, center microphone, dark timber floor, charcoal curtain의 화면축을 고정한다.",
+      "music_reason": "공간을 바꾸지 않아도 카메라 거리와 시선으로 8초의 미세한 감정 상승을 보일 수 있다."
+    },
+    "props": {
+      "choice": "letter-prop 하나만 사용한다. 아이보리 접힌 편지의 색·접힘·크기·손 위치를 shot 사이에 유지한다.",
+      "music_reason": "보이지 않는 상대에게 건네지 못한 말을 가사로 단정하지 않고, 손의 행동으로만 암시한다."
+    },
+    "performance_choreography": {
+      "choice": "hero는 크게 안무하지 않고, 편지를 낮게 들기→숨 고르기→시선 들기→턱을 조금 올리는 네 동작만 수행한다.",
+      "music_reason": "RIGEND의 음악·동작 우선 원리를 작은 구절의 호흡에 적용해, 빠른 편집보다 읽히는 동작을 우선한다."
+    },
+    "camera_lenses": {
+      "choice": "shot-01의 관객 중심 eye-level medium-wide에서 shot-02의 stage-right chest-up three-quarter로 가까워진다. 자연스러운 거리감만 의도하고 특정 렌즈 mm를 제어값으로 주장하지 않는다.",
+      "music_reason": "도입의 거리감에서 응답 구절의 관찰로 이동해 시선 변화가 음악의 상승과 함께 읽히게 한다."
+    },
+    "lighting_color": {
+      "choice": "rear-right amber practical, left-side cool rim, soft warm key, charcoal/blue/ivory 팔레트를 유지한다.",
+      "music_reason": "손승희의 색·재질을 음악 구간에 연결하는 원리를 따라, 도입의 차가움과 응답의 따뜻함을 같은 세트 안에서 조금만 이동시킨다."
+    },
+    "film_look": {
+      "choice": "AI 생성 디지털 시네마틱 룩에만 적용하는 절제된 시뮬레이션 그레인과 부드러운 하이라이트 롤오프다. 실제 필름 촬영, 필름 스톡, 렌즈 제어를 주장하지 않는다.",
+      "music_reason": "질감은 가까운 고백의 부드러운 온도를 돕되, 곡보다 과한 복고 효과가 되지 않게 한다."
+    },
+    "vfx": {
+      "choice": "기본 컷을 먼저 사용하며, 필요한 경우에만 연속성 색 보정 외의 합성 VFX를 쓰지 않는다.",
+      "music_reason": "손승희의 기본 컷·싱크 우선 원리에 따라 짧은 예시의 감정은 표정과 편지로 충분히 전달한다."
+    },
+    "transitions": {
+      "choice": "shot-01에서 shot-02로 handle 없는 편집 컷을 쓰고, shot-02는 깨끗한 hold로 끝낸다.",
+      "music_reason": "망설임에서 응답으로 넘어가는 실제 구간 경계를 명료하게 하며, 디졸브가 행동의 작은 변화를 흐리지 않게 한다."
+    },
+    "visual_sfx": {
+      "choice": "첫 shot의 amber lamp beam 안에만 아주 미세한 보이는 dust를 선택적으로 둔다. 비·연무·강풍 효과는 쓰지 않는다.",
+      "music_reason": "정지한 공간의 공기를 보태되 hero와 편지를 가리지 않고, 실제 음악의 리듬보다 앞서지 않게 한다."
+    },
+    "sound_policy": {
+      "choice": "인계된 원곡을 자르거나 반복하거나 시간 늘리거나 새 sound SFX를 더하지 않는다. visual_sfx는 들리는 효과음을 뜻하지 않는다.",
+      "music_reason": "예시의 영상 길이는 실제 확정 음원의 구간에 맞춰야 하며, 화면 효과가 원곡의 보컬과 호흡을 바꾸지 않는다."
+    },
+    "typography_graphics": {
+      "choice": "영상 안에 제목·자막·로고·읽을 수 있는 편지 글자를 넣지 않는다. 필요하면 후반 별도 그래픽 레이어로 검수한다.",
+      "music_reason": "짧은 감정 변화는 텍스트 설명보다 표정·손·카메라 거리로 읽히게 한다."
+    }
+  },
+  "music_sections": [
+    {
+      "id": "opening-confession",
+      "start_frame": 0,
+      "end_frame_exclusive": 96,
+      "musical_event": "예시용 미확정 원본의 0.0초~4.0초 도입 구간이다. 실제 가사·비트·발성 사건은 확정 음원 인계 뒤에 대체한다.",
+      "visual_goal": "망설이는 정지와 편지의 첫 제시로 화자와 공간을 읽게 한다."
+    },
+    {
+      "id": "answering-phrase",
+      "start_frame": 96,
+      "end_frame_exclusive": 192,
+      "musical_event": "예시용 미확정 원본의 4.0초~8.0초 응답 구간이다. 실제 가사·비트·발성 사건은 확정 음원 인계 뒤에 대체한다.",
+      "visual_goal": "카메라를 가까이하고 시선을 들어 작은 결심으로 끝낸다."
+    }
+  ],
+  "story_beats": [
+    {
+      "id": "hesitation",
+      "section_ids": [
+        "opening-confession"
+      ],
+      "goal": "말을 시작하기 전에 편지를 숨기듯 붙잡는다.",
+      "action": "편지를 낮게 든 채 숨을 고르고 시선을 피한다.",
+      "change": "빈 무대의 거리감이 hero와 편지의 관계를 드러낸다."
+    },
+    {
+      "id": "release",
+      "section_ids": [
+        "answering-phrase"
+      ],
+      "goal": "말을 건네기로 결심한 듯 시선을 올린다.",
+      "action": "편지는 놓지 않은 채 빈 공간을 보고 턱을 조금 든다.",
+      "change": "카메라 거리가 줄고 warm key가 얼굴에 더 가까워져 망설임이 응답으로 바뀐다."
+    }
+  ],
+  "directing_methods": [
+    {
+      "source": "https://www.melon.com/musicstory/inform.htm?mstorySeq=13341&startIndex=0",
+      "principle": "감정 블록마다 시점과 기록 질감의 서사적 이유를 정한다.",
+      "application": "hero가 누구에게 편지를 건네려 하는지 빈 객석 방향의 시선으로만 암시하며, 캠코더 흉내나 특정 작품의 배열을 복제하지 않는다.",
+      "shot_ids": [
+        "shot-01",
+        "shot-02"
+      ]
+    },
+    {
+      "source": "https://cine21.com/news/view/?mag_id=101988",
+      "principle": "고비용 제작 전에 애니매틱과 대표 스틸로 길이·색·편집을 검증한다.",
+      "application": "두 단일 이미지로 실제 원곡 애니매틱을 먼저 검수하고 amber/blue의 인접 톤을 확인한 뒤에만 LTX proof를 계획한다.",
+      "shot_ids": [
+        "shot-01",
+        "shot-02"
+      ]
+    },
+    {
+      "source": "https://envimedia.co/creative-spotlight-rigend-gets-in-depth-on-the-magic-of-music-videos/",
+      "principle": "음악과 동작을 먼저 분석하고 공간 깊이·관찰자 시점·효과 목적을 정한다.",
+      "application": "편지와 표정을 먼저 읽게 하는 프레임 크기를 선택하고, piano·hero·lamp의 전중후경을 유지하며 dust를 선택적 화면 효과로 제한한다.",
+      "shot_ids": [
+        "shot-01",
+        "shot-02"
+      ]
+    },
+    {
+      "source": "https://blog.adobe.com/ko/publish/2022/12/13/cc-series-producer-sonseunghee-interview",
+      "principle": "음악에서 색·재질·가사 시퀀스를 정하고 기본 컷과 싱크 뒤에만 후반 효과를 더한다.",
+      "application": "charcoal/blue/ivory와 warm/cool light를 두 구간에 유지하고, 합성 효과 없이 컷과 시선의 싱크부터 독립 검수한다.",
+      "shot_ids": [
+        "shot-01",
+        "shot-02"
+      ]
+    }
+  ],
+  "props": [
+    {
+      "id": "letter-prop",
+      "asset_id": "letter-prop",
+      "character_ids": [
+        "hero"
+      ],
+      "location_ids": [
+        "stage-a"
+      ],
+      "continuity_rules": "same warm ivory paper, once-folded crease, small scale, and left-hand orientation; the envelope stays off screen in both illustrative shots."
+    }
+  ]
+}

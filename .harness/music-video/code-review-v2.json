@@ -1,0 +1,30 @@
+{
+  "run_id": "mv-harness-smoke-20261016-v2",
+  "task_id": "code-review",
+  "status": "completed",
+  "summary": "독립 재검토 APPROVE. 이전 2HIGH/2MEDIUM 해소; 남은 이슈0.",
+  "artifacts": [],
+  "checks": [
+    {
+      "name": "변조·간접원본·용량정리·JSON오류 재현",
+      "status": "passed",
+      "required": true,
+      "evidence": "독립 reviewer가 frame/index/sheet/HTML변조 exit2, localHLS exit2, 3145byte상한후471byte manifest, argparse stdoutJSON, VFR PTS 보존 직접 확인."
+    },
+    {
+      "name": "도구 regression",
+      "status": "passed",
+      "required": true,
+      "command": "python3 -B -m unittest discover -s tests -p test_mv_tools.py",
+      "evidence": "10/10 OK. reviewer와 main이 최신코드로 각각 실행."
+    },
+    {
+      "name": "기존 repository tests",
+      "status": "passed",
+      "required": true,
+      "command": "npm test",
+      "evidence": "182/182 pass, fail/skipped0. 실제모델·앱렌더는 미실행."
+    }
+  ],
+  "issues": []
+}

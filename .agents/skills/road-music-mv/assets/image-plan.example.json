@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "example_only": true,
+  "profile": {
+    "music_genre": "ballad",
+    "subgenres": [],
+    "visual_format": "solo-live",
+    "visual_look": "photorealistic-cinematic",
+    "performance_source": "generated-performance",
+    "lip_sync_target": "proof-required; no synchronization claimed"
+  },
+  "characters": [
+    {
+      "id": "hero",
+      "identity_asset_id": "hero-master"
+    }
+  ],
+  "locations": [
+    {
+      "id": "stage-a",
+      "background_asset_id": "stage-base"
+    }
+  ],
+  "assets": [
+    {
+      "id": "hero-master",
+      "kind": "identity-master",
+      "required": true,
+      "method": "openai-images-api",
+      "character_ids": [
+        "hero"
+      ],
+      "location_id": null,
+      "references": [],
+      "prompt": "Create a photorealistic identity reference portrait of one fictional adult Korean female vocalist, about 30, with an oval face, dark brown eyes, a small straight nose, a subtle mole below her left eye, and shoulder-length straight black hair with a center part. Show a neutral relaxed expression facing the camera, shoulders visible, natural skin texture, simple grey crewneck top, even soft neutral studio lighting, plain mid-grey background. This is the identity master for one original character, not a real singer. No text, no collage, no other people.",
+      "invariants": [
+        "one fictional adult hero; oval face; mole below left eye; dark eyes",
+        "center-part shoulder-length straight black hair",
+        "neutral even-light single portrait"
+      ],
+      "model": "gpt-image-2.5-sunburst"
+    },
+    {
+      "id": "hero-sheet",
+      "kind": "character-sheet",
+      "required": true,
+      "method": "openai-images-api",
+      "character_ids": [
+        "hero"
+      ],
+      "location_id": null,
+      "references": [
+        "hero-look-a"
+      ],
+      "prompt": "Use the provided reference image as the exact character reference. Preserve the same identity, facial features, hairstyle, body proportions, clothing, accessories, and all visible characteristics without redesigning them. Create a wide horizontal character reference sheet on a neutral studio background. Layout: large front-facing facial close-up on the far left; one thin vertical divider line; an independently cropped front view in the center showing only from the neck down to the feet, with no head, face, jaw or chin visible. Place the center neck crop at approximately 20 percent of the canvas height and its feet at 94 percent, leaving empty neutral background above the neck crop. On the right, show a complete rear view with its entire head, crown, hairstyle and both feet inside the canvas: crown at approximately 5 percent height, neck at 20 percent and feet at 94 percent. Match the two figures in physical body scale, shoulder level, waist level, knee level and foot baseline; do not enlarge the center body to fill the space above its neck crop. The center and right figures must represent exactly the same person as the left portrait. Maintain strict visual consistency across all views. Neutral standing pose, accurate proportions, clean studio lighting, minimal shadows, orthographic reference-sheet presentation, no text, no logos, no extra objects, no decorative elements.",
+      "invariants": [
+        "same hero as the single wardrobe master in Image 1 in every panel",
+        "same midnight-blue tailored jacket, ivory blouse, dark trousers and black shoes; identity lineage hero-look-a -> hero-master"
+      ],
+      "model": "gpt-image-2.5-sunburst"
+    },
+    {
+      "id": "hero-look-a",
+      "kind": "wardrobe",
+      "required": true,
+      "method": "openai-images-api",
+      "character_ids": [
+        "hero"
+      ],
+      "location_id": null,
+      "references": [
+        "hero-master"
+      ],
+      "prompt": "Use Image 1 only for the identity of the same fictional adult singer. Make a single full-body wardrobe reference of her wearing a midnight-blue tailored jacket over an ivory blouse, dark straight trousers and simple black shoes. Keep her face, left-eye mole, age, hair and body proportions unchanged. Relaxed standing pose, natural hands, plain neutral studio backdrop, even light. One person, no panels, no lettering.",
+      "invariants": [
+        "identity from hero-master unchanged",
+        "midnight-blue jacket, ivory blouse, dark trousers, black shoes"
+      ],
+      "model": "gpt-image-2.5-sunburst"
+    },
+    {
+      "id": "stage-base",
+      "kind": "background",
+      "required": true,
+      "method": "openai-images-api",
+      "character_ids": [],
+      "location_id": "stage-a",
+      "references": [],
+      "prompt": "Create a photorealistic empty intimate music studio stage for a restrained ballad performance, wide 16:9 composition. A warm amber practical lamp stands at the rear right, matte dark timber floor, a black piano at the rear left, one simple black microphone on a stand at center front, deep charcoal curtain, subtle cool rim light from stage left. Keep the floor plan clear and plausible, no people, no audience, no signage, no text. This is a fixed location anchor for later angles.",
+      "invariants": [
+        "empty studio, piano rear-left, lamp rear-right, mic center-front",
+        "matte timber floor, charcoal curtain, warm amber/cool rim"
+      ],
+      "model": "gpt-image-2.5-sunburst"
+    },
+    {
+      "id": "letter-prop",
+      "kind": "prop",
+      "required": false,
+      "method": "openai-images-api",
+      "character_ids": [],
+      "location_id": null,
+      "references": [],
+      "prompt": "Create one fictional folded ivory letter prop for a restrained ballad performance: a small unbranded off-white envelope and a single lightly creased letter, viewed three-quarters from above on a neutral grey studio surface, with no legible writing, logos, hands, people, panels, or collage. Keep the paper edges, warm ivory color, folded size, and subtle crease pattern consistent for later single-shot reference images.",
+      "invariants": [
+        "one small folded ivory letter and envelope; no readable text or logo",
+        "same warm ivory paper, crease pattern, scale, and orientation cues"
+      ],
+      "model": "gpt-image-2.5-sunburst"
+    },
+    {
+      "id": "shot-01-start",
+      "kind": "shot-start",
+      "required": true,
+      "method": "openai-images-api",
+      "character_ids": [
+        "hero"
+      ],
+      "location_id": "stage-a",
+      "references": [
+        "hero-master",
+        "hero-look-a",
+        "stage-base",
+        "letter-prop"
+      ],
+      "prompt": "Image 1 is the identity master, Image 2 is wardrobe look A for that same singer, Image 3 is the empty studio location, and Image 4 is the only folded ivory letter prop. Combine them into one photorealistic medium-wide eye-level video starting frame of the same singer standing by the center microphone, holding the closed folded letter in her left hand at waist level. Keep the exact face, age, hair, left-eye mole, and body proportions from Image 1, the midnight-blue jacket and ivory blouse from Image 2, the piano on rear left, amber lamp on rear right, timber floor, and charcoal curtain from Image 3, and the paper color, fold, and scale from Image 4. Use a restrained emotional ballad mood, relaxed natural hands, mouth gently closed between phrases, warm key, and soft cool rim. Make one continuous scene with no panels, labels, readable letter text, extra props, or additional people.",
+      "invariants": [
+        "hero identity, look A, stage A floor plan",
+        "eye-level medium-wide single video frame"
+      ],
+      "model": "gpt-image-2.5-sunburst"
+    },
+    {
+      "id": "shot-02-start",
+      "kind": "shot-start",
+      "required": true,
+      "method": "openai-images-api",
+      "character_ids": [
+        "hero"
+      ],
+      "location_id": "stage-a",
+      "references": [
+        "hero-master",
+        "hero-look-a",
+        "stage-base",
+        "letter-prop"
+      ],
+      "prompt": "Image 1 supplies the same singer identity, Image 2 supplies the exact wardrobe, Image 3 supplies the fixed studio location, and Image 4 supplies the same folded ivory letter prop. Create one photorealistic chest-up three-quarter starting frame of this same singer at the same black microphone from a slightly more oblique stage-right camera position, with the folded letter lowered but still visible at the bottom edge in her left hand. Preserve the face, left-eye mole, hairstyle, age, midnight-blue jacket, and ivory blouse from Images 1 and 2; preserve the letter's paper color, fold, and scale from Image 4. Keep the warm lamp on the rear-right side of the same stage and the cool rim from stage left; the piano may remain outside this tighter crop. Her eyes turn slightly toward the empty space beside the lens. Use natural anatomy with no text, collage, additional props, or extra people.",
+      "invariants": [
+        "same hero/look A/stage A; no flipped mole or hair part",
+        "chest-up three-quarter single frame; same microphone"
+      ],
+      "model": "gpt-image-2.5-sunburst"
+    },
+    {
+      "id": "storyboard-page-01-sheet",
+      "kind": "storyboard-sheet",
+      "required": false,
+      "method": "compose",
+      "character_ids": [],
+      "location_id": null,
+      "references": [
+        "shot-01-start",
+        "shot-02-start"
+      ],
+      "prompt": "Compose an unchanged two-panel storyboard page from Image 1 and Image 2 in that order: place each completed single-shot image in its own evenly spaced panel on a plain neutral page with a small readable caption area beneath it, without regenerating, repainting, blending, cropping, or using the page as an I2V input. This is a local review layout only, not a new image-generation request.",
+      "invariants": [
+        "panel order is shot-01-start then shot-02-start",
+        "source shot images remain unchanged; local compose review sheet only",
+        "never use this collage sheet as an I2V input"
+      ]
+    }
+  ]
+}

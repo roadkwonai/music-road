@@ -1,0 +1,283 @@
+{
+  "as_of": "2026-10-16",
+  "selection_basis": "서로 다른 국내 감독의 제작 접근 비교. 2024~2025년 대표 사례와 2026년 최근 공식 공개 후보를 구분하며 현재 MV 인기 순위로 합치지 않는다.",
+  "analysis_limits": {
+    "frame_index": "0-based in the hashed local portfolio file; not assumed identical to YouTube upload",
+    "contact_sheet_review": "각 타일 실제 관찰; 원본해상도 전수 검수·연속재생·음악동기와 별개",
+    "shot_intervals": "관찰 블록이며 다중컷 몽타주/같은샷 세부구간을 포함. 확정된 단일컷 수가 아님",
+    "audio": "확보본은 video-only. BPM·가사·립싱크 판단 없음",
+    "permissions": "공개 비암호화 시청 스트림을 로컬 분석용 확보. 재배포·모델 참조 입력 허가로 확대하지 않음"
+  },
+  "director_evidence": [
+    {
+      "team": "RIGEND",
+      "date": "2023-03-21",
+      "type": "direct_interview",
+      "url": "https://envimedia.co/creative-spotlight-rigend-gets-in-depth-on-the-magic-of-music-videos/",
+      "principles": [
+        "음악·안무 먼저 분석",
+        "공간 깊이·관찰자 시점",
+        "아티스트 에너지 우선"
+      ],
+      "scope_note": "Armageddon 메이킹 인터뷰가 아님"
+    },
+    {
+      "team": "VM Project / 범진",
+      "date": "2023-02-09",
+      "type": "direct_interview",
+      "url": "https://cine21.com/news/view/?mag_id=101988",
+      "principles": [
+        "사전 가상 편집",
+        "붉은 반사광",
+        "노랑→빨강 경고 팔레트",
+        "시공간 모호함"
+      ]
+    },
+    {
+      "team": "돌고래유괴단 / 신우석",
+      "date": "2023-08-02",
+      "type": "direct_interview",
+      "url": "https://m.melon.com/musicstory/detail.htm?mstorySeq=13955",
+      "principles": [
+        "ETA Shot on iPhone 협업",
+        "기록 매체의 의미를 시나리오부터 설정"
+      ]
+    },
+    {
+      "team": "HIGHQUALITYFISH / 손승희",
+      "date": "2022-12-13",
+      "type": "direct_interview",
+      "url": "https://blog.adobe.com/ko/publish/2022/12/13/cc-series-producer-sonseunghee-interview",
+      "principles": [
+        "음악의 색·질감→세트·의상",
+        "기본 싱크·컷 이후 필요한 효과"
+      ],
+      "scope_note": "인터뷰 FPS 발언은 개별 확보본 FPS 증거가 아님"
+    }
+  ],
+  "technical_cases": [
+    {
+      "id": "aespa-armageddon",
+      "artist": "aespa",
+      "title": "Armageddon",
+      "year": 2024,
+      "director": "Rima Yoon / RIGEND",
+      "dop": "Giung Seo",
+      "official_video_url": "https://www.youtube.com/watch?v=nFYwcndNuOY",
+      "credit_source": "https://vimeo.com/950751826",
+      "selection": {
+        "scope": "MV award",
+        "period": "2024 MAMA",
+        "claim": "Best Music Video",
+        "source": "https://www.cjenm.com/en/news/2024-mama-awards-wrap-up-historic-run-with-iconic-performances-and-milestone-moments/"
+      },
+      "source_sha256": "f4b81b9695a02310c2139c0714524deaa08f979abe4b6fad7e33d74ede07cdc2",
+      "manifest": "Output/mv-harness-reference-20261016/armageddon-frames-v2/manifest.json",
+      "review": "Output/kpop-mv-directing-research-20261016/armageddon/merged-review.json",
+      "frame_count": 4891,
+      "contact_sheet_observed_frames": 4891,
+      "original_resolution_checked_frames": [
+        129,
+        710,
+        1002,
+        1130,
+        2397,
+        2634,
+        2877,
+        3915,
+        4015,
+        4730,
+        4890
+      ],
+      "playback_reviewed": false,
+      "complete_semantic_review": false,
+      "status": "all_contact_sheet_tiles_observed; original_details_checked; coverage_verified; semantic_review_partial",
+      "coverage": "Output/kpop-mv-directing-research-20261016/armageddon/coverage.json"
+    },
+    {
+      "id": "aespa-supernova",
+      "artist": "aespa",
+      "title": "Supernova",
+      "year": 2024,
+      "director": "Ha Jeonghun / Hattrick",
+      "dop": "Jinhyuk Lee",
+      "official_video_url": "https://www.youtube.com/watch?v=phuiiNCxRMg",
+      "official_post": "https://weverse.io/aespa/media/4-163447105",
+      "credit_source": "https://vimeo.com/949575540",
+      "selection": {
+        "scope": "song/choreography awards, not MV award",
+        "period": "2024 MAMA",
+        "claim": "Song of the Year / Best Choreography",
+        "source": "https://www.cjenm.com/en/news/2024-mama-awards-wrap-up-historic-run-with-iconic-performances-and-milestone-moments/"
+      },
+      "source_sha256": "db12a60a035af478084d643a58d35833359bb0f0fcd58c79a775099b02e8daf6",
+      "manifest": "Output/kpop-mv-directing-research-20261016/supernova/frames-v2/manifest.json",
+      "review": "Output/kpop-mv-directing-research-20261016/supernova/merged-review.json",
+      "frame_count": 4636,
+      "contact_sheet_observed_frames": 4636,
+      "original_resolution_checked_frames": [
+        1500,
+        1560,
+        2030,
+        3410,
+        3700,
+        4380
+      ],
+      "playback_reviewed": false,
+      "complete_semantic_review": false,
+      "status": "all_contact_sheet_tiles_observed; original_details_checked; coverage_verified; semantic_review_partial",
+      "automatic_analysis": {
+        "status": "completed",
+        "adopted": false,
+        "reason": "19개 반환 구간이 125초까지로 확보본 193.36초와 다름. 자동 서술/가사는 검증하지 않아 근거에서 제외"
+      },
+      "coverage": "Output/kpop-mv-directing-research-20261016/supernova/coverage.json"
+    },
+    {
+      "id": "lesserafim-crazy",
+      "artist": "LE SSERAFIM",
+      "title": "CRAZY",
+      "year": 2024,
+      "director": "Yunah Sheep",
+      "dop": "Jinhyuk Lee",
+      "official_video_url": "https://www.youtube.com/watch?v=n6B5gQXlB-0",
+      "official_post": "https://weverse.io/lesserafim/media/4-177030270",
+      "credit_source": "https://vimeo.com/1004490468",
+      "selection": {
+        "scope": "technical comparison",
+        "claim": "감독·촬영·jib·RC·SFX·3D/FX·matchmove·2D 크레딧 확인. 개별 프레임에 기법 귀속 미확인"
+      },
+      "contact_sheet_observed_frames": 4075,
+      "playback_reviewed": false,
+      "complete_semantic_review": false,
+      "status": "all_contact_sheet_tiles_observed; original_details_checked; coverage_verified; semantic_review_partial",
+      "source_sha256": "98b063e4bf82b1de32fe086b373d7cbb8a917c6f084ac4b5625e62ef9c4831c2",
+      "manifest": "Output/kpop-mv-directing-research-20261016/crazy/frames-v2/manifest.json",
+      "review": "Output/kpop-mv-directing-research-20261016/crazy/merged-review.json",
+      "frame_count": 4075,
+      "original_resolution_checked_frames": [
+        1800,
+        1900,
+        2500,
+        2770
+      ],
+      "coverage": "Output/kpop-mv-directing-research-20261016/crazy/coverage.json"
+    },
+    {
+      "id": "lesserafim-hot",
+      "artist": "LE SSERAFIM",
+      "title": "HOT",
+      "year": 2025,
+      "director": "Yunah Sheep",
+      "dop": "Jinhyuk Lee",
+      "credit_source": "https://vimeo.com/1066834678",
+      "second_credit_source": "https://13rolls.com/Le-Sserafim",
+      "album_release_date": "2025-03-14",
+      "date_source": "https://shop.weverse.io/en/shop/USD/artists/50/sales/35661",
+      "date_note": "앨범 날짜를 MV 업로드 날짜로 사용하지 않음",
+      "status": "metadata_verified; frames_not_reviewed",
+      "contact_sheet_observed_frames": 0
+    },
+    {
+      "id": "blackpink-whistle",
+      "artist": "BLACKPINK",
+      "title": "WHISTLE",
+      "year": 2016,
+      "director": "BEOMJIN / VM Project",
+      "dop": "Jinwoo Kim",
+      "credit_source": "https://vimeo.com/178139673",
+      "official_source": "https://yg-life.com/archives/78641?lang=en",
+      "status": "all_contact_sheet_tiles_observed; original_details_checked; coverage_verified; semantic_review_partial",
+      "contact_sheet_observed_frames": 5504,
+      "frame_count": 5504,
+      "source_sha256": "703e279640d3a434f40e20356fddf7969de8c65f2cb933487509f5ff98ae319e",
+      "manifest": "Output/kpop-mainstream-mv-research-20261016/blackpink-whistle/frames-v2/manifest.json",
+      "review": "Output/kpop-mainstream-mv-research-20261016/blackpink-whistle/review.json",
+      "coverage": "Output/kpop-mainstream-mv-research-20261016/blackpink-whistle/coverage.json",
+      "original_resolution_checked_frames": [
+        1376,
+        2752,
+        4128
+      ],
+      "playback_reviewed": false,
+      "complete_semantic_review": false
+    }
+  ],
+  "current_candidates": [
+    {
+      "artist": "Hearts2Hearts",
+      "title": "ICONIC HEART",
+      "channel": "SMTOWN",
+      "edition": "Japanese debut single",
+      "official_video_url": "https://www.youtube.com/watch?v=chl0R8C4NJ8",
+      "dates": {
+        "youtube_search_metadata": "2026-08-11",
+        "official_single_announcement": "2026-08-12"
+      },
+      "date_source": "https://smtown-official.jp/news/detail.php?nid=egwoPatd9sU%3D",
+      "date_note": "하루 차이 원인 미검증. 최근90일(2026-07-18 이후) 공식 공개 후보",
+      "popularity": {
+        "scope": "MV",
+        "verified": false,
+        "metric": null
+      },
+      "director_verified": false,
+      "status": "metadata_only; frames_not_reviewed"
+    },
+    {
+      "artist": "Hearts2Hearts",
+      "title": "Lemon Tang",
+      "channel": "SMTOWN",
+      "release_date": "2026-06-22",
+      "official_video_url": "https://www.youtube.com/watch?v=1VqxWNwgf5Q",
+      "official_post": "https://weverse.io/hearts2hearts/media/4-233629025",
+      "popularity": {
+        "scope": "song, not MV",
+        "region": "Melon Korea service",
+        "metric": "weekly general song chart",
+        "period": "2026-10-05/2026-10-11",
+        "rank": 34,
+        "source": "https://www.melon.com/chart/week/"
+      },
+      "director_verified": false,
+      "status": "metadata_only; frames_not_reviewed"
+    },
+    {
+      "artist": "aespa",
+      "title": "LEMONADE",
+      "channel": "SMTOWN",
+      "official_video_url": "https://www.youtube.com/watch?v=83C3TZ4Zm_o",
+      "official_post": "https://weverse.io/aespa/media/2-175357700",
+      "dates": {
+        "youtube_search_metadata": "2026-05-28",
+        "official_release_and_mv": "2026-05-29"
+      },
+      "date_source": "https://aespa-official.jp/news/lemonade-release/",
+      "date_note": "하루 차이 원인 미검증. 공식 사이트 날짜 우선, 검색 메타데이터 차이 보존",
+      "popularity": {
+        "scope": "song, not MV",
+        "region": "Melon Korea service",
+        "metric": "weekly general song chart",
+        "period": "2026-10-05/2026-10-11",
+        "rank": 9,
+        "source": "https://www.melon.com/chart/week/"
+      },
+      "director_verified": false,
+      "status": "metadata_only; frames_not_reviewed"
+    }
+  ],
+  "current_metric_gap": {
+    "source": "https://charts.youtube.com/charts/TopVideos/kr/weekly",
+    "status": "공식 페이지가 웹 도구에서 빈 본문으로 반환. 최신 MV순위 미검증. 불명확한 검색 조회수는 채택하지 않음"
+  },
+  "user_priority_expansion": {
+    "catalog": "kpop-mainstream-research.json",
+    "playbook": "kpop-mainstream-playbook.md",
+    "reason": "BLACKPINK·RESCENE·ITZY 지정에 따라 인물·패션·현실 기반 공간·퍼포먼스 중심으로 확장. 과거 aespa 관찰은 선택적 SF 비교로 보존. 현재 인기 순위 검증과 구분."
+  },
+  "source_quality_upgrade": {
+    "catalog": "Output/kpop-mainstream-mv-highres-20261016/catalog.json",
+    "report": "Output/kpop-mainstream-mv-highres-20261016/quality-report.md",
+    "policy": "2160p 우선·최소 인코딩1080p·업스케일제외. 기존 저해상도 자료의 관찰과 새파일 의미분석완료를 구분."
+  }
+}

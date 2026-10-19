@@ -1,0 +1,526 @@
+{
+  "objective": "별도 음악 작업에서 인계한 원곡·가사를 보존하며 음악별 전체 결정과 스토리라인, 키시트·실제 이미지 스토리보드·애니매틱을 검수한 일관된 LTX 2.5 MV를 납품한다. 분석/기획은 필요한 노드만 구체화하고 새 MV 전체 제작은 13단계 계약을 적용한다.",
+  "tasks": [
+    {
+      "id": "analyze",
+      "role": "mv_reference_analyst",
+      "dependencies": [],
+      "ownership": [
+        ".harness/work/mv-template/references"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_reference_analyst.toml",
+        ".agents/skills/road-music-mv/references/analysis-protocol.md",
+        ".agents/skills/road-music-mv/references/genre-style-guide.md",
+        ".agents/skills/road-music-mv/references/genre-references.json"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "2160p 우선/최소1080p 원본 품질과 실제 관찰·coverage·전환 근거. 추출/메타데이터만으로 전수 의미분석 완료를 주장하지 않음.",
+        " 새 이미지 제작 범위에서는 의상·세계 명소/자연/스튜디오·소품·화보 구도의 실제 출처/관찰·음악 적합성과 권리 범위를 references/lookdev-research.md에 남긴다. 단순 부분 수정은 유효한 기존 조사를 재사용할 수 있다."
+      ],
+      "required": true
+    },
+    {
+      "id": "direct",
+      "role": "mv_director",
+      "dependencies": [
+        "analyze"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/direction"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_director.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/director-research.md",
+        ".agents/skills/road-music-mv/references/genre-style-guide.md",
+        ".agents/skills/road-music-mv/assets/character-sheet.prompt.txt",
+        ".agents/skills/road-music-mv/references/music-led-lookdev.md",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "원곡 실측 구간과 16개 연출 결정·선택 이유·story beat·전체shot·prop·panel/page·완성 이미지 프롬프트가 연결됨. Bible이 있으면 구조/binding. planning-only는 실제자산 미완료를 표시.",
+        "eyeline_target/body_orientation/screen_position/start_pose/end_pose와 단일 카메라 경로를 구체화하고 상위 구도 약속·실제 shot-size/angle/movement 분포·대표 샷 ID를 대조한다.",
+        "조사에서 선택/탈락 이유를 설명하고 음악별 룩·공간·소품을 결정. 새 의상 master→고정 원문 캐릭터시트·배경 시점·소품의 선택 규칙에 따른 선행 이미지 계획 및 실사 촬영 프롬프트가 연결됨.",
+        "안무/군무 요청 또는 안무형 퍼포먼스 선택 시 choreography.json에 음악 시간/카운트·멤버별 동작/대형·샷 연결을 설계하고 실제 군무 대표 샘플과 proof를 계획한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "preflight",
+      "role": "mv_quality_reviewer",
+      "dependencies": [
+        "analyze",
+        "direct"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/review/preflight.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/assets/character-sheet.prompt.txt",
+        ".agents/skills/road-music-mv/references/music-led-lookdev.md",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "음악·장르·인원·시대·공간·스토리·촬영/필름look·시각효과·전환·키시트/보드 구조를 독립 검토. 전체곡 shot timeline gap/overlap 없음, critical/high 없음.",
+        "상위 MCU/관계 구도가 개별 샷에 실제 있는지, 일반 명칭만 반복한 action/이동이 아닌지 독립 확인한다. 고정 라이브/원테이크의 의도적 반복은 근거로 구분한다.",
+        "안무형이면 걷기/정지 포즈를 군무로 대체하지 않고 카운트/대형/카메라·포즈키/샷 연결과 실제 런타임 조건화 한계를 검토한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "create-keys",
+      "role": "mv_art_director",
+      "dependencies": [
+        "direct",
+        "preflight"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/visuals/keys",
+        ".harness/work/mv-template/visuals/keys-manifest.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_art_director.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/assets/character-sheet.prompt.txt",
+        ".agents/skills/road-music-mv/references/music-led-lookdev.md",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "인물별 master/캐릭터·표정/의상과 장소·소품 키시트를 참조 순서대로 기본 GPT Image 2.5 API 또는 키 부재/명시 선택 시 image_gen/충족된 재사용으로 실제 확보. 영상 keyframes/pages는 이 단계에서 완료로 주장하지 않음."
+      ],
+      "required": true
+    },
+    {
+      "id": "review-keys",
+      "role": "mv_quality_reviewer",
+      "dependencies": [
+        "direct",
+        "create-keys"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/review/keys.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/assets/character-sheet.prompt.txt",
+        ".agents/skills/road-music-mv/references/music-led-lookdev.md",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "실제 키시트의 얼굴·나이·의상·배경·소품을 독립 대조. --production-design --storyboard --stage keys --require-ready 통과. 미사용 optional 자산을 강제하지 않음. keys 전역판정도 현재4문서 canonical digest에 결속하여 계획변경후오래된키승인을거부한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "create-samples",
+      "role": "mv_art_director",
+      "dependencies": [
+        "direct",
+        "create-keys",
+        "review-keys"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/visuals/samples",
+        ".harness/work/mv-template/visuals/samples-manifest.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_art_director.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/music-led-lookdev.md",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "감독이 정한 서로 다른 핵심 구도·eyeline·다인 배치 대표 샷만 먼저 실제 확보하고 부분 manifest/원문·참조·파일 지문을 보존한다. 이 샷은 최종 집합에 포함하며 키/나머지 샷을 중복 생성하지 않는다.",
+        "안무형이면 군무 대형/발 지지와 해당 음악 시점의 실제 시작 자세를 가진 전신 표본을 포함한다. 파생 종료 이미지가 있으면 실제 시작 PNG를 표시·검사한 뒤 제출하며, 부분 manifest의 실제 ID/행수를 확인한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "review-samples",
+      "role": "mv_quality_reviewer",
+      "dependencies": [
+        "direct",
+        "create-keys",
+        "review-keys",
+        "create-samples"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/review/samples.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/references/music-led-lookdev.md",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "실제 대표 샷의 시선·몸 방향·화면 위치·시작 자세·shot-size/angle과 서사 읽힘을 계획과 독립 대조한다. 현재4문서 digest·표본ID·실제producer/reviewer·파일SHA에 판정을 결속한다. 부분 표본의 pass는 전체 storyboard/animatic ready가 아니다.",
+        "안무형이면 실제 시작/종료 포즈·대형이 카운트와 맞는지 검토하며 스틸 PASS는 동작 성공과 구분한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "create-storyboard",
+      "role": "mv_art_director",
+      "dependencies": [
+        "direct",
+        "create-keys",
+        "review-keys",
+        "create-samples",
+        "review-samples"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/visuals/storyboard",
+        ".harness/work/mv-template/visuals/asset-manifest.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_art_director.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "승인 keys를 참조한 단일 shot-start/end 이미지와 그 패널들을 변형 없이 조립한 실제 storyboard-sheet PNG 페이지. 승인 keys를 변경하지 않고 full manifest에서 파일/해시를 재참조.",
+        "승인 대표 샷은 원본·지문을 그대로 참조하고 나머지만 제작한다. 최대2요청 유한 배치마다 메인 지시/배정 제출중지 파일을 확인하며 진행 중 결과를 보존하고 자체 코디네이터를 종료할 수 있어야 한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "review-storyboard",
+      "role": "mv_quality_reviewer",
+      "dependencies": [
+        "direct",
+        "review-keys",
+        "create-storyboard",
+        "create-samples"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/review/images.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "전체 패널·페이지·인물/의상/소품·시선/방향·이야기/에너지/전환을 실제 이미지로 검수. 전역 storyboard 판정을 4문서 canonical digest·전체 panel ID·실제 producer/reviewer에 결속하고 --stage storyboard --require-ready 통과."
+      ],
+      "required": true
+    },
+    {
+      "id": "build-animatic",
+      "role": "mv_ltx_producer",
+      "dependencies": [
+        "direct",
+        "create-storyboard",
+        "review-storyboard",
+        "create-samples"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/preproduction"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_ltx_producer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/ltx-roadmusic.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님",
+          "애니매틱은 원곡과 동일 sample rate/channels의 무손실 PCM 기준으로 실제 신호를 비교한다; final master MP4 포맷은 유지."
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "검수 패널의 at_frame과 원곡으로 실제 애니매틱 영상 생성. 원곡 길이/속도/순서 보존, 실제 도구·명령·파일/source hash·타이밍을 build 기록에 저장. preproduction/animatic.mov에 무손실 PCM-s32 기준음원을 유지하고 source와 동일sample_rate/channels로 비교 가능한 신호를 보존한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "review-animatic",
+      "role": "mv_quality_reviewer",
+      "dependencies": [
+        "direct",
+        "create-storyboard",
+        "review-storyboard",
+        "build-animatic",
+        "create-samples"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/review/animatic.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님",
+          "애니매틱은 원곡과 동일 sample rate/channels의 무손실 PCM 기준으로 실제 신호를 비교한다; final master MP4 포맷은 유지."
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "원곡과 실제 애니매틱을 정상속도로 재생해 이야기·감정·반복·패널 길이·싱크/전환 검토. 실제 media SHA·source audio SHA·4문서 digest 결속 및 --stage animatic --animatic-review ... --require-ready 통과. 실제내장오디오와source의 normalized PCM-s32 samplecount/지문이 일치하고 전체길이가 유지돼야 한다. 선언SHA나오디오존재만으로 통과하지 않는다."
+      ],
+      "required": true
+    },
+    {
+      "id": "produce",
+      "role": "mv_ltx_producer",
+      "dependencies": [
+        "direct",
+        "preflight",
+        "create-storyboard",
+        "review-storyboard",
+        "build-animatic",
+        "review-animatic",
+        "create-samples"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/production"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".agents/skills/road-music-mv/references/harness-spec.json",
+        ".codex/agents/mv_ltx_producer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/ltx-roadmusic.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님",
+          "애니매틱은 원곡과 동일 sample rate/channels의 무손실 PCM 기준으로 실제 신호를 비교한다; final master MP4 포맷은 유지."
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "선행 이미지/스토리보드/애니매틱 실제 검수 통과 뒤 어려운 얼굴·손·군무·립싱크 proof. generation_defaults의 LTX 2.5 Distilled Q8 또는 사용자 지정 모델의 실제 help/로컬 모델/argv로 생성·편집하고 원곡·기록 보존. 미설치면 자동 다운로드·2.3 대체 없이 보고.",
+        "안무형이면 원곡 애니매틱 이후 기존 proof 예산에서 기획한 멤버 구성의 실제 군무를 생성·검수하고 동작/박/인물 일관성의 필수 결함을 해소한 뒤 전체로 확장한다. I2V에 중간 안무도 실제로 전달하고 런타임의 입력 길이·잘림을 확인한다."
+      ],
+      "required": true
+    },
+    {
+      "id": "review",
+      "role": "mv_quality_reviewer",
+      "dependencies": [
+        "analyze",
+        "direct",
+        "create-storyboard",
+        "review-storyboard",
+        "review-animatic",
+        "produce",
+        "create-samples"
+      ],
+      "ownership": [
+        ".harness/work/mv-template/review/final.json"
+      ],
+      "inputs": [
+        ".harness/work/mv-template/input.json",
+        ".codex/agents/mv_quality_reviewer.toml",
+        ".agents/skills/road-music-mv/references/creative-direction.md",
+        ".agents/skills/road-music-mv/references/production-workflow.md",
+        ".agents/skills/road-music-mv/references/image-preproduction.md",
+        ".agents/skills/road-music-mv/references/group-world-planning.md",
+        ".agents/skills/road-music-mv/references/quality-gates.md",
+        ".agents/skills/road-music-mv/scripts/validate_mv_context.py",
+        ".agents/skills/road-music-mv/scripts/validate_preproduction.py",
+        ".agents/skills/road-music-mv/scripts/mv_storyboard.py",
+        ".agents/skills/road-music-mv/references/idol-choreography.md"
+      ],
+      "context": {
+        "decisions": [
+          "원곡·가사 보존; 음악 생성/선정 별도; 기획-only는 필요한 노드만 구체화",
+          "키시트→독립검수→대표샷/독립연출검수→실제 이미지 보드→독립검수→원곡 애니매틱→독립검수→LTX. 입력/자산 변경은 downstream 재검수",
+          "기획 선택은 모델/CLI 전용 제어값이나 실제 물리 촬영의 증거가 아님"
+        ],
+        "skill_paths": [
+          ".agents/skills/road-music-mv/SKILL.md"
+        ]
+      },
+      "acceptance": [
+        "최종 실제 영상·원곡·프레임 경계·인물/소품·효과·출력조건을 독립 재생 검수. critical/high 없음. 미실행을 통과로 처리하지 않음.",
+        "안무형이면 실제 원곡 동기 재생으로 군무의 인원/대형/발 접지/팔 분리/동작 순서와 타격 시점, 계획 대비 한계를 독립 확인한다."
+      ],
+      "required": true
+    }
+  ]
+}

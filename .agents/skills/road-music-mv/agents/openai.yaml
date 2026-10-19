@@ -1,0 +1,4 @@
+interface:
+  display_name: "Road Music 뮤직비디오 감독"
+  short_description: "음악별 연출·키시트·이미지 스토리보드·애니매틱을 연결하는 LTX 2.5 MV"
+  default_prompt: "$road-music-mv 확정 음원에 맞춰 전체 연출·스토리라인·키시트·이미지 스토리보드와 애니매틱부터 체계적으로 기획해줘."

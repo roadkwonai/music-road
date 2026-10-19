@@ -1,0 +1,157 @@
+{
+  "as_of": "2026-10-16",
+  "basis": "공식 수상·크레딧 중심의 분석 후보이며 현재 인기 순위가 아님. Armageddon의 접촉시트 전 타일 관찰과 일부 원본 확대를 추가했다. 국내 K-POP 추가 작품·최신 후보의 실제 상태는 kpop-research.json 참조. 연속 재생을 포함한 전수 의미 분석 완료 작품은 없음.",
+  "items": [
+    {
+      "id": "aespa-armageddon",
+      "country": "KR",
+      "artist": "aespa",
+      "title": "Armageddon",
+      "release_date": "2024-05-27",
+      "date_source": "https://www.youtube.com/watch?v=nFYwcndNuOY",
+      "official_video_url": "https://www.youtube.com/watch?v=nFYwcndNuOY",
+      "director": "Rima Yoon",
+      "credit_source": "https://vimeo.com/950751826",
+      "selection_reason": "2024 MAMA Best Music Video",
+      "selection_source": "https://www.cjenm.com/en/news/2024-mama-awards-wrap-up-historic-run-with-iconic-performances-and-milestone-moments/",
+      "retrieved_at": "2026-10-16",
+      "viewing_status": "all_frames_extracted / all_4891_contact_sheet_tiles_observed / 11_original_details_checked / playback_not_reviewed / semantic_review_partial",
+      "download_permission_status": "public unencrypted browser playback obtained for analysis; redistribution/model-input permission not established",
+      "source_path": "/Users/freelife/youtube/music/music-road/Output/mv-harness-reference-20261016/armageddon-official-1080p-video-only.mp4",
+      "source_sha256": "f4b81b9695a02310c2139c0714524deaa08f979abe4b6fad7e33d74ede07cdc2",
+      "reviewed_frames": 4891,
+      "total_frames": 4891,
+      "metric_period": null,
+      "frame_manifest": "/Users/freelife/youtube/music/music-road/Output/mv-harness-reference-20261016/armageddon-frames-v2/manifest.json",
+      "audio_status": "video-only; no music/beat/lipsync judgments",
+      "review": "Output/kpop-mv-directing-research-20261016/armageddon/merged-review.json",
+      "coverage": "Output/kpop-mv-directing-research-20261016/armageddon/coverage.json",
+      "playback_reviewed": false,
+      "exact_edit_boundaries_verified": false
+    },
+    {
+      "id": "ive-heya",
+      "country": "KR",
+      "artist": "IVE",
+      "title": "해야 (HEYA)",
+      "release_date": "2024-04-29",
+      "date_source": "https://ssl.sme.co.jp/artist/IVE/info/562900",
+      "official_video_url": "https://www.youtube.com/watch?v=07EzMbVH3QE",
+      "director": "Rima Yoon",
+      "credit_source": "https://eleanor.co/creatives/rima-yoon/ive-heya/",
+      "selection_reason": "MMA2024 올해의 뮤직비디오",
+      "selection_source": "https://kakaoent.com/pr/detail/157",
+      "retrieved_at": "2026-10-16",
+      "viewing_status": "metadata_verified / frames_not_reviewed",
+      "download_permission_status": "not_established",
+      "source_path": null,
+      "source_sha256": null,
+      "reviewed_frames": 0,
+      "total_frames": null,
+      "metric_period": null
+    },
+    {
+      "id": "kendrick-not-like-us",
+      "country": "US",
+      "artist": "Kendrick Lamar",
+      "title": "Not Like Us",
+      "release_date": "2024-07-04",
+      "date_source": "https://www.youtube.com/watch?v=H58vbez_m4E",
+      "official_video_url": "https://www.youtube.com/watch?v=H58vbez_m4E",
+      "director": "Dave Free & Kendrick Lamar",
+      "credit_source": "https://www.youtube.com/watch?v=H58vbez_m4E",
+      "selection_reason": "2025 Grammy Best Music Video",
+      "selection_source": "https://www.grammy.com/awards/categories/best-music-video/2025/",
+      "retrieved_at": "2026-10-16",
+      "viewing_status": "metadata_verified / frames_not_reviewed",
+      "download_permission_status": "not_established",
+      "source_path": null,
+      "source_sha256": null,
+      "reviewed_frames": 0,
+      "total_frames": null,
+      "metric_period": null
+    },
+    {
+      "id": "sabrina-manchild",
+      "country": "US",
+      "artist": "Sabrina Carpenter",
+      "title": "Manchild",
+      "release_date": "2025-06-06",
+      "date_source": "https://www.youtube.com/watch?v=aSugSGCC12I",
+      "official_video_url": "https://www.youtube.com/watch?v=aSugSGCC12I",
+      "director": "Vania Heymann & Gal Muggia",
+      "credit_source": "https://vimeo.com/1103992585",
+      "selection_reason": "2026 Grammy Best Music Video nominee; 2025-06 공개 당시 성과 별도",
+      "selection_source": "https://www.grammy.com/awards/categories/best-music-video/2026/",
+      "retrieved_at": "2026-10-16",
+      "viewing_status": "all_frames_extracted / 144_frame_visual_pilot / semantic_review_partial",
+      "download_permission_status": "public unencrypted browser playback obtained for analysis; redistribution/model-input permission not established",
+      "source_path": "/Users/freelife/youtube/music/music-road/Output/mv-harness-reference-20261016/manchild-official-video-only.mp4",
+      "source_sha256": "fd0c6dda45c839b9a5e5d3e5d6138157c34edd29ca46afe81ec2f22bc06592f0",
+      "reviewed_frames": 144,
+      "total_frames": 5669,
+      "metric_period": null,
+      "date_note": "YouTube 2025-06-06, artist site 2025-06-05. Upload/site dates differ; not a 2026 current trend claim.",
+      "historical_metric": {
+        "publisher": "Universal Music Japan",
+        "source": "https://www.universal-music.co.jp/sabrina-carpenter/news/2025-06-10/",
+        "period": "first 24 hours after 2025 release",
+        "claim": "6M+ MV views; YouTube world trending No.1 at that time"
+      },
+      "frame_manifest": "/Users/freelife/youtube/music/music-road/Output/mv-harness-reference-20261016/manchild-frames-v2/manifest.json",
+      "audio_status": "video-only; no music/beat/lipsync judgments"
+    },
+    {
+      "id": "doechii-anxiety",
+      "country": "US",
+      "artist": "Doechii",
+      "title": "Anxiety",
+      "release_date": null,
+      "date_source": null,
+      "official_video_url": "https://www.youtube.com/watch?v=riCP9x31Kuk",
+      "director": "James Mackel",
+      "credit_source": "https://www.universalmusic.com.br/2025/06/03/o-hit-anxiety-da-rapper-doechii-ganha-videoclipe-e-versao-em-vinil/",
+      "selection_reason": "2026 Grammy Best Music Video",
+      "selection_source": "https://www.grammy.com/awards/categories/best-music-video/2026/",
+      "retrieved_at": "2026-10-16",
+      "viewing_status": "metadata_verified / frames_not_reviewed",
+      "download_permission_status": "not_established",
+      "source_path": null,
+      "source_sha256": null,
+      "reviewed_frames": 0,
+      "total_frames": null,
+      "metric_period": null,
+      "date_note": "2025作品. Research returned conflicting release clues; original-video upload date must be reverified before asserting a day."
+    }
+  ],
+  "source_conflicts": [
+    {
+      "work": "aespa-armageddon",
+      "issue": "KOCCA directory conflates MAMA and MMA awards. MAMA Armageddon / MMA HEYA follows event-organizer results.",
+      "preferred_sources": [
+        "https://www.cjenm.com/en/news/2024-mama-awards-wrap-up-historic-run-with-iconic-performances-and-milestone-moments/",
+        "https://kakaoent.com/pr/detail/157"
+      ]
+    }
+  ],
+  "optional_candidates": [
+    {
+      "artist": "Lady Gaga",
+      "title": "Abracadabra",
+      "official_video_url": "https://www.youtube.com/watch?v=vBynw9Isr28",
+      "reason": "2025 VMA direction; choreography corpus expansion",
+      "source": "https://www.mtv.com/info-page/prnkr6/winners-for-2025-mtv-video-music-awards",
+      "viewing_status": "frames_not_reviewed"
+    }
+  ],
+  "user_priority_expansion": {
+    "catalog": "kpop-mainstream-research.json",
+    "playbook": "kpop-mainstream-playbook.md",
+    "reason": "BLACKPINK·RESCENE·ITZY 지정에 따라 인물·패션·현실 기반 공간·퍼포먼스 중심으로 확장. 과거 aespa 관찰은 선택적 SF 비교로 보존. 현재 인기 순위 검증과 구분."
+  },
+  "source_quality_upgrade": {
+    "catalog": "Output/kpop-mainstream-mv-highres-20261016/catalog.json",
+    "report": "Output/kpop-mainstream-mv-highres-20261016/quality-report.md",
+    "policy": "2160p 우선·최소 인코딩1080p·업스케일제외. 기존 저해상도 자료의 관찰과 새파일 의미분석완료를 구분."
+  }
+}

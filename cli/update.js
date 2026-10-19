@@ -127,9 +127,10 @@ async function latest () {
 async function check (params = {}, context = {}) {
   assertParams(params, [])
   const release = await latest()
-  if (!release) return recordComponent({ current: CURRENT, available: false, version: null, releaseUrl: null, notes: '', asset: null, installable: false }, { installedVersion: CURRENT, status: 'up-to-date' }, context)
-  const available = compare(release.version, CURRENT) > 0
-  return recordComponent({ current: CURRENT, available, version: release.version, releaseUrl: release.releaseUrl, notes: release.notes, asset: release.asset, installable: available }, { installedVersion: CURRENT, latestVersion: release.version, status: available ? 'update-available' : 'up-to-date', sourceUrl: release.releaseUrl }, context)
+  if (!release) return recordComponent({ current: CURRENT, available: false, version: null, releaseUrl: null, notes: '', asset: null, installable: false }, { installedVersion: CURRENT, status: 'no-release' }, context)
+  const order = compare(release.version, CURRENT)
+  const available = order > 0
+  return recordComponent({ current: CURRENT, available, version: release.version, releaseUrl: release.releaseUrl, notes: release.notes, asset: release.asset, installable: available, ...(order < 0 ? { reason: `현재 CLI(${CURRENT})가 공개 버전(${release.version})보다 높아 자동 업데이트를 하지 않습니다. 초기화된 배포로 전환하려면 기존 파일을 보존하고 새 경로에 수동 설치하세요.` } : {}) }, { installedVersion: CURRENT, latestVersion: release.version, status: available ? 'update-available' : order < 0 ? 'release-reset-required' : 'up-to-date', sourceUrl: release.releaseUrl }, context)
 }
 function parseChecksum (value, name) {
   for (const line of String(value).split(/\r?\n/)) {

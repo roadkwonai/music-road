@@ -11,7 +11,6 @@ const asar = require('@electron/asar')
 
 const repository = path.resolve(__dirname, '..')
 const helper = path.join(repository, 'electron', 'update-installer.js')
-const oldVersion = '1.4.0'
 const candidateVersion = '9.9.9'
 const bundleId = 'dev.roadkwon.roadmusic'
 const defaultBaseline = path.join(repository, 'dist', 'update-e2e-baseline', 'Road Music.app')
@@ -57,11 +56,17 @@ async function plist (bundle) {
   return JSON.parse(await run('/usr/bin/plutil', ['-convert', 'json', '-o', '-', path.join(bundle, 'Contents', 'Info.plist')]))
 }
 
+function bundleVersion (info) {
+  assert.equal(info.CFBundleIdentifier, bundleId)
+  assert.match(String(info.CFBundleShortVersionString || ''), /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/)
+  assert.equal(info.CFBundleVersion, info.CFBundleShortVersionString)
+  return info.CFBundleShortVersionString
+}
+
 async function verifyBundle (bundle, version) {
   const info = await plist(bundle)
-  assert.equal(info.CFBundleIdentifier, bundleId)
-  assert.equal(info.CFBundleShortVersionString, version)
-  assert.equal(info.CFBundleVersion, version)
+  const actual = bundleVersion(info)
+  if (version !== undefined) assert.equal(actual, version)
   await run('/usr/bin/codesign', ['--verify', '--deep', '--strict', bundle])
   return info
 }
@@ -130,7 +135,7 @@ async function assertSentinels (dataDir) {
   assert.equal(await fs.readFile(path.join(dataDir, 'models', 'preserved.txt'), 'utf8'), 'keep-models')
 }
 
-async function wrapOldExecutable (bundle, marker) {
+async function wrapOldExecutable (bundle, marker, oldVersion) {
   const info = await plist(bundle)
   const macos = path.join(bundle, 'Contents', 'MacOS')
   const executable = path.join(macos, info.CFBundleExecutable)
@@ -166,7 +171,7 @@ app.whenReady().then(() => app.exit(71))
   return dmg
 }
 
-async function wrongBundleCase (base, baseline) {
+async function wrongBundleCase (base, baseline, oldVersion) {
   const source = path.join(base, 'wrong-source')
   const candidate = path.join(source, 'Road Music.app')
   const installed = path.join(base, 'wrong-installed', 'Road Music.app')
@@ -176,7 +181,7 @@ async function wrongBundleCase (base, baseline) {
   await fs.mkdir(path.dirname(installed), { recursive: true })
   await Promise.all([run('/usr/bin/ditto', [baseline, candidate]), run('/usr/bin/ditto', [baseline, installed])])
   await writeSentinels(dataDir)
-  await wrapOldExecutable(installed, marker)
+  await wrapOldExecutable(installed, marker, oldVersion)
   const plistPath = path.join(candidate, 'Contents', 'Info.plist')
   await run('/usr/libexec/PlistBuddy', ['-c', `Set :CFBundleShortVersionString ${candidateVersion}`, '-c', `Set :CFBundleVersion ${candidateVersion}`, '-c', 'Set :CFBundleIdentifier dev.roadkwon.roadmusic.wrong', plistPath])
   await run('/usr/bin/codesign', ['--force', '--deep', '--sign', '-', candidate])
@@ -207,12 +212,13 @@ async function main () {
   const requested = option('--baseline-app') || defaultBaseline
   assert.ok(path.isAbsolute(requested), '--baseline-app must be absolute')
   const baseline = await fs.realpath(requested)
+  const baselineInfo = await verifyBundle(baseline)
+  const oldVersion = bundleVersion(baselineInfo)
   const proof = { baseline, oldVersion, candidateVersion, helper, startedAt: new Date().toISOString() }
   let root
   let marker
   let dataDir
   try {
-    await verifyBundle(baseline, oldVersion)
     root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'road-music-mac-rollback-')))
     const installed = path.join(root, 'installed', 'Road Music.app')
     dataDir = path.join(root, 'data')
@@ -220,7 +226,7 @@ async function main () {
     await fs.mkdir(path.dirname(installed), { recursive: true })
     await run('/usr/bin/ditto', [baseline, installed])
     await writeSentinels(dataDir)
-    await wrapOldExecutable(installed, marker)
+    await wrapOldExecutable(installed, marker, oldVersion)
     const dmg = await createCandidate(root, baseline)
     const pid = await deadOwnedPid()
     const payload = { mode: 'mac-app', pid, version: candidateVersion, dmg, bundle: await fs.realpath(installed), userData: dataDir, dataDir, service: true }
@@ -254,7 +260,7 @@ async function main () {
     proof.rollback = { durable, helperExit: helperResult.code, installedVersion: (await plist(installed)).CFBundleShortVersionString, oldLaunches: launches.length }
     proof.cli = { appVersion: state.version, engines: Array.isArray(engines) ? engines.length : null, projects: projects.current || null, songs: Array.isArray(songs) ? songs.length : null }
     proof.sentinels = ['settings', 'songs', 'models']
-    proof.wrongBundle = await wrongBundleCase(root, baseline)
+    proof.wrongBundle = await wrongBundleCase(root, baseline, oldVersion)
     proof.ok = true
   } finally {
     if (marker) await stopOwned(marker).catch(error => { proof.cleanupError = error.message })
@@ -273,3 +279,5 @@ if (require.main === module) main().catch(async error => {
   console.error(result.error)
   process.exitCode = 1
 })
+
+module.exports = { bundleVersion }

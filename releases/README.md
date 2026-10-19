@@ -50,7 +50,7 @@ npm run dist:cli
 node scripts/release-assets.js --product cli
 ```
 
-CLI 워크플로는 `cli-v*`만 받아 ZIP·체크섬을 발행합니다. 앱 DMG를 빌드하거나 앱 버전을 바꾸지 않고, CLI 릴리스를 앱의 Latest로 지정하지 않습니다. `/releases/latest`는 앱용이며 CLI 최신 버전은 `cli:update:check`로 조회합니다. 이번 명시적 초기화에서만 새 CLI 0.1.0은 앱 0.1.0 소스를 동봉하도록 기존 공개 CLI 0.1.0을 백업·철회 후 교체합니다. 이후 동일 CLI 버전을 재발행하지 않습니다.
+CLI 워크플로는 `cli-v*`만 받아 ZIP·체크섬을 발행합니다. 앱 DMG를 빌드하거나 앱 버전을 바꾸지 않고, CLI 릴리스를 앱의 Latest로 지정하지 않습니다. `/releases/latest`는 앱용이며 CLI 최신 버전은 `cli:update:check`로 조회합니다. 이번 명시적 초기화와 버전 상태 검수 보완 재배포에서만 새 CLI 0.1.0은 앱 0.1.0 소스를 동봉하도록 기존 공개 CLI 0.1.0을 백업·철회 후 교체합니다. 이후 동일 CLI 버전을 재발행하지 않습니다.
 
 ## 과거 공유 버전 철회 기록
 

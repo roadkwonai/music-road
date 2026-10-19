@@ -161,8 +161,14 @@ async function check () {
     setState(blank('checking'))
     try {
       const release = await latest()
-      if (!release) return recordComponent(setState(blank('no-release', { reason: '안정 릴리스가 아직 없습니다.' })), { status: 'up-to-date' })
-      if (compare(release.version, now) <= 0) return recordComponent(setState(blank('idle', { version: release.version, page: release.page, notes: release.notes })), { latestVersion: release.version, status: 'up-to-date', sourceUrl: release.page })
+      if (!release) return recordComponent(setState(blank('no-release', { reason: '안정 릴리스가 아직 없습니다.' })), { status: 'no-release' })
+      const versionOrder = compare(release.version, now)
+      if (versionOrder <= 0) {
+        const reason = versionOrder < 0
+          ? `현재 설치본(버전 ${now})이 공개 릴리스(버전 ${release.version})보다 높아 자동 업데이트를 하지 않습니다. 버전을 초기화한 배포로 전환하려면 GitHub 릴리스에서 수동 설치하세요.`
+          : null
+        return recordComponent(setState(blank('idle', { version: release.version, page: release.page, notes: release.notes, reason })), { latestVersion: release.version, status: versionOrder < 0 ? 'release-reset-required' : 'up-to-date', sourceUrl: release.page })
+      }
       const result = { current: now, version: release.version, notes: release.notes, page: release.page, asset: release.asset && { name: release.asset.name, size: release.asset.size, url: release.asset.browser_download_url, sums: release.sums?.browser_download_url }, available: Boolean(release.asset && release.sums), status: release.asset && release.sums ? 'available' : 'unsupported', installable: Boolean(release.asset && release.sums), reason: release.asset && release.sums ? null : `이 환경용 ${assetName(release.version)} 자산 또는 SHA256SUMS.txt가 없습니다.` }
       if (mode() === 'unsupported') Object.assign(result, { available: false, status: 'unsupported', installable: false, reason: '이 설치 방식은 자동 업데이트를 지원하지 않습니다. GitHub 릴리스에서 새 설치본을 받으세요.' })
       if (mode() === 'mac-app' && appBundle()?.startsWith('/Volumes/')) Object.assign(result, { available: false, status: 'unsupported', installable: false, reason: '마운트된 DMG에서 실행 중입니다. 앱을 /Applications로 복사한 뒤 다시 실행하세요.' })

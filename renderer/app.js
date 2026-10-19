@@ -2754,7 +2754,7 @@ function updateMessage (info) {
   if (info.error) return info.error
   if (info.reason) return info.reason
   return ({
-    idle: '최신 버전을 쓰고 있습니다.',
+    idle: info.version ? '마지막 확인에서 자동으로 적용할 새 업데이트가 없습니다.' : '아직 공개 버전을 확인하지 않았습니다.',
     checking: '업데이트를 확인하는 중…',
     downloading: '업데이트를 다운로드하는 중…',
     downloaded: '다운로드가 끝났습니다. 설치하면 프로그램이 다시 열립니다.',
@@ -2775,7 +2775,7 @@ function renderUpdate (info, { open = false } = {}) {
   $('updateTo').textContent = state.version ? '버전 ' + state.version : ''
   $('updateNotes').textContent = state.notes || ''
   $('updateNotes').classList.toggle('hidden', !state.notes)
-  $('updateTitle').textContent = state.version ? '새 버전이 나왔습니다' : '업데이트'
+  $('updateTitle').textContent = available ? '새 버전이 나왔습니다' : '업데이트'
   $('updateStatus').textContent = updateMessage(state)
   $('updateError').textContent = state.error || ''
   $('updateError').classList.toggle('hidden', !state.error)
@@ -2787,7 +2787,7 @@ function renderUpdate (info, { open = false } = {}) {
   $('updateAction').classList.toggle('hidden', !canInstall)
   $('updateAction').disabled = !canInstall
   $('updateAction').textContent = state.status === 'downloaded' ? '설치하고 다시 열기' : '다운로드하고 설치'
-  $('updatePage').classList.toggle('hidden', !state.page || state.mode === 'mac-app')
+  $('updatePage').classList.toggle('hidden', !state.page || (state.mode === 'mac-app' && !state.reason))
   if (open) $('update').classList.remove('hidden')
 }
 

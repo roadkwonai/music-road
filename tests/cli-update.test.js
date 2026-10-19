@@ -258,3 +258,27 @@ test('archive safety inspects complete listings larger than a log tail', async t
   assert.ok(Buffer.byteLength(listing.stdout) > 64 * 1024)
   await update.inspectArchive(f.kit.archive, '0.1.1')
 })
+
+
+test('a lower public CLI version records manual transition instead of latest', async t => {
+  const f = await fixture(t)
+  const lower = { ...f.stable, tag_name: 'cli-v0.0.9', html_url: 'https://github.com/' + repo + '/releases/tag/cli-v0.0.9', assets: f.stable.assets.map(item => ({ ...item, name: item.name.replace('0.1.1', '0.0.9'), browser_download_url: item.browser_download_url.replaceAll('0.1.1', '0.0.9') })) }
+  global.fetch = async () => new Response(JSON.stringify([lower]))
+  let captured
+  const result = await update.check({}, { dataDir: path.join(f.root, 'profile'), recordProduction: async value => { captured = value; return { ok: true } } })
+  assert.equal(result.available, false)
+  assert.equal(result.installable, false)
+  assert.equal(result.version, '0.0.9')
+  assert.match(result.reason, /수동 설치/)
+  assert.equal(captured.params.checkStatus, 'release-reset-required')
+})
+
+test('no CLI release is recorded as no-release rather than up-to-date', async t => {
+  const f = await fixture(t)
+  global.fetch = async () => new Response('[]')
+  let captured
+  const result = await update.check({}, { dataDir: path.join(f.root, 'profile'), recordProduction: async value => { captured = value; return { ok: true } } })
+  assert.equal(result.version, null)
+  assert.equal(result.available, false)
+  assert.equal(captured.params.checkStatus, 'no-release')
+})

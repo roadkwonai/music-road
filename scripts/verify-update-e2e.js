@@ -10,7 +10,16 @@ const { spawn } = require('node:child_process')
 const { parseArgs } = require('../cli/client')
 
 const repository = path.resolve(__dirname, '..')
+const VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms))
+function resolveBaselineVersion (actual, requested) {
+  assert.match(String(actual || ''), VERSION, '기준 설치본의 버전 형식이 올바르지 않습니다.')
+  if (requested !== undefined) {
+    assert.match(String(requested), VERSION, '--baseline-version은 X.Y.Z 형식이어야 합니다.')
+    assert.equal(requested, actual, '--baseline-version은 기준 설치본의 실제 버전과 같아야 합니다.')
+  }
+  return actual
+}
 async function until (read, accept, timeoutMs, label, pollMs = 200) {
   const deadline = Date.now() + timeoutMs
   let value
@@ -84,7 +93,6 @@ async function main () {
     return rows
   }, []))
   const mode = options.mode || 'cli'
-  const baselineVersion = options['baseline-version'] || '1.4.0'
   assert.ok(['gui', 'cli', 'source'].includes(mode), 'mode must be gui, cli or source')
   const expected = options['expected-version']
   assert.match(expected || '', /^\d+\.\d+\.\d+$/)
@@ -120,17 +128,21 @@ async function main () {
   let source = null
   let executable
   let args
+  let baselineVersion
   const port = await freePort()
   if (mode === 'source') {
     source = path.join(root, 'source')
     await run('git', ['clone', 'https://github.com/roadkwonai/music-road.git', source])
-    await run('git', ['checkout', '--detach', options['baseline-ref'] || 'c7070c269bc2d06f7e3962d2db963410921789f2'], source)
+    await run('git', ['checkout', '--detach', options['baseline-ref'] || 'v0.1.0'], source)
     await run('npm', ['ci', '--include=dev', '--no-audit', '--no-fund'], source, 300000)
+    baselineVersion = resolveBaselineVersion(JSON.parse(await fs.readFile(path.join(source, 'package.json'), 'utf8')).version, options['baseline-version'])
     executable = path.join(source, 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
     args = [source, '--roadmusic-service']
   } else {
     bundle = path.join(root, 'Road Music.app')
     await run('/usr/bin/ditto', [options['baseline-app'], bundle])
+    const info = JSON.parse(await run('/usr/bin/plutil', ['-convert', 'json', '-o', '-', path.join(bundle, 'Contents/Info.plist')]))
+    baselineVersion = resolveBaselineVersion(info.CFBundleShortVersionString, options['baseline-version'])
     executable = path.join(bundle, 'Contents/MacOS/Road Music')
     args = mode === 'cli' ? ['--roadmusic-service'] : [`--remote-debugging-port=${port}`, '--remote-debugging-address=127.0.0.1']
   }
@@ -147,7 +159,7 @@ async function main () {
   let renderer
   let oldPid
   let success = false
-  const evidence = { mode, expected, root }
+  const evidence = { mode, expected, baselineVersion, root }
   try {
     launched = spawn(executable, args, { env, cwd: source || root, stdio: ['ignore', log, log] })
     const started = await until(() => cli('service:status', {}, { optional: true }), Boolean, 45000, 'baseline service')
@@ -269,3 +281,5 @@ async function main () {
   }
 }
 if (require.main === module) main().catch(error => { console.error(error.stack); process.exitCode = 1 })
+
+module.exports = { resolveBaselineVersion }

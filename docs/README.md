@@ -87,7 +87,7 @@
 | 앱 asset과 독립 CLI 키트 | `RoadMusic-X.Y.Z-source.zip` · `RoadMusic-CLI-X.Y.Z.zip` |
 | 최신 지식 조회·찬송가 리메이크 | [CCM 상세 가이드](ccm-prompts.md) · [찬송가 리메이크 가이드](hymn-remake-guide.md) |
 
-앱과 CLI는 각각 0.1.0부터 번호를 시작합니다. 앱 Release만 Latest이며 CLI Release는 `cli-v*` 태그로 조회합니다. 공통 초기 번호라도 manifest·태그·asset·체크섬·설치 경로는 분리합니다. 기존 1.4.x 앱과 이전 공개 CLI 0.1.0 키트는 새 0.1.0으로 자동 전환되지 않으므로 새 위치에 한 번 수동 설치한 뒤 해당 제품의 0.1.1 이상 알림을 받습니다. 이후 CI는 제품별 바로 다음 버전과 같은 manifest·노트만 허용합니다. 날짜 노트와 실제 GitHub Release 발행은 별개의 단계입니다.
+앱과 CLI는 각각 0.1.0부터 번호를 시작합니다. 앱 Release만 Latest이며 CLI Release는 `cli-v*` 태그로 조회합니다. 공통 초기 번호라도 manifest·태그·asset·체크섬·설치 경로는 분리합니다. 이전 앱·스킬 0.1.1, CLI 0.1.1·0.1.2, 1.4.x와 같은 번호의 옛 0.1.0은 새 배포로 자동 전환되지 않으므로 새 위치에 한 번 수동 설치한 뒤 해당 제품의 0.1.1 이상 알림을 받습니다. 이후 CI는 제품별 바로 다음 버전과 같은 manifest·노트만 허용합니다. 날짜 노트와 실제 GitHub Release 발행은 별개의 단계입니다.
 
 <a id="verification"></a>
 
@@ -97,7 +97,8 @@
 | --- | --- |
 | [CLI 검수 결과](cli-qa-report.md) | 테스트·실제 ACE·음원/영상 검증과 미검증 항목 |
 | [첫 CLI 독립 업데이트 검증](cli-update-qa-report.md) | 초기화 전 첫 CLI 0.1.0 배포의 감지·설치·앱 보존 기록 |
-| [앱·CLI 0.1.0 초기화 검증](version-reset-qa-report.md) | 현재 배포 파일·GUI/CLI 실제 설치·이전 키트 전환·버전 보호 확인 |
+| [0.1.0 재배포 안내](version-republish-20261020.md) | 버전 상태 보완·동일 번호 재배포·새 체크섬 확인 |
+| [앱·CLI 0.1.0 최초 초기화 검증](version-reset-20261020-qa-report.md) | 교체 전 배포 파일의 실제 설치·이전 키트 전환·해시 기록 |
 | [업데이트 전 과정 검증](update-e2e-report.md) | 실제 GUI·CLI·소스 업데이트·재시작·복구 결과 |
 | [업데이트 검증 원시 결과](update-e2e-results.json) | 위 보고서가 참조하는 구조화된 실행 결과 |
 

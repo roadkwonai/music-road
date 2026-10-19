@@ -1,5 +1,7 @@
 'use strict'
 const { app, BrowserWindow, ipcMain, shell, dialog, Menu, screen, powerSaveBlocker } = require('electron')
+// Python helpers must not add bytecode files to the signed application bundle.
+if (app.isPackaged) process.env.PYTHONDONTWRITEBYTECODE = '1'
 const { spawn, execFile } = require('child_process')
 const fs = require('fs')
 const fsp = require('fs/promises')

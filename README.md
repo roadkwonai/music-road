@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/roadkwonai/music-road"><img src="docs/assets/brand/banner.svg" alt="Road Music — 로컬 AI 음악 스튜디오" width="900"></a>
+  <a href="https://github.com/roadkwonai/music-road"><img src="assets/main.jpg" alt="Road Music — 로컬 AI 음악 스튜디오" width="900"></a>
 </p>
 
 <a id="road-music"></a>

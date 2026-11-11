@@ -66,7 +66,7 @@ CLI의 `song:prepare`는 YuE 계열 요청에 `officialGuide`를 돌려준다. `
 
 ### 보정 절차
 
-1. 원래 입력으로 `song:prepare`를 실행하고 `officialGuide.checks`와 `changes`·`nativeRequest`를 읽는다.
+1. 원래 입력으로 `song:prepare`를 실행하고 `officialGuide.checks`와 `changes`·`nativeRequest`를 읽는다. `song:prepare`는 서비스·모델 없이 로컬에서 실행되므로 초안만 요청받은 경우에도 실행한다. 실행할 수 없으면 정적 점검 결과와 `미실행`을 적는다.
 2. `advice` 항목마다 공식 근거를 확인해 보정안을 만든다.
    - **AI가 작성한 style·가사:** 공식 규칙에 맞게 바로 보정한다.
    - **사용자가 제공·승인한 원문:** [원문 보존 규칙](music-review.md#preserve-input)을 따른다. 원문은 유지하고 보정안·근거·예상 영향을 제안한 뒤 승인받은 부분만 반영한다. 전체 자동 위임이라도 AI가 새로 결정한 부분만 보정한다.
@@ -78,7 +78,7 @@ CLI의 `song:prepare`는 YuE 계열 요청에 `officialGuide`를 돌려준다. `
 
 ### 요청자에게 보고할 형식
 
-생성 전 검토안이나 자동 위임 결과 보고에 아래 절을 포함한다.
+생성 전 검토안, 초안만 요청한 답변, 자동 위임 결과 보고에 아래 절을 **이 제목과 표 형식 그대로** 포함한다. 보정할 것이 없어도 절을 생략하지 않는다.
 
 ```text
 ## YuE2 공식 가이드 보정 보고

@@ -83,7 +83,7 @@ test('song:prepare reports official YuE2 guide checks for YuE without changing t
   const input = { engine: 'yue', style: 'make a song, ballad without drums', lyrics: '사랑해 (속삭이듯)\n너를', cot: 'melody', abc: 'X:1\nQ:1/4=90\nK:C\nV:Vocal\n"C"c d e|' }
   const flagged = preparePreview(input)
   const status = Object.fromEntries(flagged.officialGuide.checks.map(item => [item.id, item.status]))
-  for (const id of ['style-vocal', 'style-tempo', 'style-positive-description', 'style-no-instruction', 'lyrics-sections', 'lyrics-no-annotations', 'abc-tempo-consistency', 'melody-abc-chord-free']) assert.equal(status[id], 'advice', id)
+  for (const id of ['style-genre-instruments', 'style-vocal', 'style-tempo', 'style-positive-description', 'style-no-instruction', 'lyrics-sections', 'lyrics-no-annotations', 'abc-tempo-consistency', 'melody-abc-chord-free']) assert.equal(status[id], 'advice', id)
   assert.ok(flagged.valid, 'official guide advice must not block preparation')
   assert.equal(flagged.requests[0].lyrics, '사랑해 (속삭이듯)\n너를')
 
@@ -96,4 +96,11 @@ test('song:prepare reports official YuE2 guide checks for YuE without changing t
   const guide = fs.readFileSync(path.join(root, 'docs/yue-prompt-guide.md'), 'utf8')
   for (const item of flagged.officialGuide.checks) assert.ok(guide.includes(`\`${item.id}\``), `${item.id} is documented`)
   for (const anchor of ['<a id="official-correction"></a>', '<a id="official-report"></a>']) assert.ok(guide.includes(anchor))
+})
+
+test('song:prepare does not take a section tag as the inferred title', () => {
+  const title = lyrics => validate('song:prepare', { engine: 'yue-mlx', style: 'pop', lyrics }).paramsValue.title
+  assert.equal(title('[Verse]\n너를 불러'), '너를 불러')
+  assert.equal(title('# 내 노래\n[Verse]\n가사'), '내 노래')
+  assert.equal(title('[Verse]'), '무제')
 })

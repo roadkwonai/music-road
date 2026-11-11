@@ -240,7 +240,7 @@ function validate (command, params = {}) {
       value.video.spectrum = { ...value.video.spectrum, cover: media(cover) }
     }
   }
-  if (command === 'song:generate' || command === 'song:prepare') { value.engine = value.engine || 'ace'; value.title = value.title || String(value.lyrics || '').split(/\r?\n/).find(Boolean) || '무제'; if (value.bpm !== undefined) value.parts = { ...(value.parts || {}), bpm: value.bpm } }
+  if (command === 'song:generate' || command === 'song:prepare') { value.engine = value.engine || 'ace'; const lines = String(value.lyrics || '').split(/\r?\n/); const heading = lines.find(line => /^\s*#/.test(line)); value.title = value.title || (heading && heading.replace(/^\s*#+\s*/, '').trim()) || lines.find(line => line.trim() && !/^\s*\[/.test(line)) || '무제'; if (value.bpm !== undefined) value.parts = { ...(value.parts || {}), bpm: value.bpm } }
   const error = ['song:generate', 'song:prepare'].includes(command) && generationError(value); if (error) fail(error)
   return { ...e, paramsValue: value, args: (e.args || (() => []))(value) }
 }

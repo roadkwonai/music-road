@@ -76,7 +76,8 @@ function officialGuideChecks ({ userStyle, style, lyrics, instrumental, cot, abc
   const abcTempo = abc ? (String(abc).match(/^Q:\s*(?:\d+\/\d+\s*=\s*)?(\d{2,3})/m) || [])[1] : undefined
   const checks = [
     check('style-language', instrumental ? null : LANGUAGE.test(style), 'style에 가창 언어를 적는다', 'style 앞쪽에 실제 가사 언어(예: Korean)를 적는다.'),
-    check('style-genre-instruments', INSTRUMENT.test(style), 'style에 장르와 주요 악기를 적는다', '장르 뒤에 주요 악기 2~4개를 영어로 적는다.'),
+    // "no drums" names an instrument without asking for it.
+    check('style-genre-instruments', style.split(',').some(part => INSTRUMENT.test(part) && !NEGATION.test(part)), 'style에 장르와 주요 악기를 적는다', '장르 뒤에 주요 악기 2~4개를 영어로 적는다.'),
     check('style-vocal', instrumental ? null : VOICE.test(style), 'style에 보컬 성격을 적는다', 'solo female vocal처럼 보컬 성격을 적는다. 특정 가수 보장은 아니다.'),
     check('style-tempo', TEMPO.test(style), 'style에 의도한 템포를 적는다', 'bpm 필드나 style에 의도한 BPM을 적는다. 정확한 템포 보장은 아니다.'),
     check('style-positive-description', !NEGATION.test(userStyle), 'negative_prompt 필드가 없으므로 원하는 소리를 긍정형으로 기술한다', '부정·제외 문구는 제외를 보장하지 않는다. 원하는 편성·질감을 긍정형으로 바꾸는 안을 제안한다.'),

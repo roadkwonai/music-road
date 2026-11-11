@@ -98,6 +98,7 @@ node cli/road-music.js app:state
 - `uncertain:true` 오류는 요청이 실제로 접수됐는지 알 수 없다는 뜻이다. 자동 재제출하지 말고 `service:status`, `queue:list`, `songs:list` 또는 `job:wait`을 조회한다.
 - `--confirm`, `--overwrite`, `--input`, `--output`은 JSON 안이 아닌 CLI 최상위 플래그다. 경로는 사용자가 고른 절대 경로를 쓴다.
 - `about:feedback`, `shell:open`, `about:open`, `update:open-page`, `notices:open`, `song:reveal`, `log:open`은 외부 전송·앱·브라우저 동작을 할 수 있으므로 명시적 요청이 있을 때만 쓴다.
+- Codex 같은 샌드박스에서는 `schema`, `prompt:knowledge`, `song:prepare`, `yue:capabilities`처럼 서비스 없이 실행되는 명령은 읽기 전용에서도 동작한다. `lyrics:clean`·`prompt:compose`·`app:state` 등 서비스 명령은 Road Music 데이터 폴더의 로그·소켓을 써야 하므로 읽기 전용이나 작업 폴더 한정 샌드박스에서 `EPERM`이 날 수 있다. 이는 앱 오류가 아니다. 사용자에게 권한 상향을 요청하고, 데이터 폴더를 바꿔 다른 라이브러리로 우회하지 않는다. 실행하지 못한 점검은 `미실행`으로 보고한다.
 - 세션 첫 연결에서 `cli:version`, `cli:update:check`을 읽기 전용으로 실행한다. 새 CLI가 있으면 현재·최신 버전과 노트·설치 대상만 알린다. 사용자가 업데이트를 요청하거나 자동 업데이트를 명시적으로 위임할 때만 `cli:update:install`을 실행하고, 반환된 `cliPath`에서 버전·스키마·지식 조회를 확인한다. 앱 `update:*`는 앱 업데이트 요청에만 사용한다. [업데이트 가이드](updates.md)를 따른다.
 
 CLI 설치와 환경 점검은 [CLI 설치](cli-install.md), 명령별 상세 계약은 [CLI 레퍼런스](cli-reference.md), 검증된 범위는 [CLI 검수 결과](cli-qa-report.md)를 참고한다.

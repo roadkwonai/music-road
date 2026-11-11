@@ -361,6 +361,33 @@ CLI 제어 요청은 Unix 소켓 또는 named pipe를 사용한다. 영상 렌�
 
 ## 관리 스킬·모션그래픽 연결
 
+### 제작실에서 Codex 대화로 요청
+
+아래 명령은 로컬 실행이며 음악 서비스·브라우저·모델을 시작하지 않는다. 제작실의 **새 서버**를 Codex에서 열면 미연결 프로젝트만 현재 `CODEX_THREAD_ID`에 연결한다. 기존 연결은 유지하며, 명시적인 대화 변경은 `studio:agent:bind`로 한다.
+
+| 명령 | 필수 입력 | 역할 |
+| --- | --- | --- |
+| `studio:agent:status` | `project` 절대 경로 | 연결 정보, 프로젝트 스냅샷 `baseVersionId`와 등록 미디어 조회 |
+| `studio:agent:bind` | `project` 절대 경로 | 실행 중인 Codex 환경의 대화 ID에 연결. 브라우저에서는 호출할 수 없음 |
+| `studio:conversation:history` | `project` (`cursor`, `limit:1..20` 선택) | 연결된 대화의 저장된 사용자·공개 assistant 메시지 전문을 페이지로 조회. 대화 재개·생성 없음 |
+| `studio:draft:get` | `project`, `scope:studio/detail` | 서버 주소·토큰이 바뀐 뒤 복원할 프로젝트별 입력 초안 조회 |
+| `studio:draft:set` | `project`, `scope:studio/detail`, `draft` | 입력 초안을 로컬 관리 SQLite에 저장. 요청 전송·ACK·생성 없음 |
+| `studio:request:submit` | `project`, `requestId`, `baseVersionId`, `target`, `intent`, `prompt` | 같은 대화의 공식 CLI 대기열에 요청 등록 |
+| `studio:request:status` | `project` (`requestId` 선택) | 전달·수신·검토·제작 상태 조회 |
+| `studio:request:update` | `project`, `requestId`, `status` (`note` 선택) | 연결된 대화에서 실제 수신 ACK와 처리 결과 기록 |
+
+`requestId`는 48자리 소문자 16진수다. 같은 ID·같은 본문은 다시 전송하지 않고 기존 결과를 반환하며, 같은 ID·다른 본문은 거부한다. `baseVersionId`는 상태 조회에서 받은 64자리 값을 그대로 사용한다. 미디어를 고르면 `mediaId`와 `mediaSha256`도 함께 제출한다. 오래된 스냅샷·변경된 파일·등록되지 않은 프로젝트는 거부한다.
+
+`target`은 `chat`, `music`, `lyrics`, `video`, `intent`는 검토만 하는 `review`와 지정 범위 제작을 요청하는 `produce`다. `chat`은 대화·질문 전용으로 `review`만 허용하며 생성·설치·파일 변경을 실행하지 않는다. 선택 입력은 보존 조건 `preserve`, 새 가사 초안 `revisedLyrics`, 검토 구간 `range:{start,end}`이며 시각은 초 단위다. 구간은 시작 < 끝이어야 하고 선택한 미디어 길이를 넘을 수 없다. 원가사·원음은 제출만으로 수정하지 않는다.
+
+큐 등록은 `queued`이며 Codex 실제 수신이나 음악 완성이 아니다. 수신한 Codex는 첫 동작으로 `accepted`를 기록하고 `reviewing`/`running` 후 `needs-user-input`/`succeeded`/`failed`를 기록한다. `succeeded`가 검토 요청이면 검토 완료를 뜻한다. 다른 대화는 ACK를 기록할 수 없다. 시간 초과·응답 불명은 `uncertain`으로 남기며 자동 재전송하지 않는다.
+
+요청은 현재 작업이 끝난 뒤 같은 Codex 대화의 새 턴에서 처리한다. 즉시 활성 턴에 끼어드는 기능은 제공하지 않는다. YuE의 구간 지정은 진단·검수 위치이며 해당 부분만 원음 보존 교체하는 기능이 아니다. 가사·악기 변경의 새 녹음과 표시 가사 저장을 구분한다. 상세 동작은 [제작실 연결 설계](studio-codex-editing-design.md)를 참고한다.
+
+대화 전문 조회는 공식 로컬 `codex app-server --stdio` reader를 잠시 실행해 저장된 이력만 읽는다. 음악 모델·대화를 재개하지 않는다. 사용자 텍스트와 공개 assistant 텍스트만 반환하며 시스템·개발자·숨은 추론·도구 결과를 포함하지 않는다. `phase`와 저장된 turn 상태·시각을 구분하고, 누락 시각이나 알 수 없는 응답 완료 여부를 만들어내지 않는다. `cursor`는 반환값을 그대로 다음 페이지에 사용한다. 저장 반영은 지연될 수 있고 삭제·압축 전 이력의 복원을 보장하지 않는다. [HTML 대화 전문·이력 설계](studio-codex-chat-design.md).
+
+초안의 `scope`는 제작실 `studio`와 음악 상세 `detail`을 구분한다. `draft`는 대상·의도·프롬프트·보존 조건·수정 가사·미디어 ID/SHA·작성 중 시작/끝 문자열·요청 식별 상태만 허용한다. 임의 파일 경로나 명령을 받지 않으며, 미완성 구간 문자열을 저장해도 실제 전송 시의 구간 검증은 생략하지 않는다. 기존 요청 상태는 같은 프로젝트의 실제 요청 원장이 우선한다. 초안 저장은 요청 제출이나 생성 승인이 아니다.
+
 | 명령 | 역할 |
 | --- | --- |
 | `skills:status` | 선택한 호스트의 관리 설치 상태 조회 |

@@ -98,13 +98,14 @@ async function dispatch (command, params = {}, options = {}, confirm = false) {
     throw new StorageError('INVALID_ARGUMENT', 'storage:lease acquire requires the producer pid')
   }
   const entry = catalog.validate(command, params)
-  if (!command.startsWith('storage:') && !command.startsWith('production:') && !command.startsWith('works:')) throw new StorageError('invalid_arguments', 'storage 명령이 필요합니다.')
+  const studioAgent = command.startsWith('studio:')
+  if (!command.startsWith('storage:') && !command.startsWith('production:') && !command.startsWith('works:') && !studioAgent) throw new StorageError('invalid_arguments', '저장공간 또는 제작실 에이전트 명령이 필요합니다.')
   if (entry.destructive && !confirm) throw new StorageError('invalid_arguments', `${command}에는 --confirm이 필요합니다.`)
   const production = command.startsWith('production:')
   const works = command.startsWith('works:')
-  const stdin = production || works
-  const action = command.slice(command.indexOf(':') + 1)
-  const args = [storageScript(options, production ? (command === 'production:activity' ? 'production_activity.py' : 'production_ledger.py') : works ? 'work_library.py' : 'storage_manager.py'), action,
+  const stdin = production || works || studioAgent
+  const action = studioAgent ? command.slice('studio:'.length).replace(/:/g, '-') : command.slice(command.indexOf(':') + 1)
+  const args = [storageScript(options, studioAgent ? 'studio_agent.py' : production ? (command === 'production:activity' ? 'production_activity.py' : 'production_ledger.py') : works ? 'work_library.py' : 'storage_manager.py'), action,
     ...(stdin ? ['--data-dir', path.resolve(options.userData || require('./client').defaultUserData({ env: options.env || process.env })), '--stdin'] : ['--json', JSON.stringify(entry.paramsValue)])]
   if (confirm) args.push('--confirm')
   return runPython(options.python || 'python3', args, stdin ? { ...options, input: JSON.stringify(entry.paramsValue) } : options)

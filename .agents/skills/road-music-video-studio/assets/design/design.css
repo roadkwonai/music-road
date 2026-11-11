@@ -296,12 +296,25 @@ html[data-road-music-ui] .work-stats dt { font-size: 14px; }
 html[data-road-music-ui] .work-stats dd { margin: 4px 0 0; color: var(--rm-text); font-size: 24px; font-weight: 700; }
 html[data-road-music-ui] .work-stats > div { flex: 1; padding: 8px 16px 8px 0; }
 html[data-road-music-ui] .work-file-info { margin-top: 16px; }
+html[data-road-music-ui] .work-audio-compare { margin: 16px 0; }
+html[data-road-music-ui] .audio-compare { display: grid; gap: 16px; }
+html[data-road-music-ui] .audio-compare h3 { margin: 0; }
+html[data-road-music-ui] .audio-compare-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+html[data-road-music-ui] .audio-compare-slot { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--rm-border); border-radius: var(--rm-control-radius); }
+html[data-road-music-ui] .audio-compare-slot legend, html[data-road-music-ui] .audio-compare label { font-weight: 700; }
+html[data-road-music-ui] .audio-compare :is(select,input) { width: 100%; margin-top: 6px; }
+html[data-road-music-ui] .audio-compare-range { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+html[data-road-music-ui] .audio-compare-volume { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+html[data-road-music-ui] .audio-compare-volume input { grid-column: 1 / -1; }
+html[data-road-music-ui] .audio-compare-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+html[data-road-music-ui] .audio-compare [data-audio-compare-player] { width: 100%; }
 html[data-road-music-ui] .file-hash { overflow-wrap: anywhere; }
 html[data-road-music-ui] .file-warning { color: var(--rm-text); font-size: 14px; }
 html[data-road-music-ui] .works-page summary { min-height: 44px; padding: 10px 0; cursor: pointer; }
 html[data-road-music-ui] .work-subnav a { min-height: 44px; }
 html[data-road-music-ui] .works-page[data-page=detail] #workDetail > section { scroll-margin-top: 148px; }
 @media(max-width:760px){html[data-road-music-ui] .work-file { flex-direction: column; }html[data-road-music-ui] .works-page[data-page=detail] #workDetail > section { scroll-margin-top: 196px; }}
+@media(max-width:390px){html[data-road-music-ui] .audio-compare-slots,.audio-compare-range { grid-template-columns: 1fr; }html[data-road-music-ui] .audio-compare :is(button,select,input) { min-height:44px; }}
 
 html[data-road-music-ui] ::selection { background: var(--rm-text); color: var(--rm-surface); }
 html[data-road-music-ui] :is(input,textarea) { caret-color: var(--rm-text); }
@@ -659,5 +672,37 @@ html[data-road-music-ui] button.recipe-tag[aria-pressed=true]{background:color-m
 .recipe-engine-selector{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:16px 0}.recipe-engine-selector>span{font-weight:700;margin-right:8px}.recipe-engine-selector .hint{flex-basis:100%;margin:0}html[data-road-music-ui] button.recipe-engine{min-width:88px;background:var(--rm-surface);color:var(--rm-text);border:1px solid var(--rm-border)}html[data-road-music-ui] button.recipe-engine[aria-pressed=true]{background:var(--rm-primary);border-color:var(--rm-primary);color:var(--rm-text)}
 
 html[data-road-music-ui] .recipe-primer .page-actions{justify-content:flex-start;gap:16px;margin-top:16px}
+/* The request editor stays above results; persisted history remains in the record section. */
+html[data-road-music-ui] .studio-agent-composer{display:grid;gap:16px;margin:16px 0 32px;padding:20px;border:1px solid var(--rm-border);border-top:4px solid var(--rm-primary);border-radius:12px;background:var(--rm-surface,#fff);scroll-margin-top:148px}
+html[data-road-music-ui] .studio-agent-composer h3{margin:0;font-size:22px}
+html[data-road-music-ui] .has-agent-composer{padding-bottom:88px}
+html[data-road-music-ui] .studio-agent-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+html[data-road-music-ui] .studio-agent-composer>p{margin:0}
+html[data-road-music-ui] .studio-agent-prompt textarea{min-height:144px;background:var(--rm-surface,#fff);border:1px solid var(--rm-text);font-size:16px}
+html[data-road-music-ui] .studio-agent-composer .studio-agent-connection{margin:0;padding:12px}
+html[data-road-music-ui] .studio-agent-launcher{position:fixed;right:24px;bottom:24px;z-index:25;min-height:48px;padding:12px 20px;border:1px solid var(--rm-text);box-shadow:0 2px 8px #0002}
+@media(max-width:760px){html[data-road-music-ui] .studio-agent-composer{scroll-margin-top:236px;padding:16px}html[data-road-music-ui] .studio-agent-launcher{right:16px;bottom:16px}}
+html[data-road-music-ui] .studio-agent-composer .studio-agent-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+html[data-road-music-ui] .studio-agent-composer .studio-agent-fields>.studio-agent-prompt,html[data-road-music-ui] .studio-agent-composer .studio-agent-fields>label:nth-child(n+4){grid-column:1/-1}
+html[data-road-music-ui] .studio-agent-composer label{display:grid;gap:6px;font-weight:700;min-width:0}
+html[data-road-music-ui] .studio-agent-composer textarea,html[data-road-music-ui] .studio-agent-composer select,html[data-road-music-ui] .studio-agent-composer input{width:100%;min-width:0}
+html[data-road-music-ui] .studio-agent-composer details{padding:14px 0;border-top:1px solid var(--rm-border);border-bottom:1px solid var(--rm-border)}
+html[data-road-music-ui] .studio-agent-composer summary{min-height:44px;font-weight:700;cursor:pointer}
+html[data-road-music-ui] .studio-agent-composer details>label{margin:12px 0}
+html[data-road-music-ui] .agent-lyrics-diff{max-height:12rem;margin:12px 0 0;padding:12px 12px 12px 30px;overflow:auto;background:var(--rm-surface-muted);border:1px solid var(--rm-border);border-radius:var(--rm-control-radius);white-space:pre-wrap;overflow-wrap:anywhere}
+html[data-road-music-ui] .agent-lyrics-diff li+li{margin-top:6px}
+html[data-road-music-ui] .studio-agent-history-section{display:grid;gap:12px;padding-top:24px;border-top:1px solid var(--rm-divider)}
+html[data-road-music-ui] .studio-agent-history-section h4{margin:0;font-size:18px}
+html[data-road-music-ui] .studio-agent-history,html[data-road-music-ui] .studio-agent-request-feed{display:grid;gap:12px;min-width:0}
+html[data-road-music-ui] .studio-agent-turn,html[data-road-music-ui] .studio-agent-request-card{display:grid;gap:8px;padding:16px;border:1px solid var(--rm-border);border-radius:7px;background:var(--rm-surface,#fff);min-width:0}
+html[data-road-music-ui] .studio-agent-turn-meta{margin:0;color:var(--rm-muted);font-size:14px}
+html[data-road-music-ui] .studio-agent-message{display:grid;gap:8px;padding:12px;border:1px solid var(--rm-border);border-radius:5px;min-width:0}
+html[data-road-music-ui] .studio-agent-message--assistant{border-left:3px solid var(--rm-link)}
+html[data-road-music-ui] .studio-agent-message--user{border-left:3px solid var(--rm-line-green,#06c755)}
+html[data-road-music-ui] .studio-agent-message-head{display:flex;gap:8px;align-items:center;justify-content:space-between;min-width:0}
+html[data-road-music-ui] .studio-agent-message-head span{color:var(--rm-muted);font-size:14px}
+html[data-road-music-ui] .studio-agent-message-copy{margin-left:auto;min-height:36px;padding:6px 10px;font-size:14px}
+html[data-road-music-ui] .studio-agent-message-text{max-width:100%;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:inherit;line-height:1.7}
+@media(max-width:640px){html[data-road-music-ui] .studio-agent-composer{padding-top:20px}html[data-road-music-ui] .studio-agent-composer .studio-agent-fields{grid-template-columns:1fr}html[data-road-music-ui] .studio-agent-composer .actions{display:grid;grid-template-columns:1fr}html[data-road-music-ui] .studio-agent-composer .actions button{width:100%}}
 html[data-road-music-ui] .recipe-primer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-road-music-ui] .recipe-primer-grid article[hidden]+article[data-recipe-model]{border-left:0;padding-left:0}@media(max-width:900px){html[data-road-music-ui] .recipe-primer-grid{grid-template-columns:1fr}}
 .recipe-style-card details{margin:16px 0;border-top:1px solid var(--rm-border);border-bottom:1px solid var(--rm-border)}.recipe-style-card summary{min-height:44px;padding:12px 0;font-weight:700;cursor:pointer}.recipe-style-card details h4{margin-top:16px}.recipe-style-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.recipe-style-actions button{flex:1 1 180px}.recipe-style-card .recipe-prompt{font-size:14px}

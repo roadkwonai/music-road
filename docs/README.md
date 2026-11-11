@@ -50,6 +50,7 @@
 | 최근 인기 스타일을 조사해서 제작 | [리서치 기반 음악 만들기](music-research.md) | 날짜·출처·지표 → 창작 가사·설정 → 생성 |
 | 검토 후 생성하거나 전부 자동 위임 | [검토와 자동 생성](music-review.md) | 승인 범위·부분 위임·수정·결과 자료 |
 | 반복 작업을 AI에게 맡김 | [작업 프롬프트](../prompts/cli-workflows.md) | 생성·앨범·자막·영상·오류 진단 |
+| 제작실에서 Codex로 수정 요청 연결 | [제작실·Codex 요청](studio-codex-editing-design.md) · [대화 전문·이력](studio-codex-chat-design.md) · [모의·실기 검수](studio-codex-chat-qa.md) | 동일 대화의 요청·공개 응답 전문·이력, 구간·수정 가사 전달과 처리 상태 |
 
 | AI가 읽는 동봉 자료 | 역할 |
 | --- | --- |

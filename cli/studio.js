@@ -56,13 +56,21 @@ function writeSession (userData, value) {
   fs.renameSync(temporary, target)
 }
 
+function removeSessionIfMatches (userData, session) {
+  try {
+    const target = sessionPath(userData)
+    const registered = JSON.parse(fs.readFileSync(target, 'utf8'))
+    if (registered && registered.url === session.url && registered.pid === session.pid) fs.unlinkSync(target)
+  } catch {}
+}
+
 async function readState (url, requestStudioState) {
   const state = await requestStudioState(new URL('/api/state' + new URL(url).search, url).toString())
   return state && state.application === STUDIO_APPLICATION && typeof state.project === 'string' ? state : null
 }
 
 async function defaultRequestStudioState (url) {
-  const response = await fetch(url, { headers: { Accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(2_000) })
+  const response = await fetch(url, { headers: { Accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(READY_TIMEOUT) })
   if (!response.ok) throw new Error(`제작실 상태 확인 실패 (${response.status})`)
   return response.json()
 }
@@ -213,11 +221,35 @@ async function openStudio (options = {}) {
     '--session-file', sessionPath(userData)
   ], options)
   let ready
-  try { ready = await waitForReady(child, options.readyTimeout) } catch (error) { stopChild(child); throw error }
+  try { ready = await waitForReady(child, options.readyTimeout) } catch (error) {
+    const registered = readSession(userData)
+    stopChild(child)
+    if (registered && registered.pid === child.pid) removeSessionIfMatches(userData, registered)
+    throw error
+  }
   const session = safeSession({ schemaVersion: 1, url: ready.url, project: ready.project, pid: child.pid, expiresAt: unixNow() + 86_400 })
   if (!session || session.project !== canonicalPath(project)) {
     stopChild(child)
+    removeSessionIfMatches(userData, { url: ready.url, pid: child.pid })
     throw new Error('제작실 준비 주소가 올바르지 않습니다')
+  }
+  let state
+  try {
+    state = await readState(session.url, requestStudioState)
+  } catch (error) {
+    stopChild(child)
+    removeSessionIfMatches(userData, session)
+    throw error
+  }
+  if (!state) {
+    stopChild(child)
+    removeSessionIfMatches(userData, session)
+    throw new Error('제작실 상태 응답이 올바르지 않습니다')
+  }
+  if (canonicalPath(state.project) !== session.project) {
+    stopChild(child)
+    removeSessionIfMatches(userData, session)
+    throw new Error('제작실 상태 프로젝트가 현재 프로젝트와 일치하지 않습니다')
   }
   writeSession(userData, session)
   child.unref()

@@ -45,6 +45,10 @@ const storageKind = { type: 'string', enum: ['cache', 'intermediate', 'history']
 const productionContext = { requestPrompt: str({ maxLength: 65536, maxBytes: 65536 }), requestId: storagePlanId }
 const productionScope = { projectId: storageHash, groupId: storageHash, domain: { type: 'string', enum: ['music', 'motion'] }, engine: str({ maxLength: 200 }), model: str({ maxLength: 200 }), taskType: str({ minLength: 1, maxLength: 80 }), status: { type: 'string', enum: ['queued', 'running', 'succeeded', 'failed', 'cancelled'] }, since: integer({ minimum: 0 }), until: integer({ minimum: 0 }) }
 const productionPage = { ...productionScope, limit: integer({ minimum: 1, maximum: 100 }), cursor: integer({ minimum: 1 }) }
+const studioAgentTarget = { type: 'string', enum: ['chat', 'music', 'lyrics', 'video'] }
+const studioAgentIntent = { type: 'string', enum: ['review', 'produce'] }
+const studioRequestStatus = { type: 'string', enum: ['accepted', 'reviewing', 'running', 'needs-user-input', 'succeeded', 'failed'] }
+const studioRange = S.object({ start: num({ minimum: 0 }), end: num({ minimum: 0 }) }, ['start', 'end'])
 function description (command) {
   const [subject, action] = command.split(':')
   const nouns = { app: '앱', setup: '초기 설정', engines: 'AI 엔진', projects: '프로젝트', songs: '곡 목록', song: '곡', score: '악보', queue: '작업 대기열', video: '영상', tracklist: '영상 트랙 목록', settings: '설정', assets: '에셋', recording: '녹음', presets: '프리셋', shell: '운영체제', log: '로그', update: '업데이트', about: '앱 정보', notices: '공지', window: '창', lyrics: '가사', prompt: '프롬프트', player: '재생기', editor: '영상 편집기', renderer: '화면 자동화', ui: '화면 로그', album: '앨범', storage: '저장공간', skills: '모션그래픽 스킬', motion: '모션그래픽 스튜디오' }
@@ -71,8 +75,21 @@ const productionEntries = [
   entry('production:components', null, noParams, undefined, { local: true, description: '관찰한 앱·CLI·스킬 설치 버전과 마지막 업데이트 확인 결과를 조회합니다.' }),
   entry('production:component-record', null, S.object({ componentId: str({ minLength: 1, maxLength: 160 }), kind: { type: 'string', enum: ['app', 'cli', 'skill'] }, name: str({ minLength: 1, maxLength: 200 }), installedVersion: str({ minLength: 1, maxLength: 100 }), latestVersion: str({ maxLength: 100 }), status: str({ maxLength: 80 }), sourceUrl: str({ maxLength: 2000, pattern: '^https://' }), checkedAt: integer({ minimum: 0 }) }, ['componentId', 'kind', 'name', 'installedVersion']), undefined, { local: true, description: '실제 설치 정보와 기존 업데이트 검사 결과를 기록합니다. 설치·다운로드는 수행하지 않습니다.' })
 ]
+const studioDraftScope = { type: 'string', enum: ['studio', 'detail'] }
+const studioDraft = S.object({ target: studioAgentTarget, intent: studioAgentIntent, prompt: str({ maxLength: 12000 }), preserve: str({ maxLength: 4000 }), revisedLyrics: str({ maxLength: 20000 }), mediaId: str({ maxLength: 100 }), mediaSha256: storageHash, baseVersionId: storageHash, rangeStart: str({ maxLength: 80 }), rangeEnd: str({ maxLength: 80 }), requestId: str({ pattern: '^(?:[0-9a-f]{48})?$' }), status: { type: 'string', enum: ['', 'queued', 'sending', 'uncertain', 'accepted', 'reviewing', 'running', 'needs-user-input', 'succeeded', 'failed'] }, submittedFingerprint: str({ maxLength: 160000 }), previousRequestId: str({ pattern: '^(?:[0-9a-f]{48})?$' }) })
+const studioAgentEntries = [
+  entry('studio:agent:status', null, S.object({ project: absolutePath }, ['project']), undefined, { local: true, description: '제작실 Codex 연결 상태를 조회합니다.' }),
+  entry('studio:agent:bind', null, S.object({ project: absolutePath }, ['project']), undefined, { local: true, description: '현재 Codex 대화를 제작실 프로젝트에 연결합니다.' }),
+  entry('studio:conversation:history', null, S.object({ project: absolutePath, cursor: str({ minLength: 1, maxLength: 4096 }), limit: integer({ minimum: 1, maximum: 20 }) }, ['project']), undefined, { local: true, description: '연결된 Codex 대화의 저장된 사용자·공개 응답 전문을 페이지로 읽습니다. 대화를 재개하거나 생성하지 않습니다.' }),
+  entry('studio:draft:get', null, S.object({ project: absolutePath, scope: studioDraftScope }, ['project', 'scope']), undefined, { local: true, description: '서버 재시작 후 복원할 프로젝트별 입력 초안을 조회합니다.' }),
+  entry('studio:draft:set', null, S.object({ project: absolutePath, scope: studioDraftScope, draft: studioDraft }, ['project', 'scope', 'draft']), undefined, { local: true, description: '프로젝트별 입력 초안을 로컬 SQLite에 보관합니다. 요청을 전송하거나 제작하지 않습니다.' }),
+  entry('studio:request:submit', null, S.object({ project: absolutePath, requestId: storagePlanId, target: studioAgentTarget, intent: studioAgentIntent, prompt: str({ minLength: 1, maxLength: 12000 }), preserve: str({ maxLength: 4000 }), revisedLyrics: str({ maxLength: 20000 }), mediaId: str({ minLength: 1, maxLength: 100 }), mediaSha256: storageHash, baseVersionId: storageHash, range: studioRange }, ['project', 'requestId', 'target', 'intent', 'prompt', 'baseVersionId']), undefined, { local: true, description: '검증된 제작실 수정 요청을 Codex 대화에 전달합니다.' }),
+  entry('studio:request:status', null, S.object({ project: absolutePath, requestId: storagePlanId }, ['project']), undefined, { local: true, description: '제작실 Codex 요청 상태를 조회합니다.' }),
+  entry('studio:request:update', null, S.object({ project: absolutePath, requestId: storagePlanId, status: studioRequestStatus, note: str({ maxLength: 4000 }) }, ['project', 'requestId', 'status']), undefined, { local: true, description: '현재 Codex 대화가 확인한 제작실 요청 상태를 기록합니다.' })
+]
 const entries = [
   ...productionEntries,
+  ...studioAgentEntries,
   entry('works:list', null, S.object({ favoritesOnly: S.boolean }), undefined, { local: true, description: '음악 그룹 목록 또는 SQLite에 저장한 좋아요 그룹만 조회합니다.' }),
   entry('works:favorite', null, S.object({ groupId: storageHash, favorite: S.boolean }, ['groupId', 'favorite']), undefined, { local: true, description: '등록한 음악 그룹의 좋아요를 SQLite에 저장하거나 해제합니다.' }),
   entry('storage:list', 'storage:list', S.object({ projectId: storageId })),
@@ -211,6 +228,7 @@ function validate (command, params = {}) {
     if (spec.type === 'object') { if (typeof value !== 'object' || Array.isArray(value)) fail(`${key} must be an object`); for (const name of Object.getOwnPropertyNames(value)) { if (name === '__proto__' || name === 'constructor' || name === 'prototype') fail(`Forbidden parameter: ${key}.${name}`); if (spec.additionalProperties === false && !Object.prototype.hasOwnProperty.call(spec.properties || {}, name)) fail(`Unknown parameter: ${key}.${name}`) } for (const name of spec.required || []) if (value[name] === undefined || value[name] === null) fail(`Missing parameter: ${key}.${name}`); for (const [name, child] of Object.entries(spec.properties || {})) if (value[name] !== undefined) check(value[name], child, `${key}.${name}`) }
   }
   const raw = { ...params }; check(raw, e.params || noParams, command)
+  if (command === 'studio:request:submit' && raw.target === 'chat' && raw.intent !== 'review') fail('대화·질문은 검토 전용이며 제작을 실행할 수 없습니다.')
   if (command === 'production:task-progress' && raw.progress === undefined && raw.currentStage === undefined && raw.summary === undefined) fail('production:task-progress requires progress, currentStage, or summary')
   if (command === 'song:replay') {
     const issue = advancedError(params.advanced || {}) || runtimeError(params.runtime || {}, 'yue-mlx')

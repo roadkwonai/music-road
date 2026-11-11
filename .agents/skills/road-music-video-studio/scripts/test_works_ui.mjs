@@ -67,6 +67,11 @@ assert.match(detailHtml, /rm-callout--important/);
 assert.match(detailHtml, /rm-callout--warning/);
 assert.match(detailHtml, /id="workArtifacts"/);
 assert.match(detailHtml, /id="productionZip"/);
+assert.match(detailHtml, /id="workAudioCompare"/);
+assert.match(script, /function compareAudioFiles/);
+assert.match(script, /function compareAudioRange/);
+assert.match(script, /function playAudioCompareMedia/);
+assert.match(script, /data-audio-compare-player/);
 assert.match(detailHtml, /href="#work-versions"/);
 assert.match(detailHtml, /id="work-versions"/);
 assert.match(detailHtml, /id="versionProject"/);
@@ -93,6 +98,95 @@ assert.match(script, /이전 변경 이력 더 보기/);
 assert.match(script, /workEventsCursor/);
 assert.match(script, /song-published/);
 assert.match(script, /policy:'보존 정책 변경'/);
+
+const compare = harness('detail');
+compare.context.compareFixture = {
+  groupId,
+  source: { name: '원본.mp3', sha256: 'a'.repeat(64), available: true, url: '/original', technical: { durationSeconds: 289.279 } },
+  files: [
+    { id: 'music-0', kind: 'music', name: '원본 별칭.mp3', sha256: 'a'.repeat(64), available: true, url: '/duplicate' },
+    { id: 'music-1', kind: 'music', name: '보강 v3.mp3', sha256: 'b'.repeat(64), available: true, url: '/v3', technical: { durationSeconds: 284.1 } },
+    { id: 'music-2', kind: 'music', name: '누락.mp3', sha256: 'c'.repeat(64), available: false, url: '/missing' },
+  ],
+};
+assert.deepEqual(JSON.parse(vm.runInContext('JSON.stringify(compareAudioFiles(compareFixture).map(file=>file.sha256))', compare.context)), ['a'.repeat(64), 'b'.repeat(64)], 'same-SHA 원음/완성 별칭과 누락 파일은 A/B 선택지에서 제외한다');
+assert.deepEqual(JSON.parse(vm.runInContext("JSON.stringify(compareAudioRange(compareFixture.files[1],132.56,170,284.1))", compare.context)), { start: 132.56, end: 170 });
+assert.equal(vm.runInContext('compareAudioSwitchStart(131,171,145,129.87,169.87)', compare.context), 143.87, 'A의 구간 내 상대 위치를 B의 별도 구간으로 옮긴다');
+assert.throws(() => vm.runInContext("compareAudioRange(compareFixture.files[1],'',170,284.1)", compare.context), /시작·끝 초/);
+assert.throws(() => vm.runInContext("compareAudioRange(compareFixture.files[1],170,132.56,284.1)", compare.context), /끝은 시작보다 커야/);
+assert.throws(() => vm.runInContext("compareAudioRange(compareFixture.files[1],132.56,300,284.1)", compare.context), /길이/);
+let resolveFirst, resolveSecond, playCalls = 0;
+compare.context.racePlayer = {
+  dataset: {}, pauseCalls: 0, pause() { this.pauseCalls += 1; },
+  play() { playCalls += 1; return playCalls === 1 ? new Promise(resolve => { resolveFirst = resolve; }) : new Promise(resolve => { resolveSecond = resolve; }); },
+};
+vm.runInContext('audioCompareEpoch=1', compare.context);
+const first = vm.runInContext("playAudioCompareMedia(racePlayer,compareFixture.source,{start:128.96,end:166},1,1)", compare.context);
+vm.runInContext('audioCompareEpoch=2', compare.context);
+const second = vm.runInContext("playAudioCompareMedia(racePlayer,compareFixture.files[1],{start:132.56,end:170},1,2)", compare.context);
+resolveFirst();
+assert.equal(await first, false, '늦게 끝난 A 재생 Promise는 B 상태를 바꾸지 않는다');
+assert.equal(compare.context.racePlayer.src, '/v3');
+assert.equal(compare.context.racePlayer.pauseCalls, 2, '재생 전환은 같은 단일 비교 플레이어만 멈춘다');
+resolveSecond();
+assert.equal(await second, true);
+console.log('works VM: A/B audio comparison deduplicates verified files, validates independent ranges, and ignores stale rapid-play completion');
+
+const compareTarget = compare.node('#workAudioCompare');
+compareTarget.querySelector = selector => compare.node('#compare ' + selector);
+const control = selector => compareTarget.querySelector(selector);
+const comparePlayer = control('[data-audio-compare-player]');
+Object.assign(comparePlayer, {
+  paused: true, duration: 289.279, currentTime: 0, pauseCalls: 0,
+  pause() { this.paused = true; this.pauseCalls++; },
+  async play() { this.paused = false; },
+});
+vm.runInContext('renderAudioCompare(compareFixture)', compare.context);
+for (const [slot, start, end] of [['a', 131, 171], ['b', 129.87, 169.87]]) {
+  control(`[data-audio-compare-start="${slot}"]`).value = String(start);
+  control(`[data-audio-compare-end="${slot}"]`).value = String(end);
+  control(`[data-audio-compare-start="${slot}"]`).oninput();
+}
+await control('[data-audio-compare-play="a"]').onclick();
+comparePlayer.currentTime = 145;
+await control('[data-audio-compare-play="b"]').onclick();
+assert.ok(Math.abs(comparePlayer.currentTime - 143.87) < 1e-8);
+comparePlayer.currentTime += 2;
+await control('[data-audio-compare-play="a"]').onclick();
+assert.equal(comparePlayer.currentTime, 147, 'A→B→A retains total elapsed time relative to each range origin');
+await control('[data-audio-compare-play="b"]').onclick();
+control('[data-audio-compare-pause]').onclick();
+control('[data-audio-compare-reset]').onclick();
+assert.equal(comparePlayer.currentTime, 129.87, 'pause must retain B as the reset target');
+await control('[data-audio-compare-play="a"]').onclick();
+const pausesBeforeRefresh = comparePlayer.pauseCalls;
+vm.runInContext('renderAudioCompare(compareFixture)', compare.context);
+assert.equal(comparePlayer.paused, true);
+assert.ok(comparePlayer.pauseCalls > pausesBeforeRefresh, 'refresh pauses the outgoing player before replacing its DOM');
+console.log('works VM: repeated A/B switching, paused B reset, and player teardown preserve playback semantics');
+
+compare.context.unknownDurationFixture = JSON.parse(JSON.stringify(compare.context.compareFixture));
+delete compare.context.unknownDurationFixture.source.technical;
+delete compare.context.unknownDurationFixture.files[1].technical;
+compare.storage.clear();
+comparePlayer.duration = NaN;
+vm.runInContext('renderAudioCompare(unknownDurationFixture)', compare.context);
+control('[data-audio-compare-end="a"]').value = '60';
+control('[data-audio-compare-end="a"]').oninput();
+let releaseMetadataPlay;
+comparePlayer.play = function () {
+  this.paused = false;
+  return new Promise(resolve => { releaseMetadataPlay = resolve; });
+};
+const waitingForMetadata = control('[data-audio-compare-play="a"]').onclick();
+comparePlayer.duration = 10;
+comparePlayer.onloadedmetadata();
+const metadataError = control('[data-audio-compare-status]').textContent;
+assert.match(metadataError, /길이 10\.00초/);
+releaseMetadataPlay();
+await waitingForMetadata;
+assert.equal(control('[data-audio-compare-status]').textContent, metadataError, 'late play resolution cannot replace the metadata length error with success');
+assert.equal(comparePlayer.paused, true);
 
 const list = harness();
 list.node('#workSearch').value = '애시드';

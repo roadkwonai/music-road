@@ -2,6 +2,7 @@ from contextlib import closing
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -319,6 +320,55 @@ class EntityRemovalTests(unittest.TestCase):
         value = json.loads(marker.read_text()); value["media"][0]["path"] = selected["media"][1]["path"]; marker.write_text(json.dumps(value))
         plan = self.removal.preview_group({"groupId": selected["group"]})
         self.assertFalse(plan["eligible"]); self.assertTrue(any("사용하는" in item["reason"] for item in plan["blocked"]))
+
+    def migrated_project(self):
+        old = self.root.parent / "old-jizura" / "studio"
+        old.mkdir(parents=True)
+        (old / "studio-project.json").write_text(json.dumps({"schemaVersion": 1, "media": []}))
+        old_id = self.manager.register({"project": str(old)})["id"]
+        current = self.make_project("migrated")
+        marker = current["project"] / "studio-project.json"
+        value = json.loads(marker.read_text())
+        value.update(musicSha256=current["group"], projectId=hashlib.sha256((current["group"] + "\0" + str(old)).encode()).hexdigest())
+        marker.write_text(json.dumps(value))
+        shutil.rmtree(old.parent)
+        return old, old_id, current
+
+    def test_verified_migrated_project_references_replace_missing_old_root(self):
+        selected = self.make_project("remove-old-song")
+        old, old_id, current = self.migrated_project()
+        plan = self.removal.preview_group({"groupId": selected["group"]})
+        self.assertTrue(plan["eligible"], plan)
+        self.assertTrue(any(item["path"] == str(old) for item in plan["preserved"]))
+        self.removal.cleanup({"planId": plan["planId"], "confirm": True})
+        self.assertTrue(current["project"].is_dir())
+        self.assertIn(old_id, self.manager._read()["projects"])
+
+    def test_migrated_project_dependency_still_blocks_removal(self):
+        selected = self.make_project("used-old-song")
+        old, old_id, current = self.migrated_project()
+        marker = current["project"] / "production-request.json"
+        marker.write_text(json.dumps({"sourceAudio": selected["media"][1]["path"]}))
+        self.assertFalse(self.removal.preview_group({"groupId": selected["group"]})["eligible"])
+
+    def test_missing_root_without_matching_migration_proof_still_blocks(self):
+        selected = self.make_project("unknown-migration")
+        old, old_id, current = self.migrated_project()
+        marker = current["project"] / "studio-project.json"
+        value = json.loads(marker.read_text()); value["projectId"] = "0" * 64
+        marker.write_text(json.dumps(value))
+        self.assertFalse(self.removal.preview_group({"groupId": selected["group"]})["eligible"])
+
+    def test_recreated_old_project_invalidates_migrated_removal_plan(self):
+        selected = self.make_project("restored-old-song")
+        old, old_id, current = self.migrated_project()
+        plan = self.removal.preview_group({"groupId": selected["group"]})
+        self.assertTrue(plan["eligible"], plan)
+        old.mkdir(parents=True)
+        (old / "studio-project.json").write_text(json.dumps({"media": [{"path": selected["media"][1]["path"]}]}))
+        with self.assertRaises(StorageError):
+            self.removal.cleanup({"planId": plan["planId"], "confirm": True})
+        self.assertTrue(selected["project"].exists())
 
 
 if __name__ == "__main__": unittest.main()

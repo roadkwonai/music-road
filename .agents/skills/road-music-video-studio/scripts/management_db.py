@@ -174,6 +174,17 @@ class ManagementDB:
             CREATE TABLE IF NOT EXISTS work_favorites (
               group_id TEXT PRIMARY KEY, liked_at INTEGER NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS studio_agent_bindings (
+              project_id TEXT PRIMARY KEY, project_path TEXT NOT NULL UNIQUE,
+              thread_id TEXT NOT NULL, bound_at INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS studio_agent_deliveries (
+              request_id TEXT PRIMARY KEY REFERENCES production_prompts(request_id) ON DELETE CASCADE,
+              project_id TEXT NOT NULL, thread_id TEXT NOT NULL, fingerprint TEXT NOT NULL,
+              payload_json TEXT NOT NULL, status TEXT NOT NULL, note TEXT,
+              queue_message_id TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS studio_agent_deliveries_project_idx ON studio_agent_deliveries(project_id, updated_at DESC);
         """
         for statement in schema.split(";"):
             if statement.strip():
@@ -398,26 +409,35 @@ class ManagementDB:
                 index_files += connection.execute("DELETE FROM storage_tracking_files WHERE workspace=?", (root,)).rowcount
                 digest = hashlib.sha256(root.encode('utf-8')).hexdigest()
                 documents += connection.execute("DELETE FROM management_documents WHERE name IN (?,?)", ('workspace-scan:' + digest, 'workspace-metadata:' + digest)).rowcount
+            documents += connection.execute("DELETE FROM management_documents WHERE name IN (?,?)", (f"studio-agent-draft:studio:{project_id}", f"studio-agent-draft:detail:{project_id}")).rowcount
             paths = connection.execute("DELETE FROM management_paths WHERE project_id=?", (project_id,)).rowcount
             events = connection.execute("DELETE FROM management_events WHERE project_id=?", (project_id,)).rowcount
+            bindings = connection.execute("DELETE FROM studio_agent_bindings WHERE project_id=?", (project_id,)).rowcount if self._has_table(connection, "studio_agent_bindings") else 0
             production = connection.execute("DELETE FROM production_projects WHERE project_id=?", (project_id,)).rowcount if not preserve_production and self._has_table(connection, "production_projects") else 0
-        return {"projectId": project_id, "removedPaths": paths, "removedEvents": events, "removedProductionProjects": production, "removedIndexFiles": index_files, "removedDocuments": documents}
+        return {"projectId": project_id, "removedPaths": paths, "removedEvents": events, "removedProductionProjects": production, "removedStudioAgentBindings": bindings, "removedIndexFiles": index_files, "removedDocuments": documents}
 
     def drop_group(self, group_id, connection=None):
         if not isinstance(group_id, str) or not group_id or len(group_id) > 160:
             raise ManagementDBError("groupId가 올바르지 않습니다")
         with self._connection(connection, write=True) as connection:
+            path_projects = [row[0] for row in connection.execute("SELECT DISTINCT project_id FROM management_paths WHERE group_id=? AND project_id IS NOT NULL", (group_id,)).fetchall()]
+            production_projects = [row[0] for row in connection.execute("SELECT project_id FROM production_projects WHERE group_id=?", (group_id,)).fetchall()] if self._has_table(connection, "production_projects") else []
+            bound_projects = sorted(set(path_projects) | set(production_projects))
             paths = connection.execute("DELETE FROM management_paths WHERE group_id=?", (group_id,)).rowcount
             events = connection.execute("DELETE FROM management_events WHERE group_id=?", (group_id,)).rowcount
             favorites = connection.execute("DELETE FROM work_favorites WHERE group_id=?", (group_id,)).rowcount if self._has_table(connection, "work_favorites") else 0
             production = 0
+            documents = 0
             if self._has_table(connection, "production_projects"):
                 production += connection.execute("DELETE FROM production_projects WHERE group_id=?", (group_id,)).rowcount
                 # A project can pre-date group binding; its explicitly grouped records
                 # still belong to this group and must not survive group deletion.
                 for table in ("production_prompts", "production_tasks", "production_files"):
                     production += connection.execute("DELETE FROM " + table + " WHERE group_id=?", (group_id,)).rowcount
-        return {"groupId": group_id, "removedPaths": paths, "removedEvents": events, "removedFavorites": favorites, "removedProductionRows": production}
+            bindings = connection.execute("DELETE FROM studio_agent_bindings WHERE project_id IN (" + ",".join("?" for _ in bound_projects) + ")", bound_projects).rowcount if bound_projects and self._has_table(connection, "studio_agent_bindings") else 0
+            for project_id in bound_projects:
+                documents += connection.execute("DELETE FROM management_documents WHERE name IN (?,?)", (f"studio-agent-draft:studio:{project_id}", f"studio-agent-draft:detail:{project_id}")).rowcount
+        return {"groupId": group_id, "removedPaths": paths, "removedEvents": events, "removedFavorites": favorites, "removedProductionRows": production, "removedStudioAgentBindings": bindings, "removedDocuments": documents}
 
 
 def main(argv=None):

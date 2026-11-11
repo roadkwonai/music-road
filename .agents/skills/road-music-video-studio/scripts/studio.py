@@ -59,6 +59,7 @@ SHOWREEL_REQUEST_FILE = 'showreel-request.json'
 MAX_JSON = 64 * 1024
 MAX_UPLOAD = 512 * 1024 * 1024
 MAX_LYRICS_TEXT = 256 * 1024
+MAX_AGENT_DRAFT = 512 * 1024
 MAX_SHARED_CACHE_OUTPUT = 1024 * 1024
 SHARED_CACHE_TIMEOUT = 30
 MAX_MAINTENANCE_OUTPUT = 16 * 1024 * 1024
@@ -455,6 +456,7 @@ class Session:
         self.storage = StorageManager()
         self.management = ManagementDB(self.storage.data_dir)
         self.production = ProductionLedger(self.storage.data_dir)
+        self._agent = None
         self._updates = None
         self._updates_lock = threading.Lock()
         self.tracking = StorageTracking(self.storage)
@@ -510,6 +512,12 @@ class Session:
                 from studio_updates import StudioUpdates
                 self._updates = StudioUpdates(self.storage.data_dir, skills_parent=SKILLS_ROOT)
             return self._updates
+
+    def agent(self):
+        if self._agent is None:
+            from studio_agent import StudioAgent
+            self._agent = StudioAgent(self.storage.data_dir)
+        return self._agent
 
     def register_library_storage_projects(self):
         """Register only projects already verified by the local work library."""
@@ -908,7 +916,9 @@ class Session:
                 if path.is_file() and not path.is_symlink() and sha256(path) == item.get('sha256'):
                     if item.get('kind') == 'lyrics':
                         lyrics_text(path)
-                    value[item['id']] = {**item, 'path': path}
+                    # Delivery history calls the file length `bytes`; project metadata calls it `size`.
+                    size = item.get('size', item.get('bytes'))
+                    value[item['id']] = {**item, 'path': path, 'size': size if isinstance(size, int) and size >= 0 else path.stat().st_size}
             except (OSError, ValueError):
                 continue
         return value
@@ -1229,11 +1239,12 @@ def publish(project, manifest, dry_run=False):
     delivery = DeliveryStore(output_root).publish(project, delivery_media, source_sha256=source_sha,
         title=value.get('title') or data.get('name') or project.name, reason=value.get('changeReason', ''), created_at=value.get('producedAt'), _allow_source_only=bool(audio_aliases), studio_name=value.get('title'))
     original_by_id = {item.get('id'): item for item in registered if isinstance(item, dict)}
-    canonical = [{**{key: value for key, value in original_by_id.get(item.get('id'), {}).items() if key not in {'path', 'name', 'size', 'sha256'}}, **item} for item in delivery['media']]
+    canonical = [{**{key: value for key, value in original_by_id.get(item.get('id'), {}).items() if key not in {'path', 'name', 'size', 'sha256', 'bytes'}},
+                  **{key: value for key, value in item.items() if key != 'bytes'}} for item in delivery['media']]
     if audio_aliases:
         source_canonical = next(item for item in canonical if item.get('id') == 'music')
-        canonical.extend({**{key: value for key, value in alias.items() if key not in {'path', 'name', 'size', 'sha256'}},
-                          **{key: source_canonical[key] for key in ('kind', 'path', 'name', 'sha256', 'bytes')}, 'id': alias['id']} for alias in audio_aliases)
+        canonical.extend({**{key: value for key, value in alias.items() if key not in {'path', 'name', 'size', 'sha256', 'bytes'}},
+                          **{key: source_canonical[key] for key in ('kind', 'path', 'name', 'sha256', 'size')}, 'id': alias['id']} for alias in audio_aliases)
     canonical.extend(item for item in registered if isinstance(item, dict) and item.get('kind') == 'artifact')
     if value.get('title'): session.data['name'] = value['title'].strip()
     session._set_registered(canonical)
@@ -1385,6 +1396,80 @@ def make_handler(session):
             source=next((item for item in data.get('media',[]) if isinstance(item,dict) and item.get('id')=='music'),{})
             if source.get('sha256')!=group_id:raise ValueError('프로젝트의 현재 원음이 이 음악과 다릅니다')
             return path,data
+        def agent_project(self, project_id=None, group_id=None):
+            if group_id is not None:
+                if not isinstance(group_id, str) or not SHA256.fullmatch(group_id):
+                    raise ValueError('음악 그룹 ID가 올바르지 않습니다')
+                if not isinstance(project_id, str) or not SHA256.fullmatch(project_id):
+                    raise ValueError('등록된 프로젝트 ID가 필요합니다')
+                return self.work_project(group_id, project_id)[0]
+            current = hashlib.sha256(str(session.project).encode()).hexdigest()
+            if project_id is not None and project_id != current:
+                raise ValueError('현재 제작실에 등록된 프로젝트가 아닙니다')
+            return session.project
+
+        def agent_context(self, group_id=None, project_id=None):
+            if group_id is None or project_id is not None:
+                projects = [self.agent_project(project_id, group_id)]
+            else:
+                if not isinstance(group_id, str) or not SHA256.fullmatch(group_id):
+                    raise ValueError('음악 그룹 ID가 올바르지 않습니다')
+                projects = []
+                for identifier in self.work_projects(group_id):
+                    try:
+                        projects.append(self.work_project(group_id, identifier)[0])
+                    except (OSError, ValueError):
+                        continue
+            group = session.library.group(group_id) if group_id else None
+            files = ([group.get('source'), *group.get('files', [])] if group else [])
+            contexts = []
+            for project in projects:
+                value = session.agent().context(project)
+                for item in value.get('media', []):
+                    if group:
+                        kind = 'source' if item.get('id') == 'music' else item.get('kind')
+                        registered = next((file for file in files if isinstance(file, dict) and file.get('available') and file.get('sha256') == item.get('sha256') and file.get('kind') == kind), None)
+                        if registered:
+                            item['url'] = f'/works/{group_id}/files/{registered["id"]}?token={quote(session.token, safe="")}'
+                    else:
+                        item['url'] = f'/media/{quote(item["id"], safe="")}?token={quote(session.token, safe="")}'
+                contexts.append(value)
+            return {'projects': contexts}
+
+        def agent_query(self, parsed):
+            values = parse_qs(parsed.query, keep_blank_values=True)
+            if set(values) - {'token', 'groupId', 'projectId', 'requestId'} or any(len(items) != 1 for items in values.values()):
+                raise ValueError('Codex 요청 조회 조건이 올바르지 않습니다')
+            result = {key: items[0] for key, items in values.items() if key != 'token'}
+            for key, value in result.items():
+                pattern = r'[0-9a-f]{48}' if key == 'requestId' else r'[0-9a-f]{64}'
+                if not re.fullmatch(pattern, value):
+                    raise ValueError(f'{key} 값이 올바르지 않습니다')
+            return result
+        def agent_history_query(self, parsed):
+            values = parse_qs(parsed.query, keep_blank_values=True)
+            if set(values) - {'token', 'groupId', 'projectId', 'cursor', 'limit'} or any(len(items) != 1 for items in values.values()):
+                raise ValueError('Codex 대화 이력 조회 조건이 올바르지 않습니다')
+            result = {key: items[0] for key, items in values.items() if key != 'token'}
+            for key in ('groupId', 'projectId'):
+                if key in result and not SHA256.fullmatch(result[key]):
+                    raise ValueError(f'{key} 값이 올바르지 않습니다')
+            if 'cursor' in result and (not result['cursor'] or len(result['cursor']) > 4096 or '\x00' in result['cursor']):
+                raise ValueError('cursor 값이 올바르지 않습니다')
+            if 'limit' in result and (not result['limit'].isdigit() or not 1 <= int(result['limit']) <= 20):
+                raise ValueError('limit 값이 올바르지 않습니다')
+            return result
+        def agent_draft_query(self, parsed):
+            values = parse_qs(parsed.query, keep_blank_values=True)
+            if set(values) - {'token', 'groupId', 'projectId', 'scope'} or any(len(items) != 1 for items in values.values()):
+                raise ValueError('작성 중 초안 조회 조건이 올바르지 않습니다')
+            result = {key: items[0] for key, items in values.items() if key != 'token'}
+            for key in ('groupId', 'projectId'):
+                if key in result and not SHA256.fullmatch(result[key]):
+                    raise ValueError(f'{key} 값이 올바르지 않습니다')
+            if not isinstance(result.get('scope'), str) or result['scope'] not in {'studio', 'detail'}:
+                raise ValueError('scope 값이 올바르지 않습니다')
+            return result
         def work_records(self, group_id):
             records=[]
             group=session.library.group(group_id)
@@ -1498,7 +1583,7 @@ def make_handler(session):
             if parsed.path == '/works.js':
                 raw = (ROOT/'assets/works.js').read_bytes()
                 self.send_response(200);self.send_header('Content-Type','text/javascript; charset=utf-8');self.send_header('Content-Length',str(len(raw)));self.send_header('Cache-Control','no-store');self.send_header('X-Content-Type-Options','nosniff');self.end_headers();return self.wfile.write(raw)
-            if parsed.path in {'/work-production.js', '/production-ui.js', '/production-activity.js'}:
+            if parsed.path in {'/work-production.js', '/production-ui.js', '/production-activity.js', '/agent-ui.js'}:
                 raw = (ROOT/'assets'/parsed.path.removeprefix('/')).read_bytes()
                 self.send_response(200);self.send_header('Content-Type','text/javascript; charset=utf-8');self.send_header('Content-Length',str(len(raw)));self.send_header('Cache-Control','no-store');self.send_header('X-Content-Type-Options','nosniff');self.end_headers();return self.wfile.write(raw)
             if parsed.path == '/dashboard.js':
@@ -1724,6 +1809,24 @@ def make_handler(session):
                 name=parsed.path.removeprefix('/design/fonts/')
                 if name not in FONT_FILES:return self.deny(404,'등록된 글꼴이 아닙니다')
                 return self.media(DESIGN_ASSETS/'fonts'/name)
+            if parsed.path in {'/api/agent/context', '/api/agent/requests', '/api/agent/history', '/api/agent/draft'}:
+                try:
+                    value = self.agent_history_query(parsed) if parsed.path.endswith('/history') else (self.agent_draft_query(parsed) if parsed.path.endswith('/draft') else self.agent_query(parsed))
+                    if parsed.path.endswith('/context'):
+                        if 'requestId' in value: raise ValueError('문맥 조회에는 요청 ID를 지정할 수 없습니다')
+                        return self.send_json(200, self.agent_context(value.get('groupId'), value.get('projectId')))
+                    if parsed.path.endswith('/history'):
+                        project = self.agent_project(value.get('projectId'), value.get('groupId'))
+                        params = {key: value[key] for key in ('cursor', 'limit') if key in value}
+                        if 'limit' in params: params['limit'] = int(params['limit'])
+                        return self.send_json(200, session.agent().history(project, params))
+                    if parsed.path.endswith('/draft'):
+                        project = self.agent_project(value.get('projectId'), value.get('groupId'))
+                        return self.send_json(200, session.agent().draft_get(project, {'scope': value['scope']}))
+                    project = self.agent_project(value.get('projectId'), value.get('groupId'))
+                    return self.send_json(200, session.agent().requests(project, value.get('requestId')))
+                except (OSError, ValueError) as error:
+                    return self.deny(422, str(error))
             if parsed.path=='/api/state': return self.send_json(200,session.state())
             if parsed.path == '/downloads/complete.zip':
                 try:return self.completed_download()
@@ -1768,6 +1871,25 @@ def make_handler(session):
                     if not isinstance(value,dict) or set(value)!=required or (updates[1]=='update' and value.get('confirm') is not True):
                         raise ValueError('업데이트 실행에는 componentId와 confirm:true가 필요합니다.')
                     return self.send_json(202,session.updates().start(updates[1],value['componentId']))
+                if parsed.path == '/api/agent/requests':
+                    if self.headers.get('Content-Type','').split(';',1)[0].strip().lower() != 'application/json':
+                        return self.deny(415, 'application/json 요청이 필요합니다')
+                    raw, _ = self.body(MAX_LYRICS_TEXT)
+                    value = json_load(raw.decode('utf-8'))
+                    allowed = {'projectId', 'groupId', 'requestId', 'target', 'intent', 'prompt', 'preserve', 'revisedLyrics', 'mediaId', 'mediaSha256', 'baseVersionId', 'range'}
+                    if not isinstance(value, dict) or set(value) - allowed or 'projectId' not in value:
+                        raise ValueError('등록된 프로젝트와 지정된 수정 요청 항목만 전달할 수 있습니다')
+                    project = self.agent_project(value.pop('projectId'), value.pop('groupId', None))
+                    return self.send_json(201, session.agent().submit(project, value))
+                if parsed.path == '/api/agent/draft':
+                    if self.headers.get('Content-Type','').split(';',1)[0].strip().lower() != 'application/json':
+                        return self.deny(415, 'application/json 요청이 필요합니다')
+                    raw, _ = self.body(MAX_AGENT_DRAFT)
+                    value = json_load(raw.decode('utf-8'))
+                    if not isinstance(value, dict) or set(value) - {'projectId', 'groupId', 'scope', 'draft'} or 'projectId' not in value or not isinstance(value.get('scope'), str) or value['scope'] not in {'studio', 'detail'} or 'draft' not in value:
+                        raise ValueError('등록된 프로젝트의 작성 중 초안만 전달할 수 있습니다')
+                    project = self.agent_project(value.pop('projectId'), value.pop('groupId', None))
+                    return self.send_json(200, session.agent().draft_set(project, value))
                 if parsed.path == '/api/production/request':
                     if self.headers.get('Content-Type','').split(';',1)[0].strip().lower()!='application/json':return self.deny(415,'application/json 요청이 필요합니다')
                     raw,_=self.body(MAX_JSON); value=json_load(raw.decode('utf-8'))
@@ -1920,6 +2042,12 @@ def make_handler(session):
 def serve(project, music=None, host=None, open_browser=False, timeout=900, review=False, session_file=None):
     if not 1 <= timeout <= 86_400: raise ValueError('--timeout: 1..86400초가 필요합니다')
     session=Session(project,music,host,review)
+    if os.environ.get('CODEX_THREAD_ID'):
+        try:
+            if not session.agent().connection(session.project).get('threadId'):
+                session.agent().bind(session.project)
+        except (OSError, ValueError) as error:
+            print(json.dumps({'event':'studio-agent-warning','message':str(error)},ensure_ascii=False),file=sys.stderr,flush=True)
     session.register_library_storage_projects()
     for project_id in session.storage_projects:
         try: session.storage.maybe_cleanup(project_id)
@@ -1928,11 +2056,11 @@ def serve(project, music=None, host=None, open_browser=False, timeout=900, revie
         try:session.library.register(session.project)
         except (OSError,ValueError) as error:print(json.dumps({'event':'studio-library-warning','message':str(error)},ensure_ascii=False),file=sys.stderr,flush=True)
     server=ThreadingHTTPServer(('127.0.0.1',0),make_handler(session));server.daemon_threads=True;thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start();url=f'http://127.0.0.1:{server.server_port}/?token={session.token}'
-    print(json.dumps({'event':'studio-ready','url':url,'project':str(session.project),'expiresSeconds':timeout,'review':review,'localExecutorOnly':True},ensure_ascii=False),file=sys.stderr,flush=True)
     registration = Path(session_file).resolve() if session_file else studio_session_file()
     if registration:
         registration.parent.mkdir(parents=True, exist_ok=True)
         atomic_json(registration, {'schemaVersion':1,'url':url,'project':str(session.project),'pid':os.getpid(),'expiresAt':int(time.time())+timeout})
+    print(json.dumps({'event':'studio-ready','url':url,'project':str(session.project),'expiresSeconds':timeout,'review':review,'localExecutorOnly':True},ensure_ascii=False),file=sys.stderr,flush=True)
     if open_browser:
         try:
             if not open_page(url):print(json.dumps({"event":"studio-open-failed","message":"제작실 페이지를 열지 못했습니다"},ensure_ascii=False),file=sys.stderr,flush=True)

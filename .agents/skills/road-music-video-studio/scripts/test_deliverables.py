@@ -11,7 +11,7 @@ import zipfile
 from http.server import ThreadingHTTPServer
 from urllib.parse import urlparse
 
-from studio import MAX_LYRICS_TEXT, Session, init_project, make_handler, publish, sha256
+from studio import MAX_LYRICS_TEXT, Session, init_project, make_handler, publish, serve, sha256
 
 
 class DeliverableTests(unittest.TestCase):
@@ -87,6 +87,47 @@ class DeliverableTests(unittest.TestCase):
         self.assertEqual(entry['sourceStatus'], 'current')
         self.assertIn('download=1', entry['downloadUrl'])
         self.assertEqual(state['media']['review']['captions'][0]['text'], captions.read_text(encoding='utf-8'))
+
+    def test_restart_serves_legacy_bytes_metadata_after_completed_audio_registration(self):
+        folder, root, project, source = self.make_project()
+        self.addCleanup(folder.cleanup)
+        _, audio, _, _ = self.publish_all(project, source, root)
+
+        marker = project / 'studio-project.json'
+        metadata = json.loads(marker.read_text(encoding='utf-8'))
+        self.assertTrue(all('size' in item and 'bytes' not in item for item in metadata['media']))
+        for item in metadata['media']:
+            item['bytes'] = item.pop('size')
+        marker.write_text(json.dumps(metadata, ensure_ascii=False), encoding='utf-8')
+
+        restarted = Session(project, review=True)
+        server = self.server(restarted)
+        status, _, body = self.get(server, f'/api/state?token={restarted.token}')
+
+        self.assertEqual(status, 200)
+        state = json.loads(body)
+        self.assertEqual(state['media']['music']['size'], source.stat().st_size)
+        self.assertEqual(state['media']['review']['audios'][0]['name'], audio.name)
+        self.assertEqual(state['media']['review']['audios'][0]['size'], audio.stat().st_size)
+
+    def test_ready_event_follows_session_registration(self):
+        folder, root, project, _ = self.make_project()
+        self.addCleanup(folder.cleanup)
+        registration = root / 'session.json'
+        session = Session(project, review=True)
+        session.done.set()
+        registered_at_ready = []
+
+        def observe(message, **_kwargs):
+            event = json.loads(message)
+            if event.get('event') == 'studio-ready':
+                registered_at_ready.append(registration.is_file() and
+                    json.loads(registration.read_text())['url'] == event['url'])
+
+        with patch('studio.Session', return_value=session), patch('studio.print', side_effect=observe):
+            serve(project, review=True, timeout=1, session_file=registration)
+        self.assertEqual(registered_at_ready, [True])
+        self.assertFalse(registration.exists())
 
     def test_lyrics_validation_rejects_unsupported_large_and_invalid_text(self):
         folder, root, project, source = self.make_project()

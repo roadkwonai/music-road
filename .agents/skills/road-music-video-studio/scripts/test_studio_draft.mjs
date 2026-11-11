@@ -13,7 +13,7 @@ function inlineScript(html) {
   return [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(match => match[1]).findLast(script => script.includes('const boot=window.__STUDIO_BOOTSTRAP__'));
 }
 
-function harness(html) {
+function harness(html, fetch = () => new Promise(() => {})) {
   const nodes = new Map();
   const selection = new Map();
   const node = selector => {
@@ -54,7 +54,7 @@ function harness(html) {
     window: { __STUDIO_BOOTSTRAP__: { token: 'test_token_12345678' }, addEventListener() {} }, document, location,
     history: { replaceState(_state, _title, value) { location.href = String(value); } }, navigator: { clipboard: { async writeText() {} } },
     sessionStorage: { getItem(key) { return session.get(key) ?? null; }, setItem(key, value) { session.set(key, String(value)); } },
-    fetch: () => new Promise(() => {}), AbortSignal, URL, Intl, JSON, String, Number, Boolean, Object, Array, RegExp,
+    fetch, AbortSignal, URL, Intl, JSON, String, Number, Boolean, Object, Array, RegExp,
     encodeURIComponent, structuredClone, setTimeout, clearTimeout,
   });
   vm.runInContext(inlineScript(html), context);
@@ -72,6 +72,20 @@ assert.match(studioHtml, /id="flowResultsLink"/);
 assert.match(studioHtml, /<dialog id="decisionGuide"/);
 assert.match(studioHtml, /Showreel CD/);
 assert.match(studioHtml, /JIZURA 음악 스튜디오/);
+
+const startup = harness(studioHtml, async () => { throw new TypeError('network internals'); });
+await new Promise(resolve => setImmediate(resolve));
+assert.match(startup.node('#status').textContent, /제작실을 불러오지 못했습니다/);
+assert.doesNotMatch(startup.node('#status').textContent, /network internals/);
+assert.equal(startup.node('#retryStudio').hidden, false);
+assert.equal(startup.node('#retryStudio').disabled, false);
+const startupState = {projectName:'초기 제작실',host:'codex',mode:'showreel-motion',hasSavedSelection:false,modes:[{id:'showreel-motion',name:'음악 모션그래픽'}],samples:{},styles:[],media:{music:null,review:{}},selection:{styleId:null,display:{showSpectrum:null,showQueue:null,showNowPlaying:null,channelName:null}}};
+startup.context.fetch = async () => ({ok:true,json:async () => startupState});
+await startup.node('#retryStudio').onclick();
+assert.match(startup.node('#status').textContent, /초기 제작실/);
+assert.match(startup.node('#modes').innerHTML, /음악 모션그래픽/);
+assert.match(startup.node('#music').innerHTML, /등록된 음악이 없습니다/);
+assert.equal(startup.node('#retryStudio').hidden, true);
 
 const studio = harness(studioHtml);
 const sparseDraft = JSON.parse(vm.runInContext('JSON.stringify(startDraft({host:"codex",mode:"showreel-motion",selection:{styleId:null},hasSavedSelection:false}))', studio.context));

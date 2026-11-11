@@ -562,7 +562,7 @@ async function runBatch (parsed, options) {
           ? await require('./yue').dispatch(command, item.params === undefined ? {} : item.params, { ...options, timeout })
         : isLocalSkills(command)
           ? await localSkills(command, item.params === undefined ? {} : item.params, { ...requestOptions, timeout })
-        : (command.startsWith('storage:') || command.startsWith('production:') || command.startsWith('works:'))
+        : (command.startsWith('storage:') || command.startsWith('production:') || command.startsWith('works:') || command.startsWith('studio:'))
           ? await localStorage(command, item.params === undefined ? {} : item.params, options, item.confirm === true, timeout)
         : command === 'prompt:knowledge'
           ? localKnowledge(item.params === undefined ? {} : item.params)
@@ -627,7 +627,7 @@ async function run (argv = process.argv.slice(2), supplied = {}) {
       writeJson(options.stdout, { ok: true, result })
       return 0
     }
-    if ((normalized.command.startsWith('storage:') || normalized.command.startsWith('production:') || normalized.command.startsWith('works:'))) {
+    if ((normalized.command.startsWith('storage:') || normalized.command.startsWith('production:') || normalized.command.startsWith('works:') || normalized.command.startsWith('studio:'))) {
       const result = await localStorage(normalized.command, params, options, parsed.confirm === true, parsed.timeout)
       writeJson(options.stdout, { ok: true, result })
       return 0

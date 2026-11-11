@@ -147,6 +147,36 @@ class StorageEntityRemoval:
             raise StorageError("남는 프로젝트의 알려진 제작 메타데이터가 없어 참조를 검증할 수 없습니다.", "missing_proof")
         return paths
 
+    def _migrated_project(self, project, registry, groups):
+        old = Path(project["path"])
+        try:
+            old.lstat()
+        except FileNotFoundError:
+            pass
+        else:
+            raise StorageError("기존 프로젝트가 있어 이전 경로로 대체하지 않습니다.", "changed_file")
+        if old.resolve(strict=False) != old or any(path.is_symlink() for path in (old, *old.parents)):
+            raise StorageError("이전 프로젝트 경로의 symlink를 보호합니다.", "unsafe_path")
+        matches = []
+        for group_id, group in groups.items():
+            if not ID.fullmatch(group_id): continue
+            # Restructure records this identity from the original group and path.
+            expected = _id(group_id + "\0" + str(old))
+            origins = {origin["project"] for item in _entries(group) for origin in item.get("origins", [])}
+            for candidate in registry["projects"].values():
+                root = Path(candidate["path"])
+                if str(root) not in origins or not root.is_relative_to(self.root / ".roadmusic" / "work"):
+                    continue
+                marker = root / "studio-project.json"
+                if marker.is_symlink() or not marker.is_file() or marker.stat().st_size > MAX_JSON:
+                    continue
+                value = _json_read(marker, {})
+                if isinstance(value, dict) and value.get("projectId") == expected and value.get("musicSha256") == group_id:
+                    matches.append(candidate)
+        if len(matches) != 1:
+            raise StorageError("누락된 프로젝트의 검증된 이전 경로가 없습니다.", "missing_proof")
+        return matches[0]
+
     def _build(self, scope, entity_id):
         registry, library, delivery = self.manager._read(), self.library._read(), self._delivery()
         groups = library["groups"]
@@ -237,7 +267,14 @@ class StorageEntityRemoval:
             if any(raw_root == Path(target["path"]) or raw_root.is_relative_to(Path(target["path"])) for target in targets):
                 blocked.append({"projectId": pid, "path": str(raw_root), "reason": "남는 등록 프로젝트가 제거 대상 폴더 안에 있습니다."})
             try:
-                references = self._project_references(project)
+                try:
+                    references = self._project_references(project)
+                except FileNotFoundError:
+                    if self.manager._busy(registry, pid):
+                        raise StorageError("누락된 프로젝트에 진행 중인 제작 lease가 있습니다.", "busy")
+                    migrated = self._migrated_project(project, registry, groups)
+                    references = self._project_references(migrated)
+                    preserved.append({"path": str(raw_root), "reason": "이전 등록은 보존하고 검증된 새 프로젝트의 참조를 검사했습니다: " + migrated["path"]})
             except (OSError, RuntimeError, ValueError, StorageError) as error:
                 blocked.append({"projectId": pid, "path": str(raw_root), "reason": "남는 프로젝트의 참조를 안전하게 검증할 수 없습니다: " + str(error)})
                 continue

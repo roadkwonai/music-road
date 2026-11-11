@@ -181,6 +181,32 @@ class ManagementDBTests(unittest.TestCase):
         self.assertEqual(len(self.db.paths(workspace=str(self.root))), 1)
         self.assertIsNotNone(self.db.read_document('workspace-scan:' + hashlib.sha256(str(self.root).encode()).hexdigest()))
 
+    def test_project_drop_removes_only_its_agent_drafts(self):
+        for project_id in ('project-a', 'project-b'):
+            for scope in ('studio', 'detail'):
+                self.db.write_document(f'studio-agent-draft:{scope}:{project_id}', {'draft': project_id})
+        result = self.db.drop_project('project-a')
+        self.assertEqual(result['removedDocuments'], 2)
+        self.assertIsNone(self.db.read_document('studio-agent-draft:studio:project-a', fallback=None))
+        self.assertIsNone(self.db.read_document('studio-agent-draft:detail:project-a', fallback=None))
+        self.assertEqual(self.db.read_document('studio-agent-draft:studio:project-b'), {'draft': 'project-b'})
+        self.assertEqual(self.db.read_document('studio-agent-draft:detail:project-b'), {'draft': 'project-b'})
+
+    def test_group_drop_removes_bound_project_agent_drafts_only(self):
+        with self.db.transaction(write=True) as connection:
+            for project_id, group_id in (('project-a', 'group-a'), ('project-b', 'group-b')):
+                connection.execute('INSERT INTO production_projects(project_id,group_id,path,title,domain,created_at,updated_at) VALUES(?,?,?,?,?,?,?)', (project_id, group_id, str(self.root / project_id), '', 'video', 1, 1))
+        path_only = self.root / 'project-c'; path_only.mkdir()
+        self.db.claim_path(str(path_only), 'project', project_id='project-c', group_id='group-a')
+        for project_id in ('project-a', 'project-b', 'project-c'):
+            for scope in ('studio', 'detail'):
+                self.db.write_document(f'studio-agent-draft:{scope}:{project_id}', {'draft': project_id})
+        result = self.db.drop_group('group-a')
+        self.assertEqual(result['removedDocuments'], 4)
+        self.assertIsNone(self.db.read_document('studio-agent-draft:studio:project-a', fallback=None))
+        self.assertIsNone(self.db.read_document('studio-agent-draft:detail:project-c', fallback=None))
+        self.assertEqual(self.db.read_document('studio-agent-draft:detail:project-b'), {'draft': 'project-b'})
+
     def test_migration_repairs_35_registered_final_file_owners_idempotently(self):
         from storage_tracking import StorageTracking
         from test_work_library import write_project

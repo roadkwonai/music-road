@@ -229,7 +229,7 @@ class ProductionLedger:
             if title := titles.get(item["projectId"]):
                 item["projectTitle"] = title
 
-    def request(self, params):
+    def request(self, params, connection=None):
         if not isinstance(params, dict):
             raise ProductionLedgerError("request는 JSON 객체여야 합니다")
         if set(params) - {"project", "domain", "intent", "prompt", "source", "requestId", "groupId", "title"}:
@@ -242,9 +242,10 @@ class ProductionLedger:
         if source not in {"user", "engine"}:
             raise ProductionLedgerError("source는 user 또는 engine이어야 합니다")
         request_id = _public_id(params.get("requestId"), "requestId")
-        with self.db.transaction(write=True) as connection:
-            project = self._ensure_project(connection, params)
-            row = connection.execute("SELECT seq,request_id,project_id,group_id,domain,intent,prompt,source,is_main,requested_at FROM production_prompts WHERE request_id=?", (request_id,)).fetchone()
+        context = self.db._connection(connection, write=True)
+        with context as writer:
+            project = self._ensure_project(writer, params)
+            row = writer.execute("SELECT seq,request_id,project_id,group_id,domain,intent,prompt,source,is_main,requested_at FROM production_prompts WHERE request_id=?", (request_id,)).fetchone()
             if row is not None:
                 item = self._row_prompt(row)
                 self._assert_matching_group(project["groupId"], item["groupId"])
@@ -253,9 +254,9 @@ class ProductionLedger:
                     raise ProductionLedgerError("같은 requestId에 다른 요청을 기록할 수 없습니다")
                 return item
             revision_intent = intent.lower() in {"revision", "revise", "lyrics", "title", "replace", "restore", "review", "verification", "update", "edit"}
-            is_main = int(source == "user" and not revision_intent and connection.execute("SELECT 1 FROM production_prompts WHERE project_id=? AND domain=? AND is_main=1", (project["projectId"], project["domain"])).fetchone() is None)
+            is_main = int(source == "user" and not revision_intent and writer.execute("SELECT 1 FROM production_prompts WHERE project_id=? AND domain=? AND is_main=1", (project["projectId"], project["domain"])).fetchone() is None)
             now = _now_ms()
-            cursor = connection.execute("INSERT INTO production_prompts(request_id,project_id,group_id,domain,intent,prompt,source,is_main,requested_at) VALUES(?,?,?,?,?,?,?,?,?)", (request_id, project["projectId"], project["groupId"], project["domain"], intent, prompt, source, is_main, now))
+            cursor = writer.execute("INSERT INTO production_prompts(request_id,project_id,group_id,domain,intent,prompt,source,is_main,requested_at) VALUES(?,?,?,?,?,?,?,?,?)", (request_id, project["projectId"], project["groupId"], project["domain"], intent, prompt, source, is_main, now))
             return {"seq": cursor.lastrowid, "requestId": request_id, "projectId": project["projectId"], "groupId": project["groupId"], "domain": project["domain"], "intent": intent, "prompt": prompt, "source": source, "main": bool(is_main), "requestedAt": _iso(now), "requestedAtMs": now}
 
     def start_task(self, params):

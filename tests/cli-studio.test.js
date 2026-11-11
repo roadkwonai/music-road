@@ -90,6 +90,33 @@ test('reuses a matching server in the shared Ego page without spawning Python', 
   } finally { fs.rmSync(userData, { recursive: true, force: true }) }
 })
 
+test('allows the full readiness window when checking a reusable studio state', async () => {
+  const userData = tempDirectory()
+  const project = path.join(userData, 'video-studio')
+  fs.mkdirSync(project)
+  const session = { schemaVersion: 1, url: 'http://127.0.0.1:45679/?token=reused_token_1234', project, pid: 13, expiresAt: Math.floor(Date.now() / 1000) + 60 }
+  fs.writeFileSync(sessionPath(userData), JSON.stringify(session))
+  const originalFetch = global.fetch
+  const originalTimeout = AbortSignal.timeout
+  const signal = new AbortController().signal
+  try {
+    AbortSignal.timeout = milliseconds => {
+      assert.equal(milliseconds, 30_000)
+      return signal
+    }
+    global.fetch = async (url, options) => {
+      assert.equal(url, 'http://127.0.0.1:45679/api/state?token=reused_token_1234')
+      assert.equal(options.signal, signal)
+      return { ok: true, json: async () => ({ application: 'road-music-video-studio', project }) }
+    }
+    await openStudio({ userData, spawnProcess: () => opener() })
+  } finally {
+    global.fetch = originalFetch
+    AbortSignal.timeout = originalTimeout
+    fs.rmSync(userData, { recursive: true, force: true })
+  }
+})
+
 test('creates the local project, records a ready session, and opens once', async () => {
   const root = tempDirectory()
   const userData = tempDirectory()
@@ -110,12 +137,23 @@ test('creates the local project, records a ready session, and opens once', async
       fs.writeFileSync(path.join(project, 'studio-project.json'), '{"schemaVersion":1}')
       process.nextTick(() => started.emit('exit', 0))
     } else {
-      process.nextTick(() => started.stderr.write(JSON.stringify({ event: 'studio-ready', url: 'http://127.0.0.1:41111/?token=ready_token_12345', project }) + '\n'))
+      const url = 'http://127.0.0.1:41111/?token=ready_token_12345'
+      fs.writeFileSync(sessionPath(userData), JSON.stringify({ schemaVersion: 1, url, project, pid: started.pid, expiresAt: Math.floor(Date.now() / 1000) + 86_400 }))
+      process.nextTick(() => started.stderr.write(JSON.stringify({ event: 'studio-ready', url, project }) + '\n'))
     }
     return started
   }
   try {
-    const result = await openStudio({ userData, root, spawnProcess, readyTimeout: 500 })
+    const result = await openStudio({
+      userData,
+      root,
+      spawnProcess,
+      readyTimeout: 500,
+      requestStudioState: async url => {
+        assert.equal(url, 'http://127.0.0.1:41111/api/state?token=ready_token_12345')
+        return { application: 'road-music-video-studio', project }
+      }
+    })
     const canonicalProject = fs.realpathSync(project)
     assert.deepEqual(result, { url: 'http://127.0.0.1:41111/?token=ready_token_12345', project: canonicalProject, reused: false })
     assert.deepEqual(calls.map(call => call.command), ['python3', 'python3', 'ego-browser'])
@@ -126,6 +164,118 @@ test('creates the local project, records a ready session, and opens once', async
       schemaVersion: 1, url: 'http://127.0.0.1:41111/?token=ready_token_12345', project: canonicalProject, pid: 201,
       expiresAt: readSession(userData).expiresAt
     })
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+    fs.rmSync(userData, { recursive: true, force: true })
+  }
+})
+
+test('stops a newly started server when its state endpoint fails', async () => {
+  const root = tempDirectory()
+  const userData = tempDirectory()
+  const studio = path.join(root, '.agents', 'skills', 'road-music-video-studio')
+  fs.mkdirSync(path.join(studio, 'scripts'), { recursive: true })
+  fs.writeFileSync(path.join(studio, 'scripts', 'studio.py'), '')
+  const project = path.join(userData, 'video-studio')
+  let killed = 0
+  try {
+    await assert.rejects(openStudio({
+      userData,
+      root,
+      requestStudioState: async () => { throw new Error('제작실 상태 확인 실패 (500)') },
+      spawnProcess: (command, args) => {
+        const started = child(args.includes('init') ? 401 : 402)
+        if (args.includes('init')) {
+          fs.mkdirSync(project, { recursive: true })
+          fs.writeFileSync(path.join(project, 'studio-project.json'), '{"schemaVersion":1}')
+          process.nextTick(() => started.emit('exit', 0))
+        } else {
+          const url = 'http://127.0.0.1:41112/?token=ready_token_12345'
+          started.kill = signal => { assert.equal(signal, 'SIGTERM'); killed += 1 }
+          fs.writeFileSync(sessionPath(userData), JSON.stringify({ schemaVersion: 1, url, project, pid: started.pid, expiresAt: Math.floor(Date.now() / 1000) + 86_400 }))
+          process.nextTick(() => started.stderr.write(JSON.stringify({ event: 'studio-ready', url, project }) + '\n'))
+        }
+        return started
+      }
+    }), /제작실 상태 확인 실패 \(500\)/)
+    assert.equal(killed, 1)
+    assert.equal(fs.existsSync(sessionPath(userData)), false)
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+    fs.rmSync(userData, { recursive: true, force: true })
+  }
+})
+
+test('keeps a newer studio session when the new server state check fails', async () => {
+  const root = tempDirectory()
+  const userData = tempDirectory()
+  const studio = path.join(root, '.agents', 'skills', 'road-music-video-studio')
+  fs.mkdirSync(path.join(studio, 'scripts'), { recursive: true })
+  fs.writeFileSync(path.join(studio, 'scripts', 'studio.py'), '')
+  const project = path.join(userData, 'video-studio')
+  const newer = { schemaVersion: 1, url: 'http://127.0.0.1:41115/?token=newer_token_12345', project, pid: 407, expiresAt: Math.floor(Date.now() / 1000) + 86_400 }
+  let killed = 0
+  try {
+    await assert.rejects(openStudio({
+      userData,
+      root,
+      requestStudioState: async () => {
+        fs.writeFileSync(sessionPath(userData), JSON.stringify(newer))
+        throw new Error('제작실 상태 확인 실패 (500)')
+      },
+      spawnProcess: (command, args) => {
+        const started = child(args.includes('init') ? 405 : 406)
+        if (args.includes('init')) {
+          fs.mkdirSync(project, { recursive: true })
+          fs.writeFileSync(path.join(project, 'studio-project.json'), '{"schemaVersion":1}')
+          process.nextTick(() => started.emit('exit', 0))
+        } else {
+          const url = 'http://127.0.0.1:41114/?token=ready_token_12345'
+          started.kill = signal => { assert.equal(signal, 'SIGTERM'); killed += 1 }
+          fs.writeFileSync(sessionPath(userData), JSON.stringify({ schemaVersion: 1, url, project, pid: started.pid, expiresAt: Math.floor(Date.now() / 1000) + 86_400 }))
+          process.nextTick(() => started.stderr.write(JSON.stringify({ event: 'studio-ready', url, project }) + '\n'))
+        }
+        return started
+      }
+    }), /제작실 상태 확인 실패 \(500\)/)
+    assert.equal(killed, 1)
+    assert.deepEqual(JSON.parse(fs.readFileSync(sessionPath(userData), 'utf8')), newer)
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true })
+    fs.rmSync(userData, { recursive: true, force: true })
+  }
+})
+
+test('stops a newly started server when its state belongs to another project', async () => {
+  const root = tempDirectory()
+  const userData = tempDirectory()
+  const studio = path.join(root, '.agents', 'skills', 'road-music-video-studio')
+  fs.mkdirSync(path.join(studio, 'scripts'), { recursive: true })
+  fs.writeFileSync(path.join(studio, 'scripts', 'studio.py'), '')
+  const project = path.join(userData, 'video-studio')
+  let killed = 0
+  try {
+    await assert.rejects(openStudio({
+      userData,
+      root,
+      requestStudioState: async () => ({ application: 'road-music-video-studio', project: path.join(userData, 'other-project') }),
+      spawnProcess: (command, args) => {
+        const started = child(args.includes('init') ? 403 : 404)
+        if (args.includes('init')) {
+          fs.mkdirSync(project, { recursive: true })
+          fs.writeFileSync(path.join(project, 'studio-project.json'), '{"schemaVersion":1}')
+          process.nextTick(() => started.emit('exit', 0))
+        } else {
+          const url = 'http://127.0.0.1:41113/?token=ready_token_12345'
+          started.kill = signal => { assert.equal(signal, 'SIGTERM'); killed += 1 }
+          fs.writeFileSync(sessionPath(userData), JSON.stringify({ schemaVersion: 1, url, project, pid: started.pid, expiresAt: Math.floor(Date.now() / 1000) + 86_400 }))
+          process.nextTick(() => started.stderr.write(JSON.stringify({ event: 'studio-ready', url, project }) + '\n'))
+        }
+        return started
+      }
+    }), /제작실 상태 프로젝트가 현재 프로젝트와 일치하지 않습니다/)
+    assert.equal(killed, 1)
+    assert.equal(fs.existsSync(sessionPath(userData)), false)
   } finally {
     fs.rmSync(root, { recursive: true, force: true })
     fs.rmSync(userData, { recursive: true, force: true })

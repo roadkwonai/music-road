@@ -73,7 +73,7 @@ node cli/road-music.js song:generate --file song.json --events --wait
 
 `language`, `vocalGender`, `voice`, `key`, `negativePrompt`, `quality` 같은 임의 필드를 `song:generate`에 추가하면 안 된다. 지원되지 않는 키는 거부된다. API는 [전체 레퍼런스](cli-reference.md), 최신 허용값은 실행 버전의 `schema`가 기준이다.
 
-CCM을 주로 만든다면 [CCM 세부 옵션](ccm-prompts.md#options)과 [완전한 JSON 8개](ccm-prompts.md#json)를 참고한다. 회중·콰이어·기도·절기 표현도 위의 같은 공개 필드로 구성한다.
+CCM도 위의 같은 공개 필드로 구성한다. [CCM 세부 옵션](ccm-prompts.md#options)과 [완전한 JSON 8개](ccm-prompts.md#json)는 필수 참고가 아니며 필요할 때만 선택적으로 본다.
 
 <a id="basic"></a>
 

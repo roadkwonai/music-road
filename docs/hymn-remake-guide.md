@@ -308,7 +308,6 @@ H20의 지정 가사·선율을 R16으로 준비해줘.
 ```bash
 node cli/road-music.js prompt:knowledge
 node cli/road-music.js prompt:knowledge --json '{"topic":"hymn-remake"}'
-node cli/road-music.js prompt:knowledge --json '{"topic":"ccm"}'
 node cli/road-music.js prompt:knowledge --json '{"topic":"ace"}'
 node cli/road-music.js schema --json '{"command":"song:generate"}'
 ```
@@ -328,7 +327,7 @@ node cli/road-music.js songs:list
 
 ### 3. 실제 입력과 전달본 검증
 
-원문 가사·프롬프트를 보관하고 `lyrics:clean`·`lyrics:check`·`prompt:compose`로 **같은 전체 입력**을 점검한다. 승인되지 않은 구절 삭제·후렴 추가·영한 번역을 원문에 반영하지 않는다. 최종 caption 512자·정리 가사 4,096자 한계를 넘으면 조용히 자르지 말고 대안을 제안한다. [구체적인 점검 파일 매핑](ccm-prompts.md#workflow)을 참고한다.
+원문 가사·프롬프트를 보관하고 `lyrics:clean`·`lyrics:check`·`prompt:compose`로 **같은 전체 입력**을 점검한다. 승인되지 않은 구절 삭제·후렴 추가·영한 번역을 원문에 반영하지 않는다. 최종 caption 512자·정리 가사 4,096자 한계를 넘으면 조용히 자르지 말고 대안을 제안한다.
 
 참조 기반 생성은 일반 생성의 `targetSeconds`를 넣어 원본 길이를 바꾸는 경로가 아니다. `coverAudio.strength`는 0.1~1이며 여기서 0.7은 출발 예시다. 입력·모델·참조에 따른 결과를 들어야 하며 “높을수록 원선율 완벽 보존”으로 설명하지 않는다.
 
@@ -380,7 +379,7 @@ node cli/road-music.js song:generate --file hymn-song.json --events --wait
 
 ## 원문 보존과 추천
 
-요청자가 제공한 가사·프롬프트·옵션은 그대로 보관한다. 지식은 **권리·기술 제약 확인과 미지정 부분의 제안**에 사용하며 예시 가사로 대체하지 않는다. 추천하려면 사용자 원문과 제안 내용을 나누고 [공식 ACE 적용 가이드](ace-prompt-guide.md), [태그 가이드](lyrics-tags.md), [CCM 레시피](ccm-prompts.md)의 해당 근거를 제시한다.
+요청자가 제공한 가사·프롬프트·옵션은 그대로 보관한다. 지식은 **권리·기술 제약 확인과 미지정 부분의 제안**에 사용하며 예시 가사로 대체하지 않는다. 추천하려면 사용자 원문과 제안 내용을 나누고 [공식 ACE 적용 가이드](ace-prompt-guide.md), [태그 가이드](lyrics-tags.md)의 해당 근거를 제시한다. CCM 레시피는 필요할 때만 선택적으로 참고한다.
 
 ```text
 내가 준 가사와 style은 그대로 보존해줘.

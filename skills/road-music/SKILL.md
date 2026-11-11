@@ -26,7 +26,6 @@ CLI 키트에 동봉하는 작업 스킬이다. 기준 경로는 이 파일에�
 | YuE2 Apple Silicon (`yue-mlx`) | [YuE 제작 가이드](../../docs/yue-prompt-guide.md), 고급 제작이면 [YuE CLI 워크플로](../../docs/yue-cli-workflow.md), [MLX 운영 안내](../../docs/yue-mlx.md), 필요한 기능의 [고정 MLX 원문](../../docs/vendor/yue2/mlx/docs/usage.md) | CUDA 설치·명령·메모리 수치를 Mac에 적용하지 않음. 목표 길이·자연 EOS·실제 길이·잘림을 구분 |
 
 - 가이드 조회에는 `prompt:knowledge`의 `ace` 또는 `yue` topic을 사용한다. 미설치 상태·가이드 조회를 새 설치 권한으로 해석하지 않는다.
-- CCM·워십 작업은 기본 [CCM 가이드](../../docs/ccm-prompts.md)를 먼저 읽고, YuE를 메인으로 쓰는 경우 [YuE 전용 고급 활용](../../docs/yue-advanced-prompts.md)을 함께 읽고, 목적별 고급 조합은 [CCM 고급 활용 가이드](../../docs/ccm-advanced.md)와 `prompt:knowledge`의 `ccm-advanced`·`ccm-recipes` topic에서 확인한다. ACE와 YuE의 입력·검수 경계를 섞지 않으며, 레시피는 사용자 원문을 자동 적용하거나 생성 권한으로 바꾸지 않는다.
 - 옵션·장르가 필요하면 [옵션](../../docs/music-options.md)과 [장르 레시피](../../docs/genre-prompts.md)의 해당 절만 읽는다. YuE의 계획·샘플링·재현·전사·반복 검수는 [YuE CLI 워크플로](../../docs/yue-cli-workflow.md)에서 필요한 절만 읽는다. 최신 인기·플레이리스트가 언급되면 [리서치 절차](../../docs/music-research.md)를 따른다.
 - 모델별 FLOW 조정·비교 요청에는 [모델별 제작·비교](../../docs/model-production-guide.md)를 읽는다. `models` topic은 실험 기록이며 제작 기본값이 아니다.
 - YuE CLI의 정밀도·속도·단계 재사용을 비교할 때는 [실기 검증](../../docs/yue-cli-validation.md)의 시간 경계·전사·메모리·청취 한계를 참고한다. 다른 장비의 최적값이나 새 요청의 생성 수량으로 일반화하지 않는다.
@@ -60,4 +59,4 @@ Road Music 영상 제작실을 함께 사용하는 작업은 생성 완료를 �
 
 ## YuE 고급 활용의 명령 경계
 
-YuE/YuE MLX의 고급 제작·CCM 요청은 `prompt:knowledge`의 `yue-advanced`와 고정 공식·MLX 근거를 함께 읽는다. song:prepare는 무추론 검증이고 mode:plan 제출은 악보 모델 추론이다. 가사/style을 바꾸면 변경한 전체 입력으로 새 prepare→generate를 사용한다. song:render는 기존 metadata의 원문을 유지하는 악보 수정에만 사용하며 수정 가사 전달에 쓰지 않는다. 제공 ABC는 planner를 우회하므로 ABC 샘플러 변경을 새 악보 비교라고 설명하지 않는다. CFG는 semantic, ODE는 acoustic이며 단계 replay는 capabilities 허용키·원 artifact 무결성을 먼저 확인한다. 다른 모델의 문자한계·직접참조음원 입력을 YuE로 옮기지 않는다. 사용 가이드의 기본 YuE 선택은 실제 생성 승인이나 미설치 모델 설치 권한이 아니다.
+YuE/YuE MLX의 고급 제작 요청은 `prompt:knowledge`의 `yue-advanced`와 고정 공식·MLX 근거를 함께 읽는다. song:prepare는 무추론 검증이고 mode:plan 제출은 악보 모델 추론이다. 가사/style을 바꾸면 변경한 전체 입력으로 새 prepare→generate를 사용한다. song:render는 기존 metadata의 원문을 유지하는 악보 수정에만 사용하며 수정 가사 전달에 쓰지 않는다. 제공 ABC는 planner를 우회하므로 ABC 샘플러 변경을 새 악보 비교라고 설명하지 않는다. CFG는 semantic, ODE는 acoustic이며 단계 replay는 capabilities 허용키·원 artifact 무결성을 먼저 확인한다. 다른 모델의 문자한계·직접참조음원 입력을 YuE로 옮기지 않는다. 사용 가이드의 기본 YuE 선택은 실제 생성 승인이나 미설치 모델 설치 권한이 아니다.

@@ -12,11 +12,14 @@ const { promisify } = require('node:util')
 const exec = promisify(execFile)
 const update = require('../cli/update')
 
+// 고정 번호는 CLI 버전을 올릴 때마다 깨졌다. 설치본은 현재 cli/package.json, 공개 Release는 그 다음 패치로 둔다.
+const CURRENT = require('../cli/package.json').version
+const NEXT = CURRENT.replace(/\d+$/, patch => String(Number(patch) + 1))
 const repo = 'roadkwonai/music-road'
 const api = `https://api.github.com/repos/${repo}/releases`
-const releaseBase = `https://github.com/${repo}/releases/download/cli-v0.1.1/`
+const releaseBase = `https://github.com/${repo}/releases/download/cli-v${NEXT}/`
 
-async function makeKit (root, version = '0.1.1', { npmFailure = false } = {}) {
+async function makeKit (root, version = NEXT, { npmFailure = false } = {}) {
   const kit = path.join(root, `RoadMusic-CLI-${version}`)
   await fs.mkdir(path.join(kit, 'cli'), { recursive: true })
   await fs.writeFile(path.join(kit, 'package.json'), JSON.stringify({ name: 'road-music', version: '1.4.0' }))
@@ -30,7 +33,7 @@ async function makeKit (root, version = '0.1.1', { npmFailure = false } = {}) {
   return { archive, kit }
 }
 
-function release (asset, version = '0.1.1', overrides = {}) {
+function release (asset, version = NEXT, overrides = {}) {
   const digest = crypto.createHash('sha256').update(asset).digest('hex')
   const name = `RoadMusic-CLI-${version}.zip`
   const manifest = `${digest}  ${name}\n`
@@ -49,9 +52,9 @@ function release (asset, version = '0.1.1', overrides = {}) {
 async function fixture (t, options = {}) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'road-cli-update-'))
   const cliHome = path.join(root, 'cli-home')
-  const kit = await makeKit(root, options.version || '0.1.1', options)
+  const kit = await makeKit(root, options.version || NEXT, options)
   const asset = await fs.readFile(kit.archive)
-  const stable = release(asset, options.version || '0.1.1', options.release)
+  const stable = release(asset, options.version || NEXT, options.release)
   const previous = global.fetch
   const oldHome = process.env.ROADMUSIC_CLI_HOME
   process.env.ROADMUSIC_CLI_HOME = cliHome
@@ -59,7 +62,7 @@ async function fixture (t, options = {}) {
     const value = String(url)
     if (value === api) return new Response(JSON.stringify(options.releases || [stable]))
     if (value === `${releaseBase}SHA256SUMS.txt`) return new Response(stable._manifest)
-    if (value === `${releaseBase}RoadMusic-CLI-${options.version || '0.1.1'}.zip`) return new Response(options.asset || asset)
+    if (value === `${releaseBase}RoadMusic-CLI-${options.version || NEXT}.zip`) return new Response(options.asset || asset)
     throw new Error(`unexpected fetch: ${value}`)
   }
   t.after(async () => {
@@ -73,16 +76,16 @@ async function fixture (t, options = {}) {
 
 test('check selects only the highest stable cli-v release with its matching assets', async t => {
   const f = await fixture(t)
-  const old = release(f.asset, '0.1.0')
+  const old = release(f.asset, CURRENT)
   const skipped = release(f.asset, '9.0.0', { prerelease: true })
   const saved = global.fetch
   global.fetch = async url => String(url) === api ? new Response(JSON.stringify([old, skipped, f.stable])) : saved(url)
   const result = await update.check()
   assert.deepEqual(result, {
-    current: '0.1.0', available: true, version: '0.1.1',
-    releaseUrl: 'https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.1',
+    current: CURRENT, available: true, version: NEXT,
+    releaseUrl: `https://github.com/roadkwonai/music-road/releases/tag/cli-v${NEXT}`,
     notes: '',
-    asset: { name: 'RoadMusic-CLI-0.1.1.zip', size: f.asset.length, url: `${releaseBase}RoadMusic-CLI-0.1.1.zip`, sumsUrl: `${releaseBase}SHA256SUMS.txt` },
+    asset: { name: `RoadMusic-CLI-${NEXT}.zip`, size: f.asset.length, url: `${releaseBase}RoadMusic-CLI-${NEXT}.zip`, sumsUrl: `${releaseBase}SHA256SUMS.txt` },
     installable: true
   })
   void old; void skipped
@@ -95,8 +98,8 @@ test('check records the observed CLI version without changing the update result'
   assert.equal(result.available, true)
   assert.equal(captured.action, 'component-record')
   assert.equal(captured.params.componentId, 'road-music-cli:current')
-  assert.equal(captured.params.installedVersion, '0.1.0')
-  assert.equal(captured.params.latestVersion, '0.1.1')
+  assert.equal(captured.params.installedVersion, CURRENT)
+  assert.equal(captured.params.latestVersion, NEXT)
   assert.equal(captured.params.checkStatus, 'update-available')
   assert.equal(typeof captured.params.checkedAt, 'number')
 })
@@ -109,7 +112,7 @@ test('check rejects extra parameters and does not use app v tags as CLI updates'
   global.fetch = async url => String(url) === api ? new Response(JSON.stringify([appRelease, f.stable])) : saved(url)
   const result = await update.check()
   assert.equal(result.available, true)
-  assert.equal(result.version, '0.1.1')
+  assert.equal(result.version, NEXT)
   void appRelease
 })
 
@@ -123,18 +126,18 @@ test('check continues past an app-only first release page to find the latest CLI
     if (value === `${api}?page=2&per_page=30`) return new Response(JSON.stringify([f.stable]))
     return saved(url)
   }
-  assert.equal((await update.check()).version, '0.1.1')
+  assert.equal((await update.check()).version, NEXT)
 })
 
 test('install verifies the release archive, npm setup and new CLI before atomically recording its path', async t => {
   const f = await fixture(t)
   const result = await update.install({ targetDir: path.join(f.root, 'installed') })
-  assert.equal(result.cliVersion, '0.1.1')
+  assert.equal(result.cliVersion, NEXT)
   assert.equal(result.appVersion, '1.4.0')
   assert.equal(result.cliPath, path.join(f.root, 'installed', 'cli', 'road-music.js'))
   assert.match(result.command, /road-music\.js/)
   const active = JSON.parse(await fs.readFile(path.join(f.cliHome, 'current.json'), 'utf8'))
-  assert.deepEqual(active, { cliVersion: '0.1.1', cliPath: result.cliPath })
+  assert.deepEqual(active, { cliVersion: NEXT, cliPath: result.cliPath })
   await fs.access(result.cliPath)
 })
 
@@ -185,7 +188,7 @@ test('install accepts GitHub checksum CDN redirects only to its approved hosts',
     return saved(url)
   }
   const result = await update.install({ targetDir: path.join(f.root, 'redirected') })
-  assert.equal(result.cliVersion, '0.1.1')
+  assert.equal(result.cliVersion, NEXT)
 })
 
 test('default target is reused only after its completed-install marker verifies', async t => {
@@ -194,21 +197,21 @@ test('default target is reused only after its completed-install marker verifies'
   const second = await update.install()
   assert.equal(second.cliPath, first.cliPath)
   await fs.rm(path.join(f.cliHome, 'current.json'))
-  await fs.rm(path.join(f.cliHome, '0.1.1', '.road-music-cli-install.json'))
+  await fs.rm(path.join(f.cliHome, NEXT, '.road-music-cli-install.json'))
   await assert.rejects(update.install(), /완료 표식/)
 })
 
 test('default target with a legacy or different release checksum is preserved and requires a new folder', async t => {
   const f = await fixture(t)
   const first = await update.install()
-  const markerPath = path.join(f.cliHome, '0.1.1', '.road-music-cli-install.json')
+  const markerPath = path.join(f.cliHome, NEXT, '.road-music-cli-install.json')
   const original = JSON.parse(await fs.readFile(markerPath, 'utf8'))
-  await fs.writeFile(markerPath, JSON.stringify({ cliVersion: '0.1.1', appVersion: '1.4.0' }))
+  await fs.writeFile(markerPath, JSON.stringify({ cliVersion: NEXT, appVersion: '1.4.0' }))
   await assert.rejects(update.install(), /배포 체크섬/)
   await fs.writeFile(markerPath, JSON.stringify(original))
   const saved = global.fetch
   global.fetch = async url => String(url) === `${releaseBase}SHA256SUMS.txt`
-    ? new Response(`${'0'.repeat(64)}  RoadMusic-CLI-0.1.1.zip\n`) : saved(url)
+    ? new Response(`${'0'.repeat(64)}  RoadMusic-CLI-${NEXT}.zip\n`) : saved(url)
   await assert.rejects(update.install(), /배포 체크섬/)
   assert.equal(await fs.readFile(markerPath, 'utf8'), JSON.stringify(original))
   await fs.access(first.cliPath)
@@ -217,16 +220,16 @@ test('default target with a legacy or different release checksum is preserved an
 test('install refuses symlink entries inside an otherwise valid CLI root before extraction', async t => {
   const f = await fixture(t)
   await fs.symlink('package.json', path.join(f.kit.kit, 'linked-package'))
-  const archive = path.join(f.root, 'RoadMusic-CLI-0.1.1.zip')
+  const archive = path.join(f.root, `RoadMusic-CLI-${NEXT}.zip`)
   await fs.rm(archive)
-  await exec('/usr/bin/zip', ['-qry', archive, 'RoadMusic-CLI-0.1.1'], { cwd: f.root })
+  await exec('/usr/bin/zip', ['-qry', archive, `RoadMusic-CLI-${NEXT}`], { cwd: f.root })
   const bytes = await fs.readFile(archive)
   const digest = crypto.createHash('sha256').update(bytes).digest('hex')
-  const manifest = `${digest}  RoadMusic-CLI-0.1.1.zip\n`
+  const manifest = `${digest}  RoadMusic-CLI-${NEXT}.zip\n`
   global.fetch = async url => {
     const value = String(url)
     if (value === api) return new Response(JSON.stringify([{ ...f.stable, assets: [
-      { name: 'RoadMusic-CLI-0.1.1.zip', size: bytes.length, browser_download_url: `${releaseBase}RoadMusic-CLI-0.1.1.zip` },
+      { name: `RoadMusic-CLI-${NEXT}.zip`, size: bytes.length, browser_download_url: `${releaseBase}RoadMusic-CLI-${NEXT}.zip` },
       { name: 'SHA256SUMS.txt', size: Buffer.byteLength(manifest), browser_download_url: `${releaseBase}SHA256SUMS.txt` }
     ] }]))
     if (value.endsWith('SHA256SUMS.txt')) return new Response(manifest)
@@ -240,11 +243,11 @@ test('archive safety rejects links and metadata outside the kit root', async t =
   const f = await fixture(t)
   await fs.symlink('cli/road-music.js', path.join(f.kit.kit, 'inside-link'))
   await exec('/usr/bin/zip', ['-qry', f.kit.archive, path.basename(f.kit.kit)], { cwd: f.root })
-  await assert.rejects(update.inspectArchive(f.kit.archive, '0.1.1'), /심볼릭 링크/)
+  await assert.rejects(update.inspectArchive(f.kit.archive, NEXT), /심볼릭 링크/)
   await fs.mkdir(path.join(f.root, '__MACOSX'))
   await fs.writeFile(path.join(f.root, '__MACOSX', 'metadata'), 'metadata')
   await exec('/usr/bin/zip', ['-qr', f.kit.archive, '__MACOSX'], { cwd: f.root })
-  await assert.rejects(update.inspectArchive(f.kit.archive, '0.1.1'), /최상위 폴더/)
+  await assert.rejects(update.inspectArchive(f.kit.archive, NEXT), /최상위 폴더/)
 })
 
 
@@ -256,13 +259,13 @@ test('archive safety inspects complete listings larger than a log tail', async t
   await exec('/usr/bin/zip', ['-qr', f.kit.archive, path.basename(f.kit.kit)], { cwd: f.root })
   const listing = await exec('/usr/bin/unzip', ['-Z1', f.kit.archive])
   assert.ok(Buffer.byteLength(listing.stdout) > 64 * 1024)
-  await update.inspectArchive(f.kit.archive, '0.1.1')
+  await update.inspectArchive(f.kit.archive, NEXT)
 })
 
 
 test('a lower public CLI version records manual transition instead of latest', async t => {
   const f = await fixture(t)
-  const lower = { ...f.stable, tag_name: 'cli-v0.0.9', html_url: 'https://github.com/' + repo + '/releases/tag/cli-v0.0.9', assets: f.stable.assets.map(item => ({ ...item, name: item.name.replace('0.1.1', '0.0.9'), browser_download_url: item.browser_download_url.replaceAll('0.1.1', '0.0.9') })) }
+  const lower = { ...f.stable, tag_name: 'cli-v0.0.9', html_url: 'https://github.com/' + repo + '/releases/tag/cli-v0.0.9', assets: f.stable.assets.map(item => ({ ...item, name: item.name.replace(NEXT, '0.0.9'), browser_download_url: item.browser_download_url.replaceAll(NEXT, '0.0.9') })) }
   global.fetch = async () => new Response(JSON.stringify([lower]))
   let captured
   const result = await update.check({}, { dataDir: path.join(f.root, 'profile'), recordProduction: async value => { captured = value; return { ok: true } } })

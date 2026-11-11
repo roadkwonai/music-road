@@ -153,7 +153,9 @@ print('warning: fixture warning', file=sys.stderr)
   const child = spawn('python3', [tool, 'transcribe', '--request', cancelRequest], {
     env: { ...process.env, ROADMUSIC_YUE_MLX_ROOT: f.engine, SLOW: '1' }, stdio: ['ignore', 'pipe', 'pipe'],
   })
-  await new Promise(resolve => setTimeout(resolve, 300))
+  // 고정 300ms 대기는 부하가 크면 marker 작성 전에 취소해 간헐 실패했다. 작업 시작을 확인한 뒤 취소한다.
+  const marker = path.join(cancelOutput, 'marker.txt')
+  for (let waited = 0; !fs.existsSync(marker) && waited < 10000; waited += 50) await new Promise(resolve => setTimeout(resolve, 50))
   child.kill('SIGTERM')
   const code = await new Promise(resolve => child.once('close', resolve))
   assert.equal(code, 1)

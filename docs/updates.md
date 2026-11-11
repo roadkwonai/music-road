@@ -2,12 +2,12 @@
 
 [Road Music](../README.md) · [문서 지도](README.md) · [제품별 릴리스](../releases/README.md)
 
-2026-10-20 배포 기준은 앱·CLI·music-road-skills 모두 **0.1.0**입니다. 이후 버전은 제품별로 독립적으로 증가합니다. 문서에 적힌 번호보다 실제 설치본의 버전과 해당 제품의 공개 Release를 우선 확인하세요.
+2026-10-20 배포 기준은 앱·CLI·music-road-skills 모두 **0.1.0**이었고, 2026-11-12에 앱·CLI가 **0.1.1**로 올라갔습니다(music-road-skills는 0.1.0 유지). 이후 버전은 제품별로 독립적으로 증가합니다. 문서에 적힌 번호보다 실제 설치본의 버전과 해당 제품의 공개 Release를 우선 확인하세요.
 
 | 제품 | 소스 버전 원본 | 공개 채널 | 현재 배포 |
 | --- | --- | --- | --- |
-| 앱 | `package.json` | 앱 저장소 Latest · `vX.Y.Z` | [v0.1.0](https://github.com/roadkwonai/music-road/releases/tag/v0.1.0) |
-| CLI | `cli/package.json` | 앱 저장소의 `cli-v*` 정식 Release | [cli-v0.1.0](https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.0) |
+| 앱 | `package.json` | 앱 저장소 Latest · `vX.Y.Z` | [v0.1.1](https://github.com/roadkwonai/music-road/releases/tag/v0.1.1) |
+| CLI | `cli/package.json` | 앱 저장소의 `cli-v*` 정식 Release | [cli-v0.1.1](https://github.com/roadkwonai/music-road/releases/tag/cli-v0.1.1) |
 | 스킬 묶음 | 해당 묶음의 `VERSION`·`manifest.json` | 별도 music-road-skills 저장소 Latest | [v0.1.0](https://github.com/roadkwonai/music-road-skills/releases/tag/v0.1.0) |
 
 같은 초기 번호라도 태그·파일·체크섬·설치 경로를 서로 바꿔 사용하지 않습니다. CLI의 `appVersion`은 동봉 앱 **소스** 버전이며 현재 실행 중인 GUI 버전이 아닙니다. 소스 체크아웃 버전, 실제 설치 버전, 마지막 확인한 최신 배포 버전도 구분합니다.
@@ -98,7 +98,7 @@ AI는 CLI 세션 첫 연결에서 `cli:version`, `cli:update:check`을 한 번 �
 | CLI | `cli-vX.Y.Z` | `RoadMusic-CLI-X.Y.Z.zip` | 앱 Latest 아님 |
 | 스킬 | `vX.Y.Z` | `MusicRoad-Skills-X.Y.Z.zip` | 스킬 저장소 Latest |
 
-각 Release의 `SHA256SUMS.txt`를 사용합니다. 앱은 `release.yml`, CLI는 `release-cli.yml`, 스킬은 별도 저장소의 Release workflow를 따릅니다. 2026-10-20 사용자 요청 초기화와 뒤이은 버전 상태 검수 보완의 동일 0.1.0 재배포는 명시적 예외이며, 이후 같은 버전 재발행·역행·번호 건너뛰기를 허용하지 않습니다. 제품별 다음 패치, 다음 마이너의 `.0`, 다음 메이저의 `.0.0`과 manifest·노트 일치를 검사합니다. 현재 기준에서 다음 패치는 해당 제품의 0.1.1이며 아직 공개됐다는 뜻이 아닙니다.
+각 Release의 `SHA256SUMS.txt`를 사용합니다. 앱은 `release.yml`, CLI는 `release-cli.yml`, 스킬은 별도 저장소의 Release workflow를 따릅니다. 2026-10-20 사용자 요청 초기화와 뒤이은 버전 상태 검수 보완의 동일 0.1.0 재배포는 명시적 예외이며, 이후 같은 버전 재발행·역행·번호 건너뛰기를 허용하지 않습니다. 제품별 다음 패치, 다음 마이너의 `.0`, 다음 메이저의 `.0.0`과 manifest·노트 일치를 검사합니다. 2026-11-12에 앱·CLI 0.1.1을 공개했으므로 다음 패치는 각각 0.1.2이며, 아직 공개됐다는 뜻이 아닙니다.
 
 <a id="html"></a>
 

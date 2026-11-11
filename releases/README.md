@@ -6,11 +6,11 @@
 
 | 항목 | 로드뮤직 앱 | Road Music CLI |
 | --- | --- | --- |
-| 현재 정식 버전 | 0.1.0 | 0.1.0 |
+| 현재 정식 버전 | 0.1.1 | 0.1.1 |
 | 버전 원본 | 루트 `package.json`·`package-lock.json` | `cli/package.json` |
-| 태그 | `v0.1.0` | `cli-v0.1.0` |
-| 노트 | [앱 0.1.0](2026-10-20-road-music-0-1-0.md) | [CLI 0.1.0](cli/v0.1.0.md) |
-| 자산 | `RoadMusic-0.1.0-mac-arm64.dmg`, `RoadMusic-0.1.0-source.zip` | `RoadMusic-CLI-0.1.0.zip` |
+| 태그 | `v0.1.1` | `cli-v0.1.1` |
+| 노트 | [앱 0.1.1](2026-11-12-yue2-official-guide-studio-agent.md) · [앱 0.1.0](2026-10-20-road-music-0-1-0.md) | [CLI 0.1.1](cli/v0.1.1.md) · [CLI 0.1.0](cli/v0.1.0.md) |
+| 자산 | `RoadMusic-0.1.1-mac-arm64.dmg`, `RoadMusic-0.1.1-source.zip` | `RoadMusic-CLI-0.1.1.zip` |
 | 체크섬 | 해당 앱 Release의 `SHA256SUMS.txt` | 해당 CLI Release의 `SHA256SUMS.txt` |
 | GitHub Latest | 앱 Release에만 지정 | 항상 `--latest=false` |
 | 업데이트 | `update:check`·`update:install` | `cli:update:check`·`cli:update:install` |

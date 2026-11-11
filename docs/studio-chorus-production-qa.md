@@ -45,6 +45,6 @@ Whisper large-v3-turbo/large-v3의 무유도 전곡 및120–180초 문맥 전�
 
 - 과거 게시 음원: `./Output/잊을 수 없는 너 — 여성 고음 리메이크 v2--e9ba0950b2aa/잊을 수 없는 너 — 여성 고음 리메이크 v2--a4533426ebf7/20261020-202626/잊을 수 없는 너 — 후렴 악기·비트 보강 v3.mp3`. 2026-10-22 사용자 요청으로 제거했으며 현재 납품본이 아니다.
 - 당시 비교 기준 곡 폴더: `~/Documents/YueStudio/Songs/최재훈 여성보컬 리메이크 1곡 2026-10-20/20261020101359_잊을 수 없는 너 — 여성 고음 리메이크 v2`. 2026-10-21 사용자의 이전 생성 음악 제거 요청으로 백업 후 삭제했으며, 이 경로는 과거 검수 기록이다.
-- [상세 JSON 검수](<../.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/후렴-보강-통합검수.json>)
-- [실제 생성 요청](<../.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/검수자료/생성요청.json>)
-- [원본 SHA 목록](<../.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/검수자료/원본SHA256.json>)
+- 상세 JSON 검수(로컬 기록, 저장소에 없음): `.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/후렴-보강-통합검수.json`
+- 실제 생성 요청(로컬 기록, 저장소에 없음): `.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/검수자료/생성요청.json`
+- 원본 SHA 목록(로컬 기록, 저장소에 없음): `.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/검수자료/원본SHA256.json`

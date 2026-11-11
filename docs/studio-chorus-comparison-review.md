@@ -75,4 +75,4 @@ v3가 더 강한 비트/베이스라는 측정 근거는 나오지 않았다. �
 - 최종 LSP 재호출은 도구 연결 종료로 실행하지 못했으며 구문·VM·전체 회귀·브라우저 검수로 확인했다.
 - 직접 청취·악기별 분리·cents 단위 음정 검수는 수행하지 못했다. 이 문서를 직접 청취 완료 보고로 사용하지 않는다.
 
-[상세 JSON 검수](<../.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/검수자료/원본-v3-후렴비교-20261020/검수결과.json>) · [작업물 가이드 원문](<../.agents/skills/road-music-video-studio/assets/guides/works.md>)
+상세 JSON 검수(로컬 기록, 저장소에 없음): `.roadmusic/work/unassigned/choi-jaehoon-first-song-20261020/source-remakes-seven-v1/.roadmusic/history/retired-published-audit-20261022/검수자료/원본-v3-후렴비교-20261020/검수결과.json` · [작업물 가이드 원문](<../.agents/skills/road-music-video-studio/assets/guides/works.md>)

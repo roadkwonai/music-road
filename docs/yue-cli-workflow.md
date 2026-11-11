@@ -81,7 +81,7 @@ YuE seed는 숫자일 때 JavaScript 안전 정수, 그보다 크면 정확한 �
 
 ### 1. 준비와 첫 생성
 
-`song:prepare`에는 `song:generate`와 같은 생성 입력을 준다. 반환된 최종 가사·최종 style·변경 notes·실효 옵션·원생 payload와 원문을 대조한다. 필드 이름은 실행 버전 `schema`를 따른다.
+`song:prepare`에는 `song:generate`와 같은 생성 입력을 준다. 반환된 최종 가사·최종 style·변경 notes·실효 옵션·원생 payload와 원문을 대조한다. `officialGuide.checks`의 `advice` 항목은 [공식 가이드 기반 보정](yue-prompt-guide.md#official-correction)으로 처리하고 보정 보고에 남긴다. 필드 이름은 실행 버전 `schema`를 따른다.
 
 ```bash
 node cli/road-music.js yue:capabilities --json '{"engine":"yue-mlx"}'

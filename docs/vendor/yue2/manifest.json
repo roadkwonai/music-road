@@ -12,7 +12,7 @@
     "current": {
       "repository": "https://github.com/multimodal-art-projection/YuE",
       "ref": "main",
-      "revision": "1647252d68b70cbead046ffd3f7caf036dde47ee",
+      "revision": "1116bea76032bee5668e5f097294d082fa0b84f0",
       "authority": "official-current-reference-only"
     },
     "legacy": {
@@ -209,15 +209,15 @@
       "path": "current/README.md",
       "sourceId": "current",
       "source": "README.md",
-      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/README.md",
-      "sha256": "ca41207b5edc1bbd9902ae21ade99986d7a81deff706a47bff252f7c3f987810",
-      "bytes": 23785
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1116bea76032bee5668e5f097294d082fa0b84f0/README.md",
+      "sha256": "73481ddf41229acc1b58f5a8b07de8fe548ba135aa7fdb323e85ba0574e8f3cb",
+      "bytes": 23687
     },
     {
       "path": "current/MODEL_LICENSE",
       "sourceId": "current",
       "source": "MODEL_LICENSE",
-      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/MODEL_LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1116bea76032bee5668e5f097294d082fa0b84f0/MODEL_LICENSE",
       "sha256": "c7a0e99360555513ff56815b5dbbc8f0b27a3ad762ceaeeab6838baea9743b3a",
       "bytes": 23876
     },
@@ -225,7 +225,7 @@
       "path": "current/skills/yue2-music/instrumental/SKILL.md",
       "sourceId": "current",
       "source": "skills/yue2-music/instrumental/SKILL.md",
-      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/skills/yue2-music/instrumental/SKILL.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1116bea76032bee5668e5f097294d082fa0b84f0/skills/yue2-music/instrumental/SKILL.md",
       "sha256": "bb4cae9cfbff4355c7b5b8c377a2156c2c36350fd674caea5c9af9e636ecc0c2",
       "bytes": 4291
     },
@@ -377,9 +377,17 @@
       "path": "current/LICENSE",
       "sourceId": "current",
       "source": "LICENSE",
-      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1647252d68b70cbead046ffd3f7caf036dde47ee/LICENSE",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1116bea76032bee5668e5f097294d082fa0b84f0/LICENSE",
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
       "bytes": 11358
+    },
+    {
+      "path": "current/docs/generation.md",
+      "sourceId": "current",
+      "source": "docs/generation.md",
+      "url": "https://raw.githubusercontent.com/multimodal-art-projection/YuE/1116bea76032bee5668e5f097294d082fa0b84f0/docs/generation.md",
+      "sha256": "c23d74fbac55efa5bcf3b83d805cd75ce9487209a00c614333c60c90184f8bc4",
+      "bytes": 7392
     },
     {
       "path": "mlx/vendor/yue/LICENSE",

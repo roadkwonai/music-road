@@ -339,7 +339,7 @@ CLI 제어 요청은 Unix 소켓 또는 named pipe를 사용한다. 영상 렌�
 
 | 명령 | 입력 | 실행 계약 |
 | --- | --- | --- |
-| `song:prepare` | `song:generate`와 같은 JSON | 서비스·생성 없이 `valid`, `errors`, 최종 `requests`, 원문 변경, `effective`, `nativeRequest` 반환. context는 실제 tokenizer 확인 전 상태 |
+| `song:prepare` | `song:generate`와 같은 JSON | 서비스·생성 없이 `valid`, `errors`, 최종 `requests`, 원문 변경, `effective`, `nativeRequest` 반환. YuE 계열은 공식 가이드 점검 `officialGuide`(`checks[]`의 `pass`·`advice`·`not-applicable`, 입력을 바꾸거나 막지 않음)도 반환. context는 실제 tokenizer 확인 전 상태 |
 | `yue:capabilities` | 선택 `engine:yue/yue-mlx`, `transcription:{python,modelDir}` | 공개 지원과 파일 탐지/전사 가용성을 구분. 모델·전사 환경 다운로드 없음 |
 | `song:replay` | 실제 `dir`, `stage:plan/synthesize/decode`, 선택 `title`, `advanced`, `runtime` | 원본을 보존한 새 queue job. `jobId`를 `job:wait`으로 확인. 현재 MLX만 지원 |
 | `score:inspect` | `text` 또는 절대 `file` 정확히 하나 | 공식 native ABC의 선율·화성·시간격자 검사. Python 필요, 엔진은 불필요 |

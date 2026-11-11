@@ -16,6 +16,7 @@
 | 설치·모델 구분 | [공식 models-and-setup](official/skills/yue2-music/references/models-and-setup.md) |
 | Apple Silicon의 실제 포트 | [MLX README](mlx/README.md), [MLX usage](mlx/docs/usage.md), [구현 설명](mlx/docs/IMPLEMENTATION.md) |
 | 정확한 원생 입력·기본값 | [공식 protocol](official/src/yue2/protocol.py), [sampling](official/src/yue2/sampling.py) |
+| 고정판 이후 악보 제어 범위·요청 점검 | [현재 generation](current/docs/generation.md) — 참고 근거이며 실행 엔진 변경이 아님 |
 | 고정판 이후 공식 연주곡 스킬 | [현재 instrumental 스킬](current/skills/yue2-music/instrumental/SKILL.md) — 현재 Road Music의 자동 실행 절차로 간주하지 않음 |
 
 ## 출처와 적용 버전
@@ -23,7 +24,7 @@
 | 구분 | 리비전 | 용도 |
 | --- | --- | --- |
 | 공식 YuE2 `yue2-v0.1.6` | `9c6c4b349be978b06a9d0d958471a07a6cdeff4d` | Road Music Windows `yue`의 고정판 근거 |
-| 조사 시 공식 main | `1647252d68b70cbead046ffd3f7caf036dde47ee` | [현재 README](current/README.md), 신규 스킬·라이선스 변화 확인 |
+| 조사 시 공식 main | `1116bea76032bee5668e5f097294d082fa0b84f0` (2026-11-12 KST 재수집) | [현재 README](current/README.md), [현재 generation](current/docs/generation.md), 신규 스킬·라이선스 변화 확인 |
 | 공식 YuE-v1 | `6d4f0b1f8ce6a55fb2392e959394c46e07ee334d` | [이전 세대 README](legacy/README.md). 현재 YuE2 제작 규칙과 혼용하지 않음 |
 | 커뮤니티 MLX 포트 | `c5b5a8190f78c74aa671a4caa19dae8b8e04b3d8` | Road Music `yue-mlx`의 실제 실행 계약 |
 | YuE2-3B 고정 모델 | `1a96eca688d6ae5d7f0feb88573fec89920fcd19` | [고정 모델 카드](models/pinned-model/README.md) |

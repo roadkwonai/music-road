@@ -73,3 +73,27 @@ test('the YuE guide example is a public MLX request and keeps its Korean lyrics 
     assert.equal(jobs[0].targetSeconds, input.targetSeconds)
   }
 })
+
+test('song:prepare reports official YuE2 guide checks for YuE without changing the request', () => {
+  const { preparePreview } = require('../electron/cli-generation')
+  const clean = preparePreview({ engine: 'yue-mlx', style: 'Korean traditional trot, mature solo female vocal, accordion, brass and drums', lyrics: '[Verse]\n아침상을 마주 보고\n[Chorus]\n함께라서 좋아요', bpm: 108 })
+  assert.equal(clean.officialGuide.advice, 0)
+  assert.equal(clean.officialGuide.basis, 'docs/yue-prompt-guide.md#official-correction')
+
+  const input = { engine: 'yue', style: 'make a song, ballad without drums', lyrics: '사랑해 (속삭이듯)\n너를', cot: 'melody', abc: 'X:1\nQ:1/4=90\nK:C\nV:Vocal\n"C"c d e|' }
+  const flagged = preparePreview(input)
+  const status = Object.fromEntries(flagged.officialGuide.checks.map(item => [item.id, item.status]))
+  for (const id of ['style-vocal', 'style-tempo', 'style-positive-description', 'style-no-instruction', 'lyrics-sections', 'lyrics-no-annotations', 'abc-tempo-consistency', 'melody-abc-chord-free']) assert.equal(status[id], 'advice', id)
+  assert.ok(flagged.valid, 'official guide advice must not block preparation')
+  assert.equal(flagged.requests[0].lyrics, '사랑해 (속삭이듯)\n너를')
+
+  const instrumental = preparePreview({ engine: 'yue-mlx', style: 'calm piano', instrumental: true, bpm: 70, parts: { strict: true, instruments: ['piano'] } })
+  const byId = Object.fromEntries(instrumental.officialGuide.checks.map(item => [item.id, item.status]))
+  assert.equal(byId['style-positive-description'], 'pass', 'CLI-added no-vocals text is not the user style')
+  assert.equal(byId['lyrics-sections'], 'not-applicable')
+  assert.equal(preparePreview({ engine: 'ace', style: 'pop', lyrics: '[Verse]\nhi' }).officialGuide, undefined)
+
+  const guide = fs.readFileSync(path.join(root, 'docs/yue-prompt-guide.md'), 'utf8')
+  for (const item of flagged.officialGuide.checks) assert.ok(guide.includes(`\`${item.id}\``), `${item.id} is documented`)
+  for (const anchor of ['<a id="official-correction"></a>', '<a id="official-report"></a>']) assert.ok(guide.includes(anchor))
+})

@@ -9,6 +9,7 @@ YuE 계열의 가사·스타일·생성 입력을 준비할 때 읽는다. **기
 ## 목차
 
 - [모델과 근거 선택](#models)
+- [공식 가이드 기반 프롬프트 보정과 보고](#official-correction)
 - [매 제작 요청의 순서](#workflow)
 - [스타일·제목·한국어 가사](#inputs)
 - [계획 모드와 ABC](#planning)
@@ -35,11 +36,66 @@ YuE 계열의 가사·스타일·생성 입력을 준비할 때 읽는다. **기
 
 ## 필요한 원문만 읽기
 
-- 새 곡: [공식 generation](vendor/yue2/official/docs/generation.md)의 style·lyrics·planning과 산출물 절.
+- 새 곡: [공식 generation](vendor/yue2/official/docs/generation.md)의 style·lyrics·planning과 산출물 절, [main generation](vendor/yue2/current/docs/generation.md)의 악보 제어 범위·요청 점검 절.
 - 모드 선택·정확한 입력 필드·EOS·재사용: [공식 generation-and-covers](vendor/yue2/official/skills/yue2-music/references/generation-and-covers.md).
 - 가사·화성·템포 수정: [공식 editing](vendor/yue2/official/docs/editing.md), [ABC 방언](vendor/yue2/official/skills/yue2-music/references/abc-editing.md).
 - 원곡 커버: [공식 covers](vendor/yue2/official/docs/covers.md). Road Music에 노출된 기능인지 별도로 확인한다.
 - MLX: [고정 usage](vendor/yue2/mlx/docs/usage.md)의 해당 기능과 자원·재현성 계약. 나머지 설치/내부 소스는 필요할 때만 읽는다.
+
+<a id="official-correction"></a>
+
+## 공식 가이드 기반 프롬프트 보정과 보고
+
+YuE·`yue-mlx`의 프롬프트를 작성하거나 생성을 준비할 때는 **매번** 아래 공식 규칙으로 style·lyrics·옵션을 점검하고 보정한다. 초안만 요청받은 경우도 같다. 보정 내용은 요청자에게 [보고 형식](#official-report)으로 알린다. 공식 규칙에서 벗어난 입력은 품질 저하나 잘못된 생성으로 이어질 수 있으므로 이 단계를 생략하지 않는다.
+
+### 공식 규칙과 근거
+
+| 규칙 | 공식 근거 | `song:prepare` 점검 ID |
+| --- | --- | --- |
+| style에 장르·악기·보컬 성격·언어·템포를 적는다. 공식 예시 순서는 `언어, 장르, 보컬, 악기, 선율·프레이징, BPM`이다 | [고정 generation](vendor/yue2/official/docs/generation.md), [공식 예시](vendor/yue2/official/examples/song.json) | `style-language`, `style-genre-instruments`, `style-vocal`, `style-tempo` |
+| lyrics에는 실제로 부를 말과 `[Verse]`·`[Chorus]` 같은 구간 태그만 넣고, 구현 메모는 넣지 않는다 | [고정 generation](vendor/yue2/official/docs/generation.md), [공식 스킬](vendor/yue2/official/skills/yue2-music/SKILL.md) | `lyrics-sections` |
+| 가사 속 발음·화자·연출 주석은 별도 제어 채널이 아니다. 그대로 불릴 수 있다 | [main generation](vendor/yue2/current/docs/generation.md) “What the score controls” | `lyrics-no-annotations` |
+| `negative_prompt`·`phonemes`·`bpm`·참조 가수·참조 음원 필드가 없다. 제외하고 싶은 소리는 원하는 소리의 긍정형 묘사로 바꾼다 | [generation-and-covers](vendor/yue2/official/skills/yue2-music/references/generation-and-covers.md) | `style-positive-description` |
+| 모드마다 원생 지시문이 따로 있다. style에 대체 명령문을 붙이지 않는다 | [generation-and-covers](vendor/yue2/official/skills/yue2-music/references/generation-and-covers.md) | `style-no-instruction` |
+| 템포·박자는 ABC에 두고 style에도 같은 값으로 적는다 | [generation-and-covers](vendor/yue2/official/skills/yue2-music/references/generation-and-covers.md) | `abc-tempo-consistency` |
+| `cot:"melody"`는 입력 ABC의 코드를 자동으로 지우지 않는다 | [공식 스킬](vendor/yue2/official/skills/yue2-music/SKILL.md) | `melody-abc-chord-free` |
+| 악보는 `Vocal`·`Ins` 두 선율뿐이다. 박자·템포·음 길이는 조건일 뿐 파형의 고정 타이밍이 아니다. 샘플링을 바꾸기 전에 악보부터 확인한다 | [main generation](vendor/yue2/current/docs/generation.md) | 보고서에 기술 |
+| CFG·샘플링 기본값은 바로 쓸 수 있는 값이다. 바꾸면 품질이 달라질 수 있다. 한 번 호출하면 후보 하나가 나온다 | [고정 generation](vendor/yue2/official/docs/generation.md) | 보고서에 기술 |
+
+CLI의 `song:prepare`는 YuE 계열 요청에 `officialGuide`를 돌려준다. `checks[]`의 각 항목은 `pass`·`advice`·`not-applicable` 중 하나다. 이 점검은 입력을 바꾸거나 생성을 막지 않으며, 문자열 휴리스틱이라 판단 근거로만 쓴다. `instrumental`·`strict`일 때 CLI가 스스로 붙이는 `no vocals` 같은 문구는 사용자 원문 점검 대상이 아니다.
+
+### 보정 절차
+
+1. 원래 입력으로 `song:prepare`를 실행하고 `officialGuide.checks`와 `changes`·`nativeRequest`를 읽는다.
+2. `advice` 항목마다 공식 근거를 확인해 보정안을 만든다.
+   - **AI가 작성한 style·가사:** 공식 규칙에 맞게 바로 보정한다.
+   - **사용자가 제공·승인한 원문:** [원문 보존 규칙](music-review.md#preserve-input)을 따른다. 원문은 유지하고 보정안·근거·예상 영향을 제안한 뒤 승인받은 부분만 반영한다. 전체 자동 위임이라도 AI가 새로 결정한 부분만 보정한다.
+3. 보정한 입력으로 `song:prepare`를 다시 실행한다. 남은 `advice`는 의도적으로 유지한 이유(예: 사용자가 원한 부정 문구)를 기록한다.
+4. 품질 저하를 막기 위해 공식 기본값(`cot:"full"`, 기본 CFG·샘플링·ODE)을 유지한다. 바꾸려면 실험이라고 밝히고 한 번에 한 요소만 바꾼다.
+5. 공식 규칙이 보장하지 않는 것(특정 가수 음색, 정확한 발음·템포·길이, 무보컬)은 보정으로 해결됐다고 쓰지 않는다.
+
+<a id="official-report"></a>
+
+### 요청자에게 보고할 형식
+
+생성 전 검토안이나 자동 위임 결과 보고에 아래 절을 포함한다.
+
+```text
+## YuE2 공식 가이드 보정 보고
+- 참고 원문: 공식 yue2-v0.1.6 generation·generation-and-covers, main(리비전) generation, 엔진 yue/yue-mlx
+- 공식 점검(song:prepare officialGuide): pass N · advice N · 해당 없음 N
+
+| 항목 | 원래 입력 | 보정 후 | 공식 근거 | 적용 |
+| --- | --- | --- | --- | --- |
+| style 언어 | (원문) | Korean, ... | style에 언어 기재 | 적용 / 제안(승인 대기) / 유지(이유) |
+
+- 최종 style 구성: 언어 / 장르 / 보컬 / 악기 / 분위기·프레이징 / BPM
+- 가사 구성: 구간 태그 순서, 주석·지시문 처리, 정리(cleanLyrics) 전후 차이
+- 모드·옵션: cot, seed, abc 유무, 기본값 유지 또는 변경 이유
+- 보장하지 않는 것: 특정 가수·발음·정확한 템포와 길이·무보컬은 청취로 확인
+```
+
+실행하지 않은 점검은 `미실행`으로 적는다. 원래 입력에서 고칠 것이 없었다면 "보정 없음"과 통과한 근거를 적는다.
 
 <a id="workflow"></a>
 
@@ -49,8 +105,8 @@ YuE 계열의 가사·스타일·생성 입력을 준비할 때 읽는다. **기
 2. 이 가이드와 해당 작업의 고정 원문을 읽고, 기본 검토/제공안 승인/전체 자동 위임을 [검토 규칙](music-review.md)으로 구분한다. 제목·가사 표현만 검토하는 요청에는 엔진 조회·설치·생성 자료를 요구하지 않는다.
 3. 한국어 제목 또는 가사가 있으면 [한국어 검수](music-review.md#korean-review)를 해당 항목에 수행한다. AI 초안의 어색한 단어 결합·문장·후렴은 자연스러운 대안으로 보완하고 다시 읽는다. 제공·승인 원문과 부분 수정 범위는 보존한다. 연주곡의 가사·비한국어 항목은 해당 없음이다.
 4. 생성 준비에는 `app:state`, `engines:list`, `projects:list`, `songs:list`, 실행 버전 `schema`와 실제 프로필을 확인한다. 이전 조회가 다른 프로필에서 이뤄졌다면 그 결과로 설치 상태를 대신하지 않는다. 생성/렌더 중인 기존 작업을 종료하거나 기본 앱을 재시작하지 않는다.
-5. 원래 style·lyrics·parts와 공통 CLI 정리·조합 결과를 대조한다. ACE뿐 아니라 YuE도 `prompt:compose`에 실제 생성과 같은 style/parts·정리 가사·연주곡 값을 매핑해 최종 style과 notes를 확인한다. YuE에서는 `yue:capabilities`로 엔진별 지원 범위를, `song:prepare`로 최종 가사·style·notes·실효 옵션·원생 payload를 함께 확인한다. 긴 문장이 삭제될 수 있으므로 스키마 통과만으로 승인 원문이 그대로 전달된다고 판단하지 않는다. [태그 가이드](lyrics-tags.md)는 Road Music의 전처리 계약이며 원생 YuE의 태그 보장표가 아니다. 의미·핵심 태그가 바뀌거나 잘림이 예상되면 조용히 삭제하지 않는다. 최종 YuE 입력을 ACE의 512/4,096자에 맞춰 자르지 않는다.
-6. 아래 모드와 실제 공개 필드로 입력 JSON을 준비하고 제목·가사 판정, 전체 전달본, style·옵션·근거를 보여준다. `parts.instruments`·`instrumentation`은 편성 요청이며, `parts.vocal`·`dynamics`·`mix`는 style 태그로 바뀌는 의도다. 이들이 가수·스템·믹서 값을 고정하지 않고, ABC의 `Vocal`·`Ins`도 두 선율일 뿐 악기별 트랙이 아님을 함께 밝힌다. 생성까지 명시적으로 전부 자동 위임받은 경우에는 요청자 검토만 생략하고 검수는 수행한다. 문서 조사나 스킬 업데이트 요청에 음악 생성을 추가하지 않는다.
+5. 원래 style·lyrics·parts와 공통 CLI 정리·조합 결과를 대조한다. ACE뿐 아니라 YuE도 `prompt:compose`에 실제 생성과 같은 style/parts·정리 가사·연주곡 값을 매핑해 최종 style과 notes를 확인한다. YuE에서는 `yue:capabilities`로 엔진별 지원 범위를, `song:prepare`로 최종 가사·style·notes·실효 옵션·원생 payload와 `officialGuide` 점검을 함께 확인하고 [공식 가이드 기반 보정](#official-correction)을 수행한다. 긴 문장이 삭제될 수 있으므로 스키마 통과만으로 승인 원문이 그대로 전달된다고 판단하지 않는다. [태그 가이드](lyrics-tags.md)는 Road Music의 전처리 계약이며 원생 YuE의 태그 보장표가 아니다. 의미·핵심 태그가 바뀌거나 잘림이 예상되면 조용히 삭제하지 않는다. 최종 YuE 입력을 ACE의 512/4,096자에 맞춰 자르지 않는다.
+6. 아래 모드와 실제 공개 필드로 입력 JSON을 준비하고 제목·가사 판정, 전체 전달본, style·옵션·근거와 [YuE2 공식 가이드 보정 보고](#official-report)를 보여준다. `parts.instruments`·`instrumentation`은 편성 요청이며, `parts.vocal`·`dynamics`·`mix`는 style 태그로 바뀌는 의도다. 이들이 가수·스템·믹서 값을 고정하지 않고, ABC의 `Vocal`·`Ins`도 두 선율일 뿐 악기별 트랙이 아님을 함께 밝힌다. 생성까지 명시적으로 전부 자동 위임받은 경우에는 요청자 검토만 생략하고 검수는 수행한다. 문서 조사나 스킬 업데이트 요청에 음악 생성을 추가하지 않는다.
 7. 추가 재제작은 먼저 [효율·중단·추천 기준](music-review.md#retry-value)으로 판단한다. 전사만의 불일치와 반복 회귀에 새 전곡 생성을 자동 권하지 않는다. 새 곡, 유효한 재제작 또는 한계를 알고 명시한 실험은 승인/위임 범위에서 1곡 요청을 `count:1`로 제출한다. `song:generate`가 반환한 `jobId`를 같은 프로필의 `job:wait`으로 확인한다. `uncertain:true`면 `service:status`, `queue:list`, `songs:list` 등으로 실행 여부부터 확인하고 재제출하지 않는다.
 8. 입력·모델/VAE·실효 설정·seed·실제 파일·길이·truncation·시도/실패/복구 시간을 남긴다. 마지막 절의 검수 범위를 구분해 보고한다. 새 요청·새 버전은 새 출력 경로에 저장하고 기존 곡은 보존한다.
 
@@ -236,3 +292,13 @@ M1 Ultra64GB의 여성 트로트1곡에서 기존 ABC를 유지한 개사·CFG1.
 - 현재 song:render는 원곡의 lyrics/style을 재사용한다. 가사/style 변경은 검증한 ABC가 있어도 변경 전체 입력을 새 song:prepare→song:generate로 제출한다. 악보만 바꾸면서 기존 원문을 유지할 때 render를 사용한다.
 - MLX의 instrumental flag는 현재 무보컬 style 의도이며 보컬성부 자동이동 보장이 아니다. 빈 가사 프로젝트의 악보 음원화는 새 mode:song 생성이나 무결성 검증한 plan replay로 처리한다.
 - 단계별16제어·replay허용키·한국어 CCM 검수·실제 적용 가능한 예시는 [YuE 전용 고급 활용](yue-advanced-prompts.md)에 정리한다. 최신 main의 별도 스킬을 조사했다고 설치된 실행 기능이 바뀐 것으로 간주하지 않는다.
+
+## 2026-11-12 공식 main 대조 보완
+
+공식 main `1116bea76032bee5668e5f097294d082fa0b84f0`(2026-11-01)을 고정판 `yue2-v0.1.6`과 다시 대조했다. 모델·VAE 모델 카드와 MLX 포트 리비전은 바뀌지 않았다. main의 변화는 실행 코드 업데이트가 아니라 참고 근거이며 Road Music 엔진을 자동으로 바꾸지 않는다.
+
+- [main generation](vendor/yue2/current/docs/generation.md)은 악보가 `Vocal`·`Ins` 두 선율이고 세 번째 ABC 성부는 독립 제어가 되지 않는다고 명시한다. 박자·템포·음 길이는 파형의 고정 타이밍이 아니다. 리듬·전사 오류는 샘플링보다 악보를 먼저 확인한다.
+- 발음 override·참조 화자·구간별 가수 필드는 없다. style의 보컬 묘사는 유도일 뿐이고, 가사에 넣은 발음·화자 주석은 제어 채널이 아니다. 이 규칙을 [공식 보정](#official-correction)과 `song:prepare`의 `lyrics-no-annotations` 점검에 반영했다.
+- 연주곡은 빈 가사와 공식 instrumental 절차로 선율을 `Ins`로 옮긴다. Vocal 쉼표가 무보컬을 보장하지 않으므로 납품 전에 청취한다.
+- 재현은 seed만으로 되지 않는다. 런타임 리비전·패키지·모델 식별자·실효 요청·원생 산출물을 보관하고, score → semantic → latent → 오디오 순으로 처음 달라진 단계를 찾는다.
+- 공식 `yue2 validate`·`inspect`·`decode`는 원생 런타임 명령이다. Road Music에서는 공개 `song:prepare`·`score:check` 등 현재 schema의 명령을 사용하며 원생 명령을 우회 실행하지 않는다.
